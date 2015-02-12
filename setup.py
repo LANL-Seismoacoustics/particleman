@@ -52,8 +52,7 @@ ext_modules += [Extension('stockwell.st',
                           include_dirs = incdirs + fftw['include_dirs'],
                           libraries = fftw['libraries'],
                           library_dirs = fftw['library_dirs'],
-                          sources = ['stockwell/src/stmodule.c', 'stockwell/src/st.c',
-                                     'stockwell/src/sinemodule.c'])]
+                          sources = ['stockwell/src/stmodule.c', 'stockwell/src/st.c'])]
 ext_modules += [Extension('stockwell.sine',
                           include_dirs = incdirs,
                           sources = ['stockwell/src/sinemodule.c'])]
@@ -68,7 +67,7 @@ setup(name = 'stockwell',
 Stockwell transform module from the YNiC Analysis and Visualisation Tools
 ''',
        packages = ['stockwell'],
-       py_modules = ['stockwell.smt'],
+       py_modules = ['stockwell.smt', 'stockwell.util'],
        ext_modules = ext_modules,
 )
 
