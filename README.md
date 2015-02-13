@@ -3,6 +3,9 @@
 The Stockwell transform, and its inverse, implemented in C and NumPy.
 
 
+All credit goes to the authors (not me).  Please see LICENSE.txt.
+
+
 ## Example
 
 Transform a chirp.
@@ -41,8 +44,7 @@ ax2.set_ylabel('frequency [Hz]')
 
 ax3 = plt.subplot2grid((3, 3), (1, 2), rowspan=2)
 ax3.plot(abs(S.sum(axis=1)), F[:,0])
-ax3.set_title('sum over time (FFT)')
-ax3.set_xlabel('amplitude')
+ax3.set_title('sum down time (FFT)')
 
 plt.tight_layout()
 plt.draw()
@@ -50,3 +52,14 @@ plt.draw()
 ``` 
 
 ![chirp](docs/data/chirp.png "chirp")
+
+
+
+## Installation
+
+
+...should hopefully be easy.
+
+```bash
+python setup.py install
+```
