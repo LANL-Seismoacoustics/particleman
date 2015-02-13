@@ -28,7 +28,7 @@ S, T, F = stransform(c, Fs=sample_rate)
 
 Plotting is easy.
 
-``python
+```python
 plt.pcolormesh(T, F, abs(S))
 
 ```
