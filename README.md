@@ -56,7 +56,7 @@ ax2.set_xlabel('time [sec]')
 ax2.set_ylabel('frequency [Hz]')
 
 ax3 = plt.subplot2grid((3, 3), (1, 2), rowspan=2)
-ax3.plot(abs(S.sum(axis=1))/(t[-1] - t[0]), F[:,0], 'r', label=r'$\sum (S(t,f) \Delta t$')
+ax3.plot(abs(S.sum(axis=1))/(t[-1] - t[0]), F[:,0], 'r', label=r'$\sum S(t,f) \Delta t$')
 ax3.plot(C, f, '--k', label='FFT')
 ax3.set_title('S(t,f) vs FFT')
 ax3.set_xlabel('amplitude')
@@ -79,3 +79,10 @@ plt.draw()
 ```bash
 python setup.py install
 ```
+
+...or
+
+```bash
+pip install git+https://git.lanl.gov/ees-geophysics/pystockwell.git
+```
+
