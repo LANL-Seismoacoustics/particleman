@@ -76,6 +76,15 @@ plt.draw()
 
 ...should hopefully be easy.
 
+### Dependencies
+
+* NumPy
+* gcc
+* fftw3
+
+On a Mac, gcc from XCode should work fine.  Getting fttw3 is easy with [homebrew](http://brew.sh/).
+To install, just:
+
 ```bash
 python setup.py install
 ```
