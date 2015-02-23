@@ -26,30 +26,6 @@ Product. Bulletin of the Seismological Society of America.
 """
 from .util import stransform, istransform
 
-def _complex_to_vector(S):
-    """
-    Turn the complex MxN numpy array S into an MxNx2 matrix with the first page being the real part,
-    and the second page being the imaginary part.
-
-    Parameters
-    ----------
-    S : numpy.ndarray (complex, rank 2)
-
-    Returns
-    -------
-    numpy.ndarray (real, rank 3)
-
-    References
-    ----------
-    Equation (14) from Meza‐Fajardo et al. (2015)
-
-    """
-    V = np.empty(S.shape + (2,))
-    V[:,:,0] = S.real
-    V[:,:,1] = S.imag
-
-    return V
-
 
 def shift_phase(S, motion='retrograde'):
     """
@@ -99,11 +75,6 @@ def rayleigh_azimuth(Svhat, Sn, Se, xpr):
     Equations (19), (20), and (21) from Meza‐Fajardo et al. (2015)
 
     """
-    #TODO: is these even necessary?
-    #Vhat = _complex_to_vector(Svhat)
-    #E = _complex_to_vector(Se)
-    #N = _complex_to_vector(Sn)
-
     num = (Se.real * Svhat.real) + (Se.imag*Svhat.imag)
     denom = (Sn.real * Svhat.real) + (Sn.imag*Svhat.imag)
     theta_r = np.arctan(num/denom)
@@ -188,7 +159,6 @@ def smooth_NIP(X, corner=None):
     Maceira and Ammon (2009)
 
     """
-    #x = np.linspace(-1.0, 1.0, X.size, endpoint=True)
     phi = (np.pi/2)*(1.0+np.tanh((X-corner)))/2
 
     return np.sin(phi)**2 * NIP
@@ -227,7 +197,6 @@ def NIP_filter(n, e, z, fs, xpr, motion='retrograde', threshold=0.8, eps=0.04):
     Se, _, _ = stransform(e, Fs=fs)
     Sv, _, _ = stransform(z, Fs=fs)
     
-    #Svhat = shift_phase(Sv, motion='retrograde')
     if motion is 'retrograde':
         Svhat = Sv * 1j
     elif motion is 'prograde':
@@ -245,7 +214,6 @@ def NIP_filter(n, e, z, fs, xpr, motion='retrograde', threshold=0.8, eps=0.04):
 
     Sr = np.where(nip >= 0.8, Sr, 0.0)
     St = np.where(nip >= 0.8, St, 0.0)
-    #Sv = np.where(nip >= 0.8, Sv, 0.0)
 
     return istransform(Sr, Fs=fs), istransform(St, Fs=fs)
 
