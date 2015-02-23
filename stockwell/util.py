@@ -28,7 +28,7 @@ def _get_lo_hi(X, hp, lp, Fs):
     return low, high, lp
 
 
-def stransform(X, hp=0, lp=0, Fs=0):
+def stransform(X, Fs=0, hp=0, lp=0):
     """Perform a Stockwell transform on a time-series.
 
     Returns the transform (S), and time (T) and frequency (F)
@@ -81,7 +81,7 @@ def stransform(X, hp=0, lp=0, Fs=0):
 
     return S,T,F
 
-def istransform(X, hp=0, lp=0, Fs=0):
+def istransform(X, Fs=0, hp=0, lp=0):
     """Perform inverse Stockwell transform on 
 
     """
