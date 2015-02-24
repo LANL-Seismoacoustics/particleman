@@ -1,11 +1,18 @@
-from stockwell.st import st, ist
-import numpy as np
+import warnings
 
-def _get_lo_hi(X, hp, lp, Fs):
+import numpy as np
+from .st import st, ist
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+def _get_lo_hi(L, hp, lp, Fs):
     """Get context-appropriate representation of hp, lp.
 
+    L : int
+        Length of time series.
+
+
     """
-    L = len(X)
     if Fs:
         # If the sample rate has been specified then
         # we low-pass at the nyquist frequency.
@@ -28,7 +35,8 @@ def _get_lo_hi(X, hp, lp, Fs):
     return low, high, lp
 
 
-def stransform(X, Fs=0, hp=0, lp=0):
+
+def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False):
     """Perform a Stockwell transform on a time-series.
 
     Returns the transform (S), and time (T) and frequency (F)
@@ -36,7 +44,7 @@ def stransform(X, Fs=0, hp=0, lp=0):
 
     Parameters
     ----------
-    X : numpy.ndarray
+    x : numpy.ndarray
         array containing time-series data
     hp : float
         high-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)
@@ -44,16 +52,20 @@ def stransform(X, Fs=0, hp=0, lp=0):
         low-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)
     Fs : float
         sampling rate in Hz
+    return_time_freq : bool
+        If True, also return the correct-sized time and frequency domain tiles.
 
     Returns
     -------
-    S, T, F : numpy.ndarray, rank 2
-        Transform (S), time (T), and frequency (F) matrices.
+    S : numpy.ndarray (complex, rank 2)
+        Stockwell transform (S) matrix
+    T, F :  numpy.ndarray (real, rank 2), optional
+        Time (T) and frequency (F) matrices.
 
     Examples
     --------
     # for a 100 Hz time series
-    >>> S, T, F = stransform(data, Fs=100)
+    >>> S, T, F = stransform(data, Fs=100, return_time_freq=True)
     >>> plt.contourf(T, F, abs(S))
 
     References
@@ -62,31 +74,36 @@ def stransform(X, Fs=0, hp=0, lp=0):
     http://kurage.nimh.nih.gov/meglab/Meg/Stockwell
 
     """
-    low, high, lp = _get_lo_hi(X, hp, lp, Fs)
+    low, high, lp = _get_lo_hi(len(x), hp, lp, Fs)
 
     # The stockwell transform
-    S = st(X,low,high)
+    S = st(x,low,high)
+
+    out = S
 
     # Compute our time and frequency matrix with
     # the correct scaling for use with the
     # contour and contourf functions
-    L = len(X)
-    if Fs:
-        t = 1.0/Fs # Length of one sample
-        t = np.arange(L)*t # List of time values
-        T, F = np.meshgrid(t, np.arange(hp, lp, (lp-hp)/(1.0*S.shape[0])))
-    else:
-        t = np.arange(L)
-        T, F = np.meshgrid(t, np.arange(int(hp), int(lp), int(lp-hp)/(1.0*S.shape[0])))
+    if return_time_freq:
+        L = len(x)
+        if Fs:
+            t = 1.0/Fs # Length of one sample
+            t = np.arange(L)*t # List of time values
+            T, F = np.meshgrid(t, np.arange(hp, lp, (lp-hp)/(1.0*S.shape[0])))
+        else:
+            t = np.arange(L)
+            T, F = np.meshgrid(t, np.arange(int(hp), int(lp), int(lp-hp)/(1.0*S.shape[0])))
+        out = (S, T, F)
 
-    return S,T,F
+    return out
+
 
 def istransform(X, Fs=0, hp=0, lp=0):
     """Perform inverse Stockwell transform on 
 
     """
     #XXX: untested
-    low, high, lp = _get_lo_hi(X, hp, lp, Fs)
+    low, high, lp = _get_lo_hi(X.shape[1], hp, lp, Fs)
 
     x = ist(X, low, high)
 
