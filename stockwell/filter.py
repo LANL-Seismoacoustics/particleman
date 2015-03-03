@@ -78,7 +78,7 @@ def estimate_azimuth(Sv, Sn, Se, polarization, xpr):
         'prograde' or 'linear' will apply a pi/2 phase delay
     xpr : int
         Sense of propagation.  1 for eastward, -1 for westward.
-        Try np.sign(station_lon - event_lon), unless they're directly N-S from each other.
+        Try -int(np.sign(np.sin(np.radians(baz)))), unless they're directly N-S from each other.
 
     Returns
     -------
@@ -143,9 +143,9 @@ def NIP(Sr, Sv, polarization=None, eps=None):
         The radial and vertical component s-transforms.
     polarization : str, optional
         If provided, the Sv will be phase-shifted according to this string before calculating the NIP.
-        'retrograde' will apply a pi/2 phase advance.
-        'prograde' or 'linear' will apply a pi/2 phase delay
-        If omitted, Sv is assumed to already be phase-shifted according to the desired wave.
+        'retrograde' will apply a pi/2 phase advance (1j * Sv)
+        'prograde' or 'linear' will apply a pi/2 phase delay (-1j * Sv)
+        If omitted, Sv is assumed to already be phase-shifted according to the desired polarization.
     eps : float, optional
         Tolerance for small denominator values, for numerical stability.
         Useful for synthetic noise-free data.  Authors used 0.04.
@@ -192,7 +192,7 @@ def smooth_NIP(X, corner=None):
     return np.sin(phi)**2 * NIP
 
 
-def get_filter(nip, polarization, threshold=0.5, width=0.1):
+def get_filter(nip, polarization, threshold=0.8, width=0.1):
     """
     Get an NIP-based filter that will pass waves of the specified type.
     
@@ -283,14 +283,20 @@ def NIP_filter(n, e, z, fs, xpr, polarization='retrograde', threshold=0.8, width
 
     nip = NIP(Sr, Sv, polarization)
 
+    # get the filter
     filt = get_filter(nip, threshold=0.8, width=0.1, polarization=polarization)
+
+    # apply the filter
     Srf = Sr*filt
     Stf = St*filt
+
+    # XXX: damp any nans?
     Srf[np.isnan(Srf)] = 0.0
     Srt[np.isnan(Srt)] = 0.0
 
-    r = istransform(Sr*filt)
-    t = istransform(St*filt)
+    # return to time domain
+    r = istransform(Srf, Fs=fs)
+    t = istransform(Stf, Fs=fs)
     
     return r, t
 
