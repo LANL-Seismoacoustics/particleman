@@ -24,6 +24,8 @@ Extraction of Surface Waves from Three Component Seismograms Based on the Normal
 Product. Bulletin of the Seismological Society of America.
 
 """
+# TODO: consider moving the nip argument to inside get_filter.  People may only 
+#   rarely want to see the NIP, and they can do so directly, using NIP.
 import numpy as np
 
 from .util import stransform, istransform

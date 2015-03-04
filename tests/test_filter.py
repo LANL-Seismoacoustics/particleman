@@ -49,179 +49,7 @@ HALFSCREEN = (SCREEN[0]/2.0, SCREEN[1])
 # save myself some plotting memory for big arrays
 #plt.ioff()
 
-# filter band
-fmin = 1./80
-fmax = 1./30
 
-#st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/aak-ii-00*")
-#st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/anmo*")
-st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/mdj*")
-tr = st[0]
-fs = tr.stats.sampling_rate
-sac = tr.stats.sac
-deg, km, az, baz = distaz(sac.evla, sac.evlo, sac.stla, sac.stlo)
-az_prop = baz + 180
-if az < 0.0:
-    az += 360.0
-if baz < 0.0:
-    baz += 360.0
-if az_prop > 360:
-    az_prop -= 360
-
-# cut window and arrivals 
-vmax = 5.0 
-vmin = 2.5
-#vmin = 1.5
-swmin = km/vmax
-swmax = km/vmin
-tmin = tr.stats.starttime + swmin
-tmax = tr.stats.starttime + swmax
-tt = taup.getTravelTimes(deg, sac.evdp, model='ak135')
-tarrivals = [(itt['phase_name'], itt['time']) for itt in tt]
-swarrivals = [(str(swvel), km/swvel) for swvel in (5.0, 4.0, 3.0)]
-tarrivals.extend(swarrivals)
-arrivals= []
-for arr, itt in tarrivals:
-    if arr in ('P', 'S') or (arr, itt) in swarrivals:
-        arrivals.append((arr, itt))
-
-st = st.trim(endtime=tmax)
-st.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True)
-
-# Filter specification
-xpr = -int(np.sign(np.sin(np.radians(baz))))
-polarization = 'retrograde'
-
-# nomenclature:
-#[nevrt][sd][f]
-# n : north
-# e : east
-# v : vertical
-# s : scalar rotation (great circle)
-# d : dynamic rotation (NIP estimate)
-# f : NIP filtered
-
-rs = st.select(component='R')[0].data
-ts = st.select(component='T')[0].data
-v = st.select(component='Z')[0].data
-
-Sv = stransform(v, fs)
-Srs = stransform(rs, fs)
-Sts = stransform(ts, fs)
-
-# get original z and n components by unrotating
-n, e = rotate_RT_NE(rs, ts, baz)
-
-# transforms
-Sn, T, F = stransform(n, fs, return_time_freq=True)
-Se = stransform(e, fs)
-
-# scalar NIP and filter
-nips = filt.NIP(Srs, filt.shift_phase(Sv, polarization=polarization))
-sfilt = filt.get_filter(nips, polarization=polarization, threshold=0.8)
-
-# remove nans
-sfilt[np.isnan(sfilt)] = 0.0
-Srs[np.isnan(Srs)] = 0.0
-Sts[np.isnan(Sts)] = 0.0
-
-#m, n = Sts.shape
-#T = T[:m, :n]
-#F = F[:m, :n]
-rsf = istransform(Srs*f, Fs=fs)
-vsf = istransform(Sv*f, Fs=fs)
-#tsf = istransform(Sts*f, Fs=fs)
-
-
-theta = filt.estimate_azimuth(Sv, Sn, Se, polarization, xpr)
-Srd, Std = filt.rotate_NE_RT(Sn, Se, theta)
-nipf = filt.NIP(Sr, filt.shift_phase(Sv, polarization=polarization))
-dfilt = filt.get_filter(nip, polarization=polarization, threshold=0.8)
-
-Srd[np.isnan(Srd)] = 0.0
-Std[np.isnan(Std)] = 0.0
-rd = istransform(Srd, Fs=fs)
-td = istransform(Std, Fs=fs)
-
-dfilt[np.isnan(dfilt)] = 0.0
-rdf = istransform(Srd*dfilt, Fs=fs)
-#vdf = istransform(Sv*dfilt, Fs=fs)
-tdf = istransform(Std*dfilt, Fs=fs)
-
-
-################ map ################
-plt.figure()
-m = Basemap()
-m.fillcontinents(color='0.75',zorder=0)
-m.drawcountries()
-m.drawcoastlines(linewidth=0.3)
-xevt, yevt = m(sac.evlo, sac.evla)
-xsta, ysta = m(sac.stlo, sac.stla)
-m.drawgreatcircle(sac.evlo, sac.evla, sac.stlo, sac.stla, color='k')
-m.plot(xevt, yevt, 'r*', markersize=17)
-m.plot(xsta, ysta, 'b^', markersize=17)
-plt.title("$\Delta$ = {}, mag {}, az = {:.0f}, baz = {:.0f}".format(deg, sac.mag, baz-180, baz))
-
-plt.savefig('map.png')
-plt.close()
-
-######################## scalar azimuth ############################################
-print("Computing raw R, T s-transforms.")
-
-print("Computing NIP and filter.")
-
-# plot NIP and filter
-print("Plotting NIP and filter, scalar az.")
-
-plt.figure()
-plt.title('NIP, scalar azimuth')
-plt.imshow(nips, cmap=plt.cm.seismic, origin='lower', extent=[0,nips.shape[1], 0, fs/2], 
-           aspect='auto',interpolation='nearest')
-plt.colorbar()
-plt.contour(T, F, nips, [0.8], linewidth=2.0, colors='k')
-plt.axis('tight')
-plt.ylim((0,fmax))
-plt.ylabel('frequency [Hz]')
-plt.xlabel('time [sec]')
-
-plt.savefig('nip_filter_scalar.png', dpi=200)
-plt.close()
-
-# plot Sr and filtered Sr
-# plot_tile
-plt.savefig('stransforms_scalar.png', dpi=200)
-plt.close()
-
-# plot original and filtered waves
-print("Plotting filtered and raw waves.")
-plt.figure(figsize=LANDSCAPE)
-plt.subplot(311)
-plt.title('vertical')
-plt.plot(v, 'gray', label='original')
-plt.plot(vsf,'k', label='NIP filtered')
-plt.legend(loc='lower left')
-
-plt.subplot(312)
-plt.title('radial')
-plt.plot(rs, 'gray', label='original')
-plt.plot(rsf, 'k', label='NIP filtered')
-plt.legend(loc='lower left')
-
-plt.subplot(313)
-plt.title('transverse')
-plt.plot(ts, 'gray', label='original')
-plt.legend(loc='lower left')
-
-# plot arrivals
-for arr, itt in arrivals:
-    plt.vlines(itt, v.min(), v.max(), 'k', linestyle='dashed')
-    plt.text(itt, v.max(), arr, fontsize=9, horizontalalignment='left', va='top')
-
-plt.savefig('waves_scalar.png', dpi=200)
-plt.close()
-
-############################ gridspec plots
-# from http://matplotlib.org/1.3.1/users/gridspec.html
 def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None, arrivals=None,
               flim=None, clim=None, hatch=None, hatchlim=None, dlim=None):
     """
@@ -297,6 +125,228 @@ def make_tiles(fig, gs0, skip=[]):
 
     return axes
 
+
+
+# filter band
+fmin = 1./80
+fmax = 1./30
+
+#st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/aak-ii-00*")
+#st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/anmo*")
+st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/mdj*")
+tr = st[0]
+fs = tr.stats.sampling_rate
+sac = tr.stats.sac
+deg, km, az, baz = distaz(sac.evla, sac.evlo, sac.stla, sac.stlo)
+az_prop = baz + 180
+if az < 0.0:
+    az += 360.0
+if baz < 0.0:
+    baz += 360.0
+if az_prop > 360:
+    az_prop -= 360
+
+# cut window and arrivals 
+vmax = 5.0 
+vmin = 2.5
+#vmin = 1.5
+swmin = km/vmax
+swmax = km/vmin
+tmin = tr.stats.starttime + swmin
+tmax = tr.stats.starttime + swmax
+tt = taup.getTravelTimes(deg, sac.evdp, model='ak135')
+tarrivals = [(itt['phase_name'], itt['time']) for itt in tt]
+swarrivals = [(str(swvel), km/swvel) for swvel in (5.0, 4.0, 3.0)]
+tarrivals.extend(swarrivals)
+arrivals= []
+for arr, itt in tarrivals:
+    if arr in ('P', 'S') or (arr, itt) in swarrivals:
+        arrivals.append((arr, itt))
+
+st = st.trim(endtime=tmax)
+st.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True)
+
+# Filter specification
+xpr = -int(np.sign(np.sin(np.radians(baz))))
+polarization = 'retrograde'
+
+# nomenclature:
+#[nevrt][sd][f]
+# n : north
+# e : east
+# v : vertical
+# s : scalar rotation (great circle)
+# d : dynamic rotation (NIP estimate)
+# f : NIP filtered
+
+rs = st.select(component='R')[0].data
+ts = st.select(component='T')[0].data
+v = st.select(component='Z')[0].data
+
+Sv = stransform(v, fs)
+Srs = stransform(rs, fs)
+Sts = stransform(ts, fs)
+
+n, e = rotate_RT_NE(rs, ts, baz)
+
+Sn, T, F = stransform(n, fs, return_time_freq=True)
+Se = stransform(e, fs)
+
+# odd cases where shape doesn't match
+m, n = Sv.shape
+T = T[:m, :n]
+F = F[:m, :n]
+
+# scalar NIP and filter
+nips = filt.NIP(Srs, filt.shift_phase(Sv, polarization=polarization))
+sfilt = filt.get_filter(nips, polarization=polarization, threshold=0.8)
+
+rsf = istransform(Srs*sfilt, Fs=fs)
+vsf = istransform(Sv*sfilt, Fs=fs)
+#tsf = istransform(Sts*f, Fs=fs)
+
+
+############### instantaneous rotations #######################
+theta = filt.estimate_azimuth(Sv, Sn, Se, polarization, xpr)
+Srd, Std = filt.rotate_NE_RT(Sn, Se, theta)
+nipf = filt.NIP(Srd, filt.shift_phase(Sv, polarization=polarization))
+dfilt = filt.get_filter(nipf, polarization=polarization, threshold=0.8)
+
+Srd[np.isnan(Srd)] = 0.0
+Std[np.isnan(Std)] = 0.0
+rd = istransform(Srd, Fs=fs)
+td = istransform(Std, Fs=fs)
+
+dfilt[np.isnan(dfilt)] = 0.0
+rdf = istransform(Srd*dfilt, Fs=fs)
+vdf = istransform(Sv*dfilt, Fs=fs)
+#tdf = istransform(Std*dfilt, Fs=fs)
+
+# get universal min/max values
+
+dmax = max([np.abs(data).max() for data in (n, e, v, rs, ts, rsf, vsf, rd, td, rdf, vdf)])
+cmax = max([np.abs(data).max() for data in (Srs, Sts, Sv, Srd, Std)])
+
+################ map ################
+plt.figure()
+m = Basemap()
+m.fillcontinents(color='0.75',zorder=0)
+m.drawcountries()
+m.drawcoastlines(linewidth=0.3)
+xevt, yevt = m(sac.evlo, sac.evla)
+xsta, ysta = m(sac.stlo, sac.stla)
+m.drawgreatcircle(sac.evlo, sac.evla, sac.stlo, sac.stla, color='k')
+m.plot(xevt, yevt, 'r*', markersize=17)
+m.plot(xsta, ysta, 'b^', markersize=17)
+plt.title("$\Delta$ = {}, mag {}, az = {:.0f}, baz = {:.0f}".format(deg, sac.mag, baz-180, baz))
+
+plt.savefig('map.png')
+plt.close()
+
+
+########## check dynamic vs inst. rotations #################
+# from http://matplotlib.org/1.3.1/users/gridspec.html
+fig = plt.figure(figsize=SCREEN)
+gs0 = gridspec.GridSpec(3, 2)
+gs0.update(hspace=0.15, wspace=0.15, left=0.05, right=0.95, top=0.95, bottom=0.05)
+tile1, tile2, tile3, tile4, tile5, tile6 = make_tiles(fig, gs0)
+ax11, ax12 = tile1
+ax21, ax22 = tile2
+ax31, ax32 = tile3
+ax41, ax42 = tile4
+ax51, ax52 = tile5
+ax61, ax62 = tile6
+
+ax11.set_title('Vertical')
+plot_tile(fig, ax11, T, F, Sv, ax12, v, 'vertical', arrivals=arrivals, 
+          flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
+ax11.set_xlim(1000, len(v))
+
+ax21.set_title('Vertical')
+plot_tile(fig, ax21, T, F, Sv, ax22, v, 'vertical', arrivals=arrivals, 
+        flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
+ax21.set_xlim(1000, len(v))
+
+ax31.set_title('Radial, scalar')
+plot_tile(fig, ax31, T, F, Srs, ax32, rs, 'great circle', rd, 'dynamic', 
+        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
+ax31.set_xlim(1000, len(v))
+
+ax41.set_title('Radial, dynamic')
+plot_tile(fig, ax41, T, F, Srd, ax42, rd, 'dynamic', rs, 'great circle',  
+        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
+ax41.set_xlim(1000, len(v))
+
+ax51.set_title('Transverse, scalar')
+plot_tile(fig, ax51, T, F, Sts, ax52, ts, 'great circle', td, 'dynamic', 
+        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
+ax51.set_xlim(1000, len(v))
+
+ax61.set_title('Transverse, dynamic')
+plot_tile(fig, ax61, T, F, Std, ax62, td, 'dynamic', ts, 'great circle',
+        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
+ax61.set_xlim(1000, len(v))
+
+plt.savefig('rotation_comparison.png', dpi=200)
+plt.close()
+
+
+######################## scalar azimuth ############################################
+print("Computing raw R, T s-transforms.")
+
+print("Computing NIP and filter.")
+
+# plot NIP and filter
+print("Plotting NIP and filter, scalar az.")
+
+plt.figure()
+plt.title('NIP, scalar azimuth')
+plt.imshow(nips, cmap=plt.cm.seismic, origin='lower', extent=[0,nips.shape[1], 0, fs/2], 
+           aspect='auto',interpolation='nearest')
+plt.colorbar()
+plt.contour(T, F, nips, [0.8], linewidth=2.0, colors='k')
+plt.axis('tight')
+plt.ylim((0,fmax))
+plt.ylabel('frequency [Hz]')
+plt.xlabel('time [sec]')
+
+plt.savefig('nip_filter_scalar.png', dpi=200)
+plt.close()
+
+# plot Sr and filtered Sr
+# plot_tile
+plt.savefig('stransforms_scalar.png', dpi=200)
+plt.close()
+
+# plot original and filtered waves
+print("Plotting filtered and raw waves.")
+plt.figure(figsize=LANDSCAPE)
+plt.subplot(311)
+plt.title('vertical')
+plt.plot(v, 'gray', label='original')
+plt.plot(vsf,'k', label='NIP filtered')
+plt.legend(loc='lower left')
+
+plt.subplot(312)
+plt.title('radial')
+plt.plot(rs, 'gray', label='original')
+plt.plot(rsf, 'k', label='NIP filtered')
+plt.legend(loc='lower left')
+
+plt.subplot(313)
+plt.title('transverse')
+plt.plot(ts, 'gray', label='original')
+plt.legend(loc='lower left')
+
+# plot arrivals
+for arr, itt in arrivals:
+    plt.vlines(itt, v.min(), v.max(), 'k', linestyle='dashed')
+    plt.text(itt, v.max(), arr, fontsize=9, horizontalalignment='left', va='top')
+
+plt.savefig('waves_scalar.png', dpi=200)
+plt.close()
+
+############################ gridspec plots
 
 fig = plt.figure(figsize=SCREEN)
 # course 2x2 grid
