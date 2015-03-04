@@ -206,7 +206,7 @@ plt.close()
 ############################ gridspec plots
 # from http://matplotlib.org/1.3.1/users/gridspec.html
 def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None, arrivals=None,
-              flim=None, clim=None, hatch=None, hatchlim=None, ):
+              flim=None, clim=None, hatch=None, hatchlim=None, dlim=None):
     """
     Returns
     -------
@@ -216,44 +216,51 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None, arrivals
     Examples
     --------
     # filtered versus unfiltered radial, and set color limits
-    >>> plot_tile(fig, ax21, T, F, Srs, ax22, rs, 'unfiltered', d2=rsf, label2='NIP filtered', 
+    >>> plot_tile(fig, ax21, T, F, Srs, ax22, rs, 'unfiltered', rsf, 'NIP filtered', 
         arrivals=arrivals, flim=(0.0, fmax), clim=(0.0, 5e-5), hatch=sfilt, hatchlim=(0.0, 0.8))
     # scalar versus dynamic rotated radial 
-    >>> plot_tile(fig, ax21, T, F, Sr, (0.0, fmax), f, (0.0, 0.8), ax22, r.data, 'scalar', rdata, 'dynamic', arrivals)
-    # scalar versus dynamic rotated transverse
-    >>> plot_tile(fig, ax31, T, F, St, (0.0, fmax), f, (0.0, 0.8), ax32, t.data, 'scalar', tdata, 'dynamic', arrivals)
+    >>> plot_tile(fig, ax21, T, F, Srs, ax22, rs, 'scalar', rd, 'dynamic', arrivals
+        flim=(0.0, fmax), clim=(0.0, 5e-5), hatch=dfilt, hatchlim=(0.0, 0.8))
 
     """
+    tm = T[0]
     # TODO: remove fig from signature?
     ax1.axes.get_xaxis().set_visible(False)
-    ax1.set_title('Radial')
     im = ax1.pcolormesh(T, F, np.abs(S))
-    im.set_clim(clim)
-    ax1.contourf(T, F, f, [0, 0.8], colors='k', hatches=['x'], alpha=0.0)
-    ax1.contour(T, F, f, [0.8], linewidth=1.0, colors='k')
-    ax1.set_ylim(flim)
+    if clim:
+        im.set_clim(clim)
+    if (hatch is not None) and hatchlim:
+        ax1.contourf(T, F, hatch, hatchlim, colors='k', hatches=['x'], alpha=0.0)
+        ax1.contour(T, F, hatch, [max(hatchlim)], linewidth=1.0, colors='k')
+    if flim:
+        ax1.set_ylim(flim)
     ax1.set_ylabel('frequency [Hz]')
     divider = make_axes_locatable(ax1)
     #cax = divider.append_axes("right", size="5%", pad=0.05)
     #cbar = plt.colorbar(im, cax=cax, format='%.2e')
     fig.add_subplot(ax1)
+
     # waves and arrivals
-    ax2.plot(tr.data, 'gray', label='original')
-    ax2.plot(trf, 'k', label='NIP filtered')
+    if d2 is not None:
+        ax2.plot(tm, d2, 'gray', label=label2)
+    ax2.plot(tm, d1, 'k', label=label1)
     ax2.set_ylabel('amplitude')
     leg = ax2.legend(loc='lower left', frameon=False, fontsize=14)
     for legobj in leg.legendHandles:
         legobj.set_linewidth(2.0)
-    ax2.axis('tight')
-    for arr, itt in arrivals:
-        ax2.vlines(itt, tr.data.min(), tr.data.max(), 'k', linestyle='dashed')
-        ax2.text(itt, tr.data.max(), arr, fontsize=12, ha='left', va='top')
+    ax2.set_xlim(tm[0], tm[-1])
+    if dlim:
+        ax2.set_ylim(dlim)
+    if arrivals:
+        for arr, itt in arrivals:
+            ax2.vlines(itt, d1.min(), d1.max(), 'k', linestyle='dashed')
+            ax2.text(itt, d1.max(), arr, fontsize=12, ha='left', va='top')
+
     cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax1, ax2], format='%.2e')
     ax2.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
     fig.add_subplot(ax2)
 
     return im
-
 
 
 
