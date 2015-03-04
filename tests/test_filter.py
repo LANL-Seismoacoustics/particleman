@@ -59,10 +59,13 @@ tr = st[0]
 fs = tr.stats.sampling_rate
 sac = tr.stats.sac
 deg, km, az, baz = distaz(sac.evla, sac.evlo, sac.stla, sac.stlo)
+az_prop = baz + 180
 if az < 0.0:
     az += 360.0
 if baz < 0.0:
     baz += 360.0
+if az_prop > 360:
+    az_prop -= 360
 
 # cut window and arrivals 
 vmax = 5.0 
@@ -76,7 +79,6 @@ tt = taup.getTravelTimes(deg, sac.evdp, model='ak135')
 tarrivals = [(itt['phase_name'], itt['time']) for itt in tt]
 swarrivals = [(str(swvel), km/swvel) for swvel in (5.0, 4.0, 3.0)]
 tarrivals.extend(swarrivals)
-
 arrivals= []
 for arr, itt in tarrivals:
     if arr in ('P', 'S') or (arr, itt) in swarrivals:
@@ -85,26 +87,50 @@ for arr, itt in tarrivals:
 st = st.trim(endtime=tmax)
 st.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True)
 
-r = st.select(component='R')[0]
-t = st.select(component='T')[0]
-z = st.select(component='Z')[0]
-tm = np.arange(z.stats.npts)*fs
+# nomenclature:
+#[nevrt][sd][f]
+# n : north
+# e : east
+# v : vertical
+# s : scalar rotation (great circle)
+# d : dynamic rotation (NIP estimate)
+# f : NIP filtered
 
+rs = st.select(component='R')[0].data
+ts = st.select(component='T')[0].data
+v = st.select(component='Z')[0].data
+tm = np.arange(len(v))*fs
 
 # get original z and n components by unrotating
-ndata, edata = rotate_RT_NE(r.data, t.data, baz)
+n, e = rotate_RT_NE(rs, ts, baz)
 
 # raw N, E, V s-transforms."
 print("Computing raw N, E, V s-transforms.")
-Sn, T, F = stransform(ndata, fs, return_time_freq=True)
-Se = stransform(edata, fs)
-Sv = stransform(z.data, fs)
+Sn, T, F = stransform(n, fs, return_time_freq=True)
+Se = stransform(e, fs)
+Sv = stransform(v, fs)
 
-# if I want to make log frequency plots
-#F[F==0.0] = np.nan
+Srs = stransform(r, fs)
+Sts = stransform(t, fs)
+
+nips = filt.NIP(Srs, filt.shift_phase(Sv, polarization=polarization))
+sfilt = filt.get_filter(nips, polarization=polarization, threshold=0.8)
+
+# remove nans
+sfilt[np.isnan(sfilt)] = 0.0
+Srs[np.isnan(Srs)] = 0.0
+Sts[np.isnan(Sts)] = 0.0
+
+#m, n = Sts.shape
+#T = T[:m, :n]
+#F = F[:m, :n]
+rsf = istransform(Srs*f, Fs=fs)
+vsf = istransform(Sv*f, Fs=fs)
+#tsf = istransform(Sts*f, Fs=fs)
 
 xpr = -int(np.sign(np.sin(np.radians(baz))))
 polarization = 'retrograde'
+
 
 ################ map ################
 plt.figure()
@@ -120,35 +146,22 @@ m.plot(xsta, ysta, 'b^', markersize=17)
 plt.title("$\Delta$ = {}, mag {}, az = {:.0f}, baz = {:.0f}".format(deg, sac.mag, baz-180, baz))
 
 plt.savefig('map.png')
+plt.close()
 
 ######################## scalar azimuth ############################################
 print("Computing raw R, T s-transforms.")
-Sr = stransform(r.data, fs)
-St = stransform(t.data, fs)
-m, n = St.shape
-T = T[:m, :n]
-F = F[:m, :n]
 
 print("Computing NIP and filter.")
-nip = filt.NIP(Sr, filt.shift_phase(Sv, polarization=polarization))
-f = filt.get_filter(nip, polarization=polarization, threshold=0.8)
-
-f[np.isnan(f)] = 0.0
-Sr[np.isnan(Sr)] = 0.0
-St[np.isnan(St)] = 0.0
-rf = istransform(Sr*f, Fs=fs)
-vf = istransform(Sv*f, Fs=fs)
-tf = istransform(St*f, Fs=fs)
 
 # plot NIP and filter
 print("Plotting NIP and filter, scalar az.")
 
 plt.figure()
 plt.title('NIP, scalar azimuth')
-plt.imshow(nip, cmap=plt.cm.seismic, origin='lower', extent=[0,nip.shape[1], 0, fs/2], 
+plt.imshow(nips, cmap=plt.cm.seismic, origin='lower', extent=[0,nips.shape[1], 0, fs/2], 
            aspect='auto',interpolation='nearest')
 plt.colorbar()
-plt.contour(T, F, nip, [0.8], linewidth=2.0, colors='k')
+plt.contour(T, F, nips, [0.8], linewidth=2.0, colors='k')
 plt.axis('tight')
 plt.ylim((0,fmax))
 plt.ylabel('frequency [Hz]')
@@ -158,98 +171,62 @@ plt.savefig('nip_filter_scalar.png', dpi=200)
 plt.close()
 
 # plot Sr and filtered Sr
-print("Plotting Sr and filtered Sr, scalar az.")
-plt.figure(figsize=LANDSCAPE)
-
-plt.subplot(221)
-plt.title('NIP, scalar azimuth')
-plt.imshow(nip, cmap=plt.cm.seismic, origin='lower', extent=[0,nip.shape[1], 0, fs/2], 
-           aspect='auto',interpolation='nearest')
-plt.colorbar()
-plt.contour(T, F, nip, [0.8], linewidth=2.0, colors='k')
-plt.axis('tight')
-plt.ylim((0,fmax))
-plt.ylabel('frequency [Hz]')
-plt.xlabel('time [sec]')
-
-plt.subplot(222)
-plt.title('Radial S(t,f) and filter, scalar azimuth')
-plt.pcolormesh(T, F, np.abs(Sr))
-plt.colorbar()
-plt.contourf(T, F, f, [0, 0.8], colors='k', alpha=0.2)
-plt.contour(T, F, f, [0.8], linewidth=1.0, colors='k')
-plt.axis('tight')
-plt.ylim((0, fmax))
-plt.ylabel('frequency [Hz]')
-plt.ylabel('frequency [Hz]')
-plt.xlabel('time [sec]')
-
-plt.subplot(223)
-plt.title('Transverse S(t,f) and filter, scalar azimuth')
-plt.pcolormesh(T, F, np.abs(St))
-plt.colorbar()
-plt.contourf(T, F, f, [0, 0.8], colors='k', alpha=0.2)
-plt.contour(T, F, f, [0.8], linewidth=1.0, colors='k')
-plt.axis('tight')
-plt.ylim((0, fmax))
-plt.ylabel('frequency [Hz]')
-plt.xlabel('time [sec]')
-
-
-plt.subplot(224)
-plt.title('Vertical S(t,f) and filter, scalar azimuth')
-plt.pcolormesh(T, F, np.abs(Sv))
-plt.colorbar()
-plt.contourf(T, F, f, [0, 0.8], colors='k', alpha=0.2)
-plt.contour(T, F, f, [0.8], linewidth=1.0, colors='k')
-plt.axis('tight')
-plt.ylim((0,fmax))
-plt.ylabel('frequency [Hz]')
-plt.xlabel('time [sec]')
-
-plt.tight_layout()
+# plot_tile
 plt.savefig('stransforms_scalar.png', dpi=200)
 plt.close()
-
 
 # plot original and filtered waves
 print("Plotting filtered and raw waves.")
 plt.figure(figsize=LANDSCAPE)
 plt.subplot(311)
 plt.title('vertical')
-plt.plot(z.data, 'gray', label='original')
-plt.plot(vf,'k', label='NIP filtered')
+plt.plot(v, 'gray', label='original')
+plt.plot(vsf,'k', label='NIP filtered')
 plt.legend(loc='lower left')
 
 plt.subplot(312)
 plt.title('radial')
-plt.plot(r.data, 'gray', label='original')
-plt.plot(rf, 'k', label='NIP filtered')
+plt.plot(rs, 'gray', label='original')
+plt.plot(rsf, 'k', label='NIP filtered')
 plt.legend(loc='lower left')
 
 plt.subplot(313)
 plt.title('transverse')
-plt.plot(t.data, 'gray', label='original')
+plt.plot(ts, 'gray', label='original')
 plt.legend(loc='lower left')
 
 # plot arrivals
 for arr, itt in arrivals:
-    plt.vlines(itt, z.data.min(), z.data.max(), 'k', linestyle='dashed')
-    plt.text(itt, z.data.max(), arr, fontsize=9, horizontalalignment='left', va='top')
+    plt.vlines(itt, v.min(), v.max(), 'k', linestyle='dashed')
+    plt.text(itt, v.max(), arr, fontsize=9, horizontalalignment='left', va='top')
 
 plt.savefig('waves_scalar.png', dpi=200)
 plt.close()
 
 ############################ gridspec plots
 # from http://matplotlib.org/1.3.1/users/gridspec.html
-# filtered versus unfiltered radial 
-plot_tile(fig, ax21, T, F, Sr, (0.0, fmax), f, (0.0, 0.8), ax22, r.data, 'original', rf, 'NIP filtered', arrivals)
-# scalar versus dynamic rotated radial 
-plot_tile(fig, ax21, T, F, Sr, (0.0, fmax), f, (0.0, 0.8), ax22, r.data, 'scalar', rdata, 'dynamic', arrivals)
-# scalar versus dynamic rotated transverse
-plot_tile(fig, ax31, T, F, St, (0.0, fmax), f, (0.0, 0.8), ax32, t.data, 'scalar', tdata, 'dynamic', arrivals)
-def plot_tile(fig, ax1, T, F, S, ylim, f, hatchlim, d1, label1, d2=None, label2=None, arrivals):
-    t = T[0]
+def plot_tile(fig, ax1, T, F, S, ylim, smax, f, hatchint, d1, label1, d2=None, label2=None, dmx=None, arrivals=None):
+    """
+    Returns
+    -------
+    matplotlib.collections.QuadMesh
+        The ax1 image from pcolormesh.
+
+    Examples
+    --------
+    # filtered versus unfiltered radial, and set color limits
+    >>> im = plot_tile(fig, ax21, T, F, Srs, (0.0, fmax), sfilt, (0.0, 0.8), ax22, rs, 'original', rsf, 'NIP filtered', arrivals)
+    >>> im.set_clim(vmin, vmax)
+    # scalar versus dynamic rotated radial 
+    >>> plot_tile(fig, ax21, T, F, Sr, (0.0, fmax), f, (0.0, 0.8), ax22, r.data, 'scalar', rdata, 'dynamic', arrivals)
+    # scalar versus dynamic rotated transverse
+    >>> plot_tile(fig, ax31, T, F, St, (0.0, fmax), f, (0.0, 0.8), ax32, t.data, 'scalar', tdata, 'dynamic', arrivals)
+
+    """
+    if not dmx:
+        dmx = np.abs(d1).max()
+        if d2:
+            dmx = max((np.abs(d2).max(), dmx))
     ax1.axes.get_xaxis().set_visible(False)
     ax1.set_title('Radial')
     im = ax1.pcolormesh(T, F, np.abs(S))
@@ -275,6 +252,8 @@ def plot_tile(fig, ax1, T, F, S, ylim, f, hatchlim, d1, label1, d2=None, label2=
     cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax1, ax2], format='%.2e')
     ax2.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
     fig.add_subplot(ax2)
+
+    return im
 
 
 
