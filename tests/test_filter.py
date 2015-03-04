@@ -44,6 +44,7 @@ LANDSCAPE = (11,8.5)
 PORTRAIT = (8.5,11)
 POWERPOINT = (10, 7.5)
 SCREEN = (31, 19)
+HALFSCREEN = (SCREEN[0]/2.0, SCREEN[1])
 
 # save myself some plotting memory for big arrays
 #plt.ioff()
@@ -87,6 +88,10 @@ for arr, itt in tarrivals:
 st = st.trim(endtime=tmax)
 st.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True)
 
+# Filter specification
+xpr = -int(np.sign(np.sin(np.radians(baz))))
+polarization = 'retrograde'
+
 # nomenclature:
 #[nevrt][sd][f]
 # n : north
@@ -99,20 +104,19 @@ st.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True)
 rs = st.select(component='R')[0].data
 ts = st.select(component='T')[0].data
 v = st.select(component='Z')[0].data
-tm = np.arange(len(v))*fs
+
+Sv = stransform(v, fs)
+Srs = stransform(rs, fs)
+Sts = stransform(ts, fs)
 
 # get original z and n components by unrotating
 n, e = rotate_RT_NE(rs, ts, baz)
 
-# raw N, E, V s-transforms."
-print("Computing raw N, E, V s-transforms.")
+# transforms
 Sn, T, F = stransform(n, fs, return_time_freq=True)
 Se = stransform(e, fs)
-Sv = stransform(v, fs)
 
-Srs = stransform(r, fs)
-Sts = stransform(t, fs)
-
+# scalar NIP and filter
 nips = filt.NIP(Srs, filt.shift_phase(Sv, polarization=polarization))
 sfilt = filt.get_filter(nips, polarization=polarization, threshold=0.8)
 
@@ -128,8 +132,21 @@ rsf = istransform(Srs*f, Fs=fs)
 vsf = istransform(Sv*f, Fs=fs)
 #tsf = istransform(Sts*f, Fs=fs)
 
-xpr = -int(np.sign(np.sin(np.radians(baz))))
-polarization = 'retrograde'
+
+theta = filt.estimate_azimuth(Sv, Sn, Se, polarization, xpr)
+Srd, Std = filt.rotate_NE_RT(Sn, Se, theta)
+nipf = filt.NIP(Sr, filt.shift_phase(Sv, polarization=polarization))
+dfilt = filt.get_filter(nip, polarization=polarization, threshold=0.8)
+
+Srd[np.isnan(Srd)] = 0.0
+Std[np.isnan(Std)] = 0.0
+rd = istransform(Srd, Fs=fs)
+td = istransform(Std, Fs=fs)
+
+dfilt[np.isnan(dfilt)] = 0.0
+rdf = istransform(Srd*dfilt, Fs=fs)
+#vdf = istransform(Sv*dfilt, Fs=fs)
+tdf = istransform(Std*dfilt, Fs=fs)
 
 
 ################ map ################
@@ -264,20 +281,21 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None, arrivals
 
 
 def make_tiles(fig, gs0, skip=[]):
-    gs0.update(hspace=0.10, wspace=0.10, left=0.05, right=0.95, top=0.95, bottom=0.05)
+    """
+    Give a list of (ax1, ax2) tuples for each non-skipped SubPlotSpec in gs0.
 
+    """
     axes = []
-    for i, gs in enumerate(gs0):
+    for i, igs in enumerate(gs0):
         if i in skip:
-            ax1, ax2 = None, None
+            pass
         else:
-            igs = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=igs, hspace=0.0)
-            ax1 = plt.Subplot(fig, igs[:-1, :])
-            ax2 = plt.Subplot(fig, igs[-1, :], sharex=ax1)
-        axes.append((ax1, ax2))
+            iigs = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=igs, hspace=0.0)
+            ax1 = plt.Subplot(fig, iigs[:-1, :])
+            ax2 = plt.Subplot(fig, iigs[-1, :], sharex=ax1)
+            axes.append((ax1, ax2))
 
     return axes
-
 
 
 fig = plt.figure(figsize=SCREEN)
@@ -412,6 +430,12 @@ del nip, f, Sr, St
 ############################### instantaneous azimuth ###################################
 print("Estimating instantaneous azimuth.")
 theta = filt.estimate_azimuth(Sv, Sn, Se, polarization, xpr)
+
+fig = plt.figure(figsize=PORTRAIT)
+gs0 = gridspec.GridSpec(3, 2)
+gs0.update(hspace=0.10, wspace=0.10, left=0.05, right=0.95, top=0.95, bottom=0.05)
+(ax11, ax12), (ax21, ax22), (ax31, ax32), (ax41, ax42), (ax51, ax52), (ax61, ax62) = make_tiles(fig, gs0)
+
 
 # plot estimated instantaneous azimuth
 plt.figure()
