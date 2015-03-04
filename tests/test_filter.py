@@ -263,6 +263,22 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None, arrivals
     return im
 
 
+def make_tiles(fig, gs0, skip=[]):
+    gs0.update(hspace=0.10, wspace=0.10, left=0.05, right=0.95, top=0.95, bottom=0.05)
+
+    axes = []
+    for i, gs in enumerate(gs0):
+        if i in skip:
+            ax1, ax2 = None, None
+        else:
+            igs = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=igs, hspace=0.0)
+            ax1 = plt.Subplot(fig, igs[:-1, :])
+            ax2 = plt.Subplot(fig, igs[-1, :], sharex=ax1)
+        axes.append((ax1, ax2))
+
+    return axes
+
+
 
 fig = plt.figure(figsize=SCREEN)
 # course 2x2 grid
@@ -294,8 +310,11 @@ fig.add_subplot(ax11)
 gs2 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[1], hspace=0.0)
 ax21 = plt.Subplot(fig, gs2[:-1, :])
 ax22 = plt.Subplot(fig, gs2[-1, :], sharex=ax21)
-ax21.axes.get_xaxis().set_visible(False)
 ax21.set_title('Radial')
+
+plot_tile(fig, ax21, T, F, Sr, ax22, r.data, 'original', rf, 'filtered', arrivals, 
+          flim=(0.0, fmax), hatch=f, hatchlim=(0.0, 0.8))
+
 im = ax21.pcolormesh(T, F, np.abs(Sr))
 print "images"
 print ax21.get_images()
