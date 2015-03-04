@@ -242,12 +242,17 @@ plt.close()
 
 ############################ gridspec plots
 # from http://matplotlib.org/1.3.1/users/gridspec.html
-def plot_tile(fig, ax1, ax2, T, F, nip, f, S, tr, trf, fs, fmin, fmax, arrivals, deg, baz):
+# filtered versus unfiltered radial 
+plot_tile(fig, ax21, T, F, Sr, (0.0, fmax), f, (0.0, 0.8), ax22, r.data, 'original', rf, 'NIP filtered', arrivals)
+# scalar versus dynamic rotated radial 
+plot_tile(fig, ax21, T, F, Sr, (0.0, fmax), f, (0.0, 0.8), ax22, r.data, 'scalar', rdata, 'dynamic', arrivals)
+# scalar versus dynamic rotated transverse
+plot_tile(fig, ax31, T, F, St, (0.0, fmax), f, (0.0, 0.8), ax32, t.data, 'scalar', tdata, 'dynamic', arrivals)
+def plot_tile(fig, ax1, T, F, S, ylim, f, hatchlim, d1, label1, d2=None, label2=None, arrivals):
+    t = T[0]
     ax1.axes.get_xaxis().set_visible(False)
     ax1.set_title('Radial')
     im = ax1.pcolormesh(T, F, np.abs(S))
-    #plt.colorbar(pc)
-    #ax21.contourf(T, F, f, [0, 0.8], colors='k', alpha=0.2)
     ax1.contourf(T, F, f, [0, 0.8], colors='k', hatches=['x'], alpha=0.0)
     ax1.contour(T, F, f, [0.8], linewidth=1.0, colors='k')
     ax1.set_ylim((0, fmax))
@@ -303,6 +308,7 @@ fig.add_subplot(ax11)
 # s transform and filter
 gs2 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[1], hspace=0.0)
 ax21 = plt.Subplot(fig, gs2[:-1, :])
+ax22 = plt.Subplot(fig, gs2[-1, :], sharex=ax21)
 ax21.axes.get_xaxis().set_visible(False)
 ax21.set_title('Radial')
 im = ax21.pcolormesh(T, F, np.abs(Sr))
@@ -317,7 +323,6 @@ divider = make_axes_locatable(ax21)
 #cbar = plt.colorbar(im, cax=cax, format='%.2e')
 fig.add_subplot(ax21)
 # waves and arrivals
-ax22 = plt.Subplot(fig, gs2[-1, :], sharex=ax21)
 ax22.plot(rdata, 'gray', label='original')
 #ax22.plot(r.data, 'gray', label='original')
 ax22.plot(rf, 'k', label='NIP filtered')
