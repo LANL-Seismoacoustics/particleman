@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.basemap import Basemap
+from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 
 from obspy import read
@@ -36,7 +37,6 @@ from obspy.signal import rotate_RT_NE
 from obspy.taup import taup
 
 from distaz import distaz
-
 from stockwell import stransform, istransform
 import stockwell.filter as filt
 
@@ -45,6 +45,7 @@ PORTRAIT = (8.5,11)
 POWERPOINT = (10, 7.5)
 SCREEN = (31, 19)
 HALFSCREEN = (SCREEN[0]/2.0, SCREEN[1])
+
 
 # save myself some plotting memory for big arrays
 #plt.ioff()
@@ -68,6 +69,8 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None, arrivals
         flim=(0.0, fmax), clim=(0.0, 5e-5), hatch=dfilt, hatchlim=(0.0, 0.8))
 
     """
+    sciformatter = FormatStrFormatter('%.2e')
+
     tm = T[0]
     # TODO: remove fig from signature?
     ax1.axes.get_xaxis().set_visible(False)
@@ -75,8 +78,9 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None, arrivals
     if clim:
         im.set_clim(clim)
     if (hatch is not None) and hatchlim:
-        ax1.contourf(T, F, hatch, hatchlim, colors='k', hatches=['x'], alpha=0.0)
-        ax1.contour(T, F, hatch, [max(hatchlim)], linewidth=1.0, colors='k')
+        ax1.contourf(T, F, hatch, hatchlim, colors='w', alpha=0.2)
+        #ax1.contourf(T, F, hatch, hatchlim, colors='w', hatches=['x'], alpha=0.0)
+        #ax1.contour(T, F, hatch, [max(hatchlim)], linewidth=1.0, colors='w')
     if flim:
         ax1.set_ylim(flim)
     ax1.set_ylabel('frequency [Hz]')
@@ -86,23 +90,27 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None, arrivals
     fig.add_subplot(ax1)
 
     # waves and arrivals
+    dmx = np.abs(d1).max()
     if d2 is not None:
         ax2.plot(tm, d2, 'gray', label=label2)
+        dmx = max([dmx, np.abs(d2).max()])
     ax2.plot(tm, d1, 'k', label=label1)
     ax2.set_ylabel('amplitude')
     leg = ax2.legend(loc='lower left', frameon=False, fontsize=14)
     for legobj in leg.legendHandles:
         legobj.set_linewidth(2.0)
     ax2.set_xlim(tm[0], tm[-1])
-    if dlim:
-        ax2.set_ylim(dlim)
+    if not dlim:
+        dlim = (-dmx, dmx)
+    ax2.set_ylim(dlim)
     if arrivals:
         for arr, itt in arrivals:
             ax2.vlines(itt, d1.min(), d1.max(), 'k', linestyle='dashed')
             ax2.text(itt, d1.max(), arr, fontsize=12, ha='left', va='top')
 
     cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax1, ax2], format='%.2e')
-    ax2.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+    #ax2.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+    ax2.yaxis.set_major_formatter(sciformatter)
     fig.add_subplot(ax2)
 
     return im
@@ -126,14 +134,21 @@ def make_tiles(fig, gs0, skip=[]):
     return axes
 
 
+######################### CALCULATIONS ##################################
 
 # filter band
-fmin = 1./80
-fmax = 1./30
+#fmin = 1./80
+#fmin= 1.0/80
+fmin= None
+
+#fmax = 1./30
+#fmax = 1.0/5
+fmax = None
 
 #st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/aak-ii-00*")
-#st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/anmo*")
-st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/mdj*")
+st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/anmo*")
+#st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/mdj*")
+set = read('/wave/seismic2/user_dirs/hans/Mines/Kazakh_Net/Discrim_Study/Waves/Single_Charge_KTS/KURK/BH/1998/19980814074411.KURK.II.BH*')
 tr = st[0]
 fs = tr.stats.sampling_rate
 sac = tr.stats.sac
@@ -148,8 +163,9 @@ if az_prop > 360:
 
 # cut window and arrivals 
 vmax = 5.0 
+vmax = 2.5
 vmin = 2.5
-#vmin = 1.5
+vmin = 1.5
 swmin = km/vmax
 swmax = km/vmin
 tmin = tr.stats.starttime + swmin
@@ -163,10 +179,15 @@ for arr, itt in tarrivals:
     if arr in ('P', 'S') or (arr, itt) in swarrivals:
         arrivals.append((arr, itt))
 
-st = st.trim(endtime=tmax)
-st.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True)
+t0 = 500
 
-# Filter specification
+st = st.trim(endtime=tmax)
+if fmin and fmax:
+    st.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True)
+else:
+    fmin, fmax = 0.0, fs/2.0
+
+# surface wave filter specs
 xpr = -int(np.sign(np.sin(np.radians(baz))))
 polarization = 'retrograde'
 
@@ -192,10 +213,14 @@ n, e = rotate_RT_NE(rs, ts, baz)
 Sn, T, F = stransform(n, fs, return_time_freq=True)
 Se = stransform(e, fs)
 
+# period
+P = 1./F
+
 # odd cases where shape doesn't match
-m, n = Sv.shape
-T = T[:m, :n]
-F = F[:m, :n]
+nm, nn = Sv.shape
+T = T[:nm, :nn]
+F = F[:nm, :nn]
+P = P[:nm, :nn]
 
 # scalar NIP and filter
 nips = filt.NIP(Srs, filt.shift_phase(Sv, polarization=polarization))
@@ -206,9 +231,11 @@ vsf = istransform(Sv*sfilt, Fs=fs)
 #tsf = istransform(Sts*f, Fs=fs)
 
 
-############### instantaneous rotations #######################
+# instantaneous rotations
 theta = filt.estimate_azimuth(Sv, Sn, Se, polarization, xpr)
 Srd, Std = filt.rotate_NE_RT(Sn, Se, theta)
+
+# dynamic NIP and filter
 nipf = filt.NIP(Srd, filt.shift_phase(Sv, polarization=polarization))
 dfilt = filt.get_filter(nipf, polarization=polarization, threshold=0.8)
 
@@ -223,11 +250,10 @@ vdf = istransform(Sv*dfilt, Fs=fs)
 #tdf = istransform(Std*dfilt, Fs=fs)
 
 # get universal min/max values
-
 dmax = max([np.abs(data).max() for data in (n, e, v, rs, ts, rsf, vsf, rd, td, rdf, vdf)])
 cmax = max([np.abs(data).max() for data in (Srs, Sts, Sv, Srd, Std)])
 
-################ map ################
+################################ map ###########################################
 plt.figure()
 m = Basemap()
 m.fillcontinents(color='0.75',zorder=0)
@@ -243,8 +269,22 @@ plt.title("$\Delta$ = {}, mag {}, az = {:.0f}, baz = {:.0f}".format(deg, sac.mag
 plt.savefig('map.png')
 plt.close()
 
-
 ########## check dynamic vs inst. rotations #################
+# plot estimated instantaneous azimuth
+plt.figure()
+plt.title('Instantaneous azimuth. great circle azimuth = {:.1f}'.format(az_prop))
+plt.imshow(theta, origin='lower', cmap=plt.cm.hsv, extent=[0, theta.shape[1], 0, fs/2], 
+           aspect='auto',interpolation='nearest')
+plt.colorbar()
+plt.axis('tight')
+plt.ylim((fmin,fmax))
+mx = np.nanmax(theta-az_prop)
+plt.clim(-mx, mx)
+plt.xlim((t0, len(v)))
+
+plt.savefig('instantaneous_azimuth.png', dpi=200)
+plt.close()
+
 # from http://matplotlib.org/1.3.1/users/gridspec.html
 fig = plt.figure(figsize=SCREEN)
 gs0 = gridspec.GridSpec(3, 2)
@@ -257,44 +297,107 @@ ax41, ax42 = tile4
 ax51, ax52 = tile5
 ax61, ax62 = tile6
 
+
 ax11.set_title('Vertical')
 plot_tile(fig, ax11, T, F, Sv, ax12, v, 'vertical', arrivals=arrivals, 
           flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
-ax11.set_xlim(1000, len(v))
+ax11.set_xlim(t0, len(v))
 
 ax21.set_title('Vertical')
 plot_tile(fig, ax21, T, F, Sv, ax22, v, 'vertical', arrivals=arrivals, 
         flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
-ax21.set_xlim(1000, len(v))
+ax21.set_xlim(t0, len(v))
 
 ax31.set_title('Radial, scalar')
 plot_tile(fig, ax31, T, F, Srs, ax32, rs, 'great circle', rd, 'dynamic', 
-        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
-ax31.set_xlim(1000, len(v))
+        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
+        hatch=(theta - az_prop), hatchlim=(-20, 20))
+ax31.set_xlim(t0, len(v))
+#ax31.contour(T, F, theta - az_prop, [20, 0.0, -20], linewidth=1.5, 
+#             colors=['r','w','b'])
+#ax31.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
 
 ax41.set_title('Radial, dynamic')
 plot_tile(fig, ax41, T, F, Srd, ax42, rd, 'dynamic', rs, 'great circle',  
-        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
-ax41.set_xlim(1000, len(v))
+        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
+        hatch=(theta - az_prop), hatchlim=(-20, 20))
+ax41.set_xlim(t0, len(v))
 
 ax51.set_title('Transverse, scalar')
 plot_tile(fig, ax51, T, F, Sts, ax52, ts, 'great circle', td, 'dynamic', 
-        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
-ax51.set_xlim(1000, len(v))
+        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
+        hatch=(theta - az_prop), hatchlim=(-20, 20))
+ax51.set_xlim(t0, len(v))
+#ax51.contour(T, F, theta - az_prop, [40, 0.0, -40], linewidth=1.5, 
+#             colors=['r','w','b'])
+#ax51.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
 
 ax61.set_title('Transverse, dynamic')
 plot_tile(fig, ax61, T, F, Std, ax62, td, 'dynamic', ts, 'great circle',
-        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
-ax61.set_xlim(1000, len(v))
+        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
+        hatch=(theta - az_prop), hatchlim=(-20, 20))
+ax61.set_xlim(t0, len(v))
 
 plt.savefig('rotation_comparison.png', dpi=200)
 plt.close()
 
 
-######################## scalar azimuth ############################################
-print("Computing raw R, T s-transforms.")
+######################## check scalar Rayleigh filters #########################
+fig = plt.figure(figsize=HALFSCREEN)
+gs0 = gridspec.GridSpec(3, 1)
+gs0.update(hspace=0.15, wspace=0.15, left=0.05, right=0.95, top=0.95, bottom=0.05)
+tile1, tile2, tile3 = make_tiles(fig, gs0)
+ax11, ax12 = tile1
+ax21, ax22 = tile2
+ax31, ax32 = tile3
 
-print("Computing NIP and filter.")
+ax11.set_title('Vertical, scalar rotation')
+plot_tile(fig, ax11, T, F, Sv, ax12, vsf, 'filtered', v, 'vertical', arrivals=arrivals, 
+          flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax), hatch=sfilt, hatchlim=(0.0, 0.8))
+ax11.set_xlim(t0, len(v))
+
+ax21.set_title('Radial, scalar rotation')
+plot_tile(fig, ax21, T, F, Srs, ax22, rsf, 'filtered', rs, 'radial', arrivals=arrivals, 
+          flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax), hatch=sfilt, hatchlim=(0.0, 0.8))
+ax21.set_xlim(t0, len(v))
+
+ax31.set_title('Transverse, scalar rotation')
+plot_tile(fig, ax31, T, F, Sts, ax32, ts, 'transverse', arrivals=arrivals, 
+          flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax), hatch=sfilt, hatchlim=(0.0, 0.8))
+ax31.set_xlim(t0, len(v))
+
+
+plt.savefig('filter_rayleigh_scalar.png', dpi=200)
+plt.close()
+
+
+
+######################## check dynamic Rayleigh filters ########################
+fig = plt.figure(figsize=HALFSCREEN)
+gs0 = gridspec.GridSpec(3, 1)
+gs0.update(hspace=0.15, wspace=0.15, left=0.05, right=0.95, top=0.95, bottom=0.05)
+tile1, tile2, tile3 = make_tiles(fig, gs0)
+ax11, ax42 = tile1
+ax21, ax52 = tile2
+ax31, ax62 = tile3
+
+ax21.set_title('Vertical, dynamic rotation')
+plot_tile(fig, ax21, T, F, Sv, ax22, vsf, 'filtered', v, 'vertical', arrivals=arrivals, 
+        flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax), hatch=dfilt, hatchlim=(0.0, 0.8))
+ax21.set_xlim(t0, len(v))
+
+ax41.set_title('Radial, dynamic rotation')
+plot_tile(fig, ax41, T, F, Srd, ax42, rdf, 'filtered', rd, 'radial', arrivals=arrivals, 
+        flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax), hatch=dfilt, hatchlim=(0.0, 0.8))
+ax41.set_xlim(t0, len(v))
+
+ax61.set_title('Transverse, dynamic rotation')
+plot_tile(fig, ax61, T, F, Std, ax62, td, 'transverse', arrivals=arrivals, 
+        flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax), hatch=dfilt, hatchlim=(0.0, 0.8))
+ax61.set_xlim(t0, len(v))
+
+plt.savefig('filter_rayleigh_dynamic.png', dpi=200)
+plt.close()
 
 # plot NIP and filter
 print("Plotting NIP and filter, scalar az.")
@@ -496,6 +599,7 @@ plt.title('Instantaneous - great circle azimuth {:.1f}'.format(az_prop))
 plt.imshow(theta - (az_prop), origin='lower', cmap=plt.cm.seismic, extent=[0, theta.shape[1], 0, fs/2], 
            aspect='auto',interpolation='nearest')
 plt.colorbar()
+plt.contour(T, F, theta - az_prop, [60, 40, 20, 0.0, -20, -40, -60], linewidth=1.5, colors='k')
 #cs = plt.contour(T, F, theta - az_prop, [-20, -10, 0, 10, 20], colors='k')
 #plt.clabel(cs)
 #plt.contour(T, F, theta, [180+baz], linewidth=2.0, colors='k')

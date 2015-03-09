@@ -30,6 +30,33 @@ import numpy as np
 
 from .util import stransform, istransform
 
+def get_shift(polarization):
+    """
+    Get the appropriate pi/2 phase advance or delay for the provided polarization.
+
+    Parameters
+    ----------
+    polarization : str, {'retrograde', 'prograde', 'linear'}
+        'retrograde' returns i, for a pi/2 phase advance.
+        'prograde' or 'linear' returns -i, for a pi/2 phase delay
+
+    Returns
+    -------
+    numpy.complex128
+        Multiply this value (i or -i) into a complex vertical S-transform to shift its phase.
+
+    """
+    if polarization is 'retrograde':
+        # phase advance
+        shft = np.array(1j)
+    elif polarization in ('prograde', 'linear'):
+        # phase delay
+        shft = -np.array(1j)
+    else:
+        raise ValueError("Polarization must be either 'prograde', 'retrograde', or 'linear'")
+
+    return shft
+
 
 def shift_phase(Sv, polarization='retrograde'):
     """
@@ -55,14 +82,7 @@ def shift_phase(Sv, polarization='retrograde'):
     Pages 5 and 10 from Meta-Fajardo et al. (2015)
 
     """
-    if polarization is 'retrograde':
-        # phase advance
-        shft = np.array(1j)
-    elif polarization in ('prograde', 'linear'):
-        # phase delay
-        shft = -np.array(1j)
-    else:
-        raise ValueError("Polarization must be either 'prograde', 'retrograde', or 'linear'")
+    shft = get_shift(polarization)
 
     return Sv * shft
 
@@ -94,21 +114,34 @@ def estimate_azimuth(Sv, Sn, Se, polarization, xpr):
     """
     Svhat = shift_phase(Sv, polarization)
 
-    num = (Se.real * Svhat.real) + (Se.imag*Svhat.imag)
-    denom = (Sn.real * Svhat.real) + (Sn.imag*Svhat.imag)
-    theta_r = np.arctan(num/denom)
+    num = (Se.real * Svhat.real) + (Se.imag * Svhat.imag)
+    denom = (Sn.real * Svhat.real) + (Sn.imag * Svhat.imag)
+    theta_r = np.arctan(num / denom)
+    #theta_r = np.arctan2(num, denom)
 
     theta_I = theta_r + np.pi*(1 - np.sign(np.sin(theta_r))) + \
-        np.pi*(1 - np.sign(np.cos(theta_r))) * np.sign(np.sign(theta_r))/2
+        np.pi*(1 - np.sign(np.cos(theta_r))) * np.sign(np.sin(theta_r))/2
 
     theta = theta_I + (np.pi/2)*(np.sign(np.sin(theta_I)) - np.sign(xpr))
+
+
+    return np.degrees(theta)
+
+def scalar_azimuth(e, n, vhat, polarization='retrograde'):
+    """
+    Estimate the scalar/average azimuth, in degrees.
+
+    """
+    theta_r = np.arctan( np.dot(e, vhat) / np.dot(n, vhat) )
+    theta = theta_r + np.pi(1 - np.sign(np.sin(theta_r))) + \
+            np.pi(1 - np.sign(np.cos(theta_r))) * np.sign(np.sin(theta_r))/2
 
     return np.degrees(theta)
 
 
 def rotate_NE_RT(Sn, Se, az):
     """
-    Rotate North and East s-transforms to radial and transverse, through an angle.
+    Rotate North and East s-transforms to radial and transverse, through the propagation angle.
 
     Parameters
     ----------
@@ -133,6 +166,8 @@ def rotate_NE_RT(Sn, Se, az):
     St = -np.sin(theta)*Sn + np.cos(theta)*Se
 
     return Sr, St
+
+
 
 
 def NIP(Sr, Sv, polarization=None, eps=None):
@@ -172,7 +207,7 @@ def NIP(Sr, Sv, polarization=None, eps=None):
         mask = (Avhat / Avhat.max()) < eps
         Avhat[mask] += eps*Avhat.max()
 
-    ip = Sr.real*Svhat.real + Sr.imag*Svhat.imag
+    ip = (Sr.real)*(Svhat.real) + (Sr.imag)*(Svhat.imag)
     n = np.abs(Sr) * Avhat
 
     return ip/n
@@ -277,20 +312,21 @@ def NIP_filter(n, e, z, fs, xpr, polarization='retrograde', threshold=0.8, width
     Se = stransform(e, Fs=fs)
     Sv = stransform(z, Fs=fs)
     
-    #Svhat = shift_phase(Sv, polarization=polarization)
-
     theta = estimate_azimuth(Sv, Sn, Se, polarization, xpr)
 
     Sr, St = rotate_NE_RT(Sn, Se, theta)
 
-    nip = NIP(Sr, Sv, polarization)
+    Svhat = shift_phase(Sv, polarization=polarization)
+
+    nip = NIP(Sr, Svhat)
 
     # get the filter
-    filt = get_filter(nip, threshold=0.8, width=0.1, polarization=polarization)
+    filt = get_filter(nip, polarization, threshold=0.8, width=0.1)
 
     # apply the filter
     Srf = Sr*filt
     Stf = St*filt
+    Sv
 
     # XXX: damp any nans?
     Srf[np.isnan(Srf)] = 0.0
