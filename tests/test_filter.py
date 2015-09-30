@@ -138,17 +138,18 @@ def make_tiles(fig, gs0, skip=[]):
 
 # filter band
 #fmin = 1./80
-#fmin= 1.0/80
-fmin= None
+fmin= 1.0/80
+#fmin= None
 
-#fmax = 1./30
+fmax = 1./30
 #fmax = 1.0/5
-fmax = None
+#fmax = None
 
 #st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/aak-ii-00*")
-st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/anmo*")
+#st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/anmo*")
 #st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/mdj*")
-set = read('/wave/seismic2/user_dirs/hans/Mines/Kazakh_Net/Discrim_Study/Waves/Single_Charge_KTS/KURK/BH/1998/19980814074411.KURK.II.BH*')
+#st = read('/wave/seismic2/user_dirs/hans/Mines/Kazakh_Net/Discrim_Study/Waves/Single_Charge_KTS/KURK/BH/1998/19980814074411.KURK.II.BH*', format='SAC')
+st = read('/wave/seismic2/user_dirs/hans/Mines/Kazakh_Net/Discrim_Study/Waves/Single_Charge_KTS/KURK/BH/1998/19980815024059.KURK.KZ.BH*', format='SAC')
 tr = st[0]
 fs = tr.stats.sampling_rate
 sac = tr.stats.sac
@@ -162,9 +163,9 @@ if az_prop > 360:
     az_prop -= 360
 
 # cut window and arrivals 
-vmax = 5.0 
+#vmax = 5.0 
 vmax = 2.5
-vmin = 2.5
+#vmin = 2.5
 vmin = 1.5
 swmin = km/vmax
 swmax = km/vmin
@@ -179,7 +180,7 @@ for arr, itt in tarrivals:
     if arr in ('P', 'S') or (arr, itt) in swarrivals:
         arrivals.append((arr, itt))
 
-t0 = 500
+t0 = 1000
 
 st = st.trim(endtime=tmax)
 if fmin and fmax:
@@ -278,7 +279,7 @@ plt.imshow(theta, origin='lower', cmap=plt.cm.hsv, extent=[0, theta.shape[1], 0,
 plt.colorbar()
 plt.axis('tight')
 plt.ylim((fmin,fmax))
-mx = np.nanmax(theta-az_prop)
+mx = np.nanmax(theta)
 plt.clim(-mx, mx)
 plt.xlim((t0, len(v)))
 

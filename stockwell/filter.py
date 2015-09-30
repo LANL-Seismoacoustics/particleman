@@ -28,6 +28,7 @@ Product. Bulletin of the Seismological Society of America.
 #   rarely want to see the NIP, and they can do so directly, using NIP.
 import numpy as np
 
+
 from .util import stransform, istransform
 
 def get_shift(polarization):
@@ -127,14 +128,15 @@ def estimate_azimuth(Sv, Sn, Se, polarization, xpr):
 
     return np.degrees(theta)
 
-def scalar_azimuth(e, n, vhat, polarization='retrograde'):
+
+def scalar_azimuth(e, n, vhat):
     """
     Estimate the scalar/average azimuth, in degrees.
 
     """
     theta_r = np.arctan( np.dot(e, vhat) / np.dot(n, vhat) )
-    theta = theta_r + np.pi(1 - np.sign(np.sin(theta_r))) + \
-            np.pi(1 - np.sign(np.cos(theta_r))) * np.sign(np.sin(theta_r))/2
+    theta = theta_r + np.pi*(1 - np.sign(np.sin(theta_r))) + \
+              np.pi*(1 - np.sign(np.cos(theta_r))) * np.sign(np.sin(theta_r))/2
 
     return np.degrees(theta)
 
@@ -168,8 +170,6 @@ def rotate_NE_RT(Sn, Se, az):
     return Sr, St
 
 
-
-
 def NIP(Sr, Sv, polarization=None, eps=None):
     """
     Get the normalized inner product of two complex MxN stockwell transforms.
@@ -177,12 +177,12 @@ def NIP(Sr, Sv, polarization=None, eps=None):
     Parameters
     ----------
     Sr, Sv: numpy.ndarray (complex, rank 2)
-        The radial and vertical component s-transforms.
+        The radial and vertical component s-transforms. If the polarization argument is omitted, 
+        Sv is assumed to be phase-shifted according to the desired polarization.
     polarization : str, optional
         If provided, the Sv will be phase-shifted according to this string before calculating the NIP.
         'retrograde' will apply a pi/2 phase advance (1j * Sv)
         'prograde' or 'linear' will apply a pi/2 phase delay (-1j * Sv)
-        If omitted, Sv is assumed to already be phase-shifted according to the desired polarization.
     eps : float, optional
         Tolerance for small denominator values, for numerical stability.
         Useful for synthetic noise-free data.  Authors used 0.04.
@@ -212,21 +212,6 @@ def NIP(Sr, Sv, polarization=None, eps=None):
 
     return ip/n
 
-
-def smooth_NIP(X, corner=None):
-    """
-    Smooth any sharp edges in the NIP.
-
-    Uses a hyperbolic tangent, with provided critical value.
-
-    References
-    ----------
-    Maceira and Ammon (2009)
-
-    """
-    phi = (np.pi/2)*(1.0+np.tanh((X-corner)))/2
-
-    return np.sin(phi)**2 * NIP
 
 
 def get_filter(nip, polarization, threshold=0.8, width=0.1):
@@ -275,7 +260,7 @@ def get_filter(nip, polarization, threshold=0.8, width=0.1):
     return filt
 
 
-def NIP_filter(n, e, z, fs, xpr, polarization='retrograde', threshold=0.8, width=0.1, eps=None):
+def NIP_filter(n, e, v, fs, xpr, polarization='retrograde', threshold=0.8, width=0.1, eps=None):
     """
     Filter a 3-component seismogram based on the NIP criterion.
 
@@ -284,13 +269,13 @@ def NIP_filter(n, e, z, fs, xpr, polarization='retrograde', threshold=0.8, width
 
     Parameters
     ----------
-    n, e, z : numpy.ndarray (rank 1)
+    n, e, v : numpy.ndarray (rank 1)
         Equal-length data arrays for North, East, and Vertical components, respectively.
     fs : float
         Sampling frequency [Hz]
     xpr : int
         Sense of wave propagation. -1 for westward, 1 for eastward.
-        Try np.sign(station_lon - event_lon), unless they're directly N-S from each other.
+        Try -int(np.sign(np.sin(np.radians(baz)))), unless they're directly N-S from each other.
     polarization : str
         'retrograde' to extract normal retrograde Rayleigh waves
         'prograde' to extract prograde Rayleigh waves
@@ -302,39 +287,69 @@ def NIP_filter(n, e, z, fs, xpr, polarization='retrograde', threshold=0.8, width
 
     Returns
     -------
-    r, t, v : numpy.ndarray (rank 1)
-        Filtered radial, traverse, and vertical components.
+    n, e, v : numpy.ndarray (rank 1)
+        Filtered north, east, and vertical components.
     theta : float
-        angle [degrees].
+        Average propagation azimuth for the given polarization [degrees].
+        Use this angle to rotate the data to radial and transverse.
+
+    Examples
+    --------
+    # compare filtered north, east, vertical to original
+    >>> import obspy.signal as signal
+    >>> nf, ef, vf, theta = NIP_filter(n, e, v, fs, xpr)
+    >>> if theta > 180:
+            nip_baz = theta - 180
+        else:
+            nip_baz = theta + 180
+
+    >>> rf, tf = signal.rotate_NE_RT(nf, ef, nip_baz)
+    >>> r, t = signal.rotate_NE_RT(n, e, baz)
+
 
     """
+    #1. Get instantaneous theta from Sn, Se, Svhat
+    #2. Rotate Sn, Se through theta, and get nip from Svhat and Sr
+    #3. Stamp get appropriate nip filter, and stamp on Sn, Se, Sv
+    #4. Invert filtered Sn, Se, Sv back to time
+    #5. Get average scalar theta from filtered e, n, vhat
+
+    shft = get_shift(polarization)
+
+    #1. Get instantaneous theta from Sn, Se, Svhat
     Sn = stransform(n, Fs=fs)
     Se = stransform(e, Fs=fs)
-    Sv = stransform(z, Fs=fs)
+    Sv = stransform(v, Fs=fs)
     
     theta = estimate_azimuth(Sv, Sn, Se, polarization, xpr)
 
+    #2. Rotate Sn, Se through theta, and get nip from Svhat and Sr
     Sr, St = rotate_NE_RT(Sn, Se, theta)
 
-    Svhat = shift_phase(Sv, polarization=polarization)
+    # damp values where theta is NaN (usually divide-by-zero problems)
+    Sr[np.isnan(Sr)] = 0.0
+    St[np.isnan(St)] = 0.0
 
-    nip = NIP(Sr, Svhat)
+    nip = NIP(Sr, shft * Sv)
 
-    # get the filter
-    filt = get_filter(nip, polarization, threshold=0.8, width=0.1)
+    #3. Stamp get appropriate nip filter, and stamp on Sn, Se, Sv
+    filt = get_filter(nip, polarization, threshold, width)
 
-    # apply the filter
-    Srf = Sr*filt
-    Stf = St*filt
-    Sv
+    nf = istransform(Sn*filt, Fs=fs)
+    ef = istransform(Se*filt, Fs=fs)
+    vf = istransform(Sv*filt, Fs=fs)
 
-    # XXX: damp any nans?
-    Srf[np.isnan(Srf)] = 0.0
-    Srt[np.isnan(Srt)] = 0.0
+    # get the average propogation azimuth
+    theta_bar = scalar_azimuth(e, n, istransform((shft * Sv) * filt, Fs=fs))
 
     # return to time domain
-    r = istransform(Srf, Fs=fs)
-    t = istransform(Stf, Fs=fs)
+    #if theta_bar > 180:
+    #    baz = theta_bar - 180
+    #else:
+    #    baz = theta_bar + 180
+
+    #import obspy.signal as signal
+    #rf, tf = signal.rotate_NE_RT(nf, ef, baz)
     
-    return r, t
+    return nf, ef, vf, theta_bar
 

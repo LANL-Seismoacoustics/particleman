@@ -4,7 +4,7 @@
 # For copyright and redistribution details, please see the COPYING file
 
 try:
-    import setuptool
+    import setuptools
 except:
     pass
 
