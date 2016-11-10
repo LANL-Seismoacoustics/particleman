@@ -143,6 +143,7 @@ def make_tiles(fig, gs0, skip=[]):
 
 
 ######################### CALCULATIONS ##################################
+# TODO: put the functions above into a stockwell.plotting module
 
 # filter band
 #fmin = 1./80
@@ -241,7 +242,7 @@ vsf = istransform(Sv*sfilt, Fs=fs)
 
 
 # instantaneous rotations
-theta = filt.estimate_azimuth(Sv, Sn, Se, polarization, xpr)
+theta = filt.instantaneous_azimuth(Sv, Sn, Se, polarization, xpr)
 Srd, Std = filt.rotate_NE_RT(Sn, Se, theta)
 
 # dynamic NIP and filter
@@ -591,7 +592,7 @@ del nip, f, Sr, St
 
 ############################### instantaneous azimuth ###################################
 print("Estimating instantaneous azimuth.")
-theta = filt.estimate_azimuth(Sv, Sn, Se, polarization, xpr)
+theta = filt.instantaneous_azimuth(Sv, Sn, Se, polarization, xpr)
 
 fig = plt.figure(figsize=PORTRAIT)
 gs0 = gridspec.GridSpec(3, 2)

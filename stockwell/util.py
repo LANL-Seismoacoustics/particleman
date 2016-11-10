@@ -35,6 +35,37 @@ def _get_lo_hi(L, hp, lp, Fs):
     return low, high, lp
 
 
+def get_TF_arrays(N, Fs=0, hp=0, lp=0):
+    """ Make the Stockwell time, frequency arrays for plotting.
+
+    Parameters
+    ----------
+    N : int
+        Number of samples in the time series.
+    hp : float
+        high-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)
+    lp : float
+        low-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)
+    Fs : float
+        sampling rate in Hz
+
+    Returns
+    -------
+    T, F : numpy.ndarray (complex, rank 2)
+
+    """
+    # XXX: doesn't work yet.  still needs "S", the transform tile
+    if Fs:
+        t = 1.0/Fs # Length of one sample
+        t = np.arange(N) * t # List of time values
+        T, F = np.meshgrid(t, np.arange(hp, lp, (lp-hp) / (1.0 * S.shape[0])))
+    else:
+        t = np.arange(N)
+        T, F = np.meshgrid(t, np.arange(int(hp), int(lp), int(lp-hp)/(1.0*S.shape[0])))
+
+    return T, F
+
+
 
 def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False):
     """Perform a Stockwell transform on a time-series.

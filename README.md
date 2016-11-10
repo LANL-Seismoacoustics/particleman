@@ -8,7 +8,7 @@ All credit goes to the authors (not me).  Please see LICENSE.txt.
 
 ## Example
 
-Transform a chirp.
+### Transform a chirp.
 
 ```python
 import numpy as np
@@ -25,6 +25,8 @@ c = chirp(t, 0.2, 20.0, 10.0, method='linear', phi=0, vertex_zero=True)
 S, T, F = stransform(c, Fs=sample_rate)
 
 ```
+
+### Plotting
 
 Plotting is easy.
 
@@ -69,6 +71,16 @@ plt.draw()
 
 ![chirp](docs/data/chirp.png "chirp")
 
+
+### Advanced Filtering
+
+One of the benefits of the Stockwell transform is that it preserves phase in the
+same way that a Fourier transform does, which makes filters based upon phase
+relationships possible in time-frequency space.  In the example below, we use
+the Normalized Inner Produce filter of Meza-Fajardo et al., (2015) to pass
+retrograde Rayleigh waves (in any frequency) from a particular azimuth.
+
+![filtered retrograde radial](docs/data/stransforms_scalar.png)
 
 
 ## Installation

@@ -24,6 +24,7 @@ Extraction of Surface Waves from Three Component Seismograms Based on the Normal
 Product. Bulletin of the Seismological Society of America.
 
 """
+import warnings
 # TODO: consider moving the nip argument to inside get_filter.  People may only 
 #   rarely want to see the NIP, and they can do so directly, using NIP.
 import numpy as np
@@ -88,7 +89,7 @@ def shift_phase(Sv, polarization='retrograde'):
     return Sv * shft
 
 
-def estimate_azimuth(Sv, Sn, Se, polarization, xpr):
+def instantaneous_azimuth(Sv, Sn, Se, polarization, xpr):
     """
     Get instantaneous propagation angle [degrees], under the Rayleigh wave assumption.
 
@@ -125,13 +126,16 @@ def estimate_azimuth(Sv, Sn, Se, polarization, xpr):
 
     theta = theta_I + (np.pi/2)*(np.sign(np.sin(theta_I)) - np.sign(xpr))
 
-
     return np.degrees(theta)
 
 
 def scalar_azimuth(e, n, vhat):
     """
     Estimate the scalar/average azimuth, in degrees.
+
+    References
+    ----------
+    Equations (10) and (12) from Meza-Fajardo et al. (2015)
 
     """
     theta_r = np.arctan( np.dot(e, vhat) / np.dot(n, vhat) )
@@ -255,7 +259,7 @@ def get_filter(nip, polarization, threshold=0.8, width=0.1):
         filt[mid] = 0.5 * np.cos((np.pi*(nip[mid]-threshold))/width) + 0.5
         filt[high] = 0.0
     else:
-        raise ValueError('Unknown polarization type.')
+        raise ValueError('Unknown polarization type: {}'.format(polarization))
 
     return filt
 
@@ -308,6 +312,7 @@ def NIP_filter(n, e, v, fs, xpr, polarization='retrograde', threshold=0.8, width
 
 
     """
+    # TODO: rewrite this to get rid of all the potentially huge intermediate arrays
     #1. Get instantaneous theta from Sn, Se, Svhat
     #2. Rotate Sn, Se through theta, and get nip from Svhat and Sr
     #3. Stamp get appropriate nip filter, and stamp on Sn, Se, Sv
@@ -321,18 +326,23 @@ def NIP_filter(n, e, v, fs, xpr, polarization='retrograde', threshold=0.8, width
     Se = stransform(e, Fs=fs)
     Sv = stransform(v, Fs=fs)
     
-    theta = estimate_azimuth(Sv, Sn, Se, polarization, xpr)
+    theta = instantaneous_azimuth(Sv, Sn, Se, polarization, xpr)
 
     #2. Rotate Sn, Se through theta, and get nip from Svhat and Sr
     Sr, St = rotate_NE_RT(Sn, Se, theta)
 
     # damp values where theta is NaN (usually divide-by-zero problems)
-    Sr[np.isnan(Sr)] = 0.0
-    St[np.isnan(St)] = 0.0
+    nanr = np.isnan(Sr)
+    nant = np.isnan(St)
+    if np.any(nanr) or np.any(nant):
+        msg = "{} fraction of NaNs found".format(float(np.sum(nanr)) / nanr.size)
+        warnings.warn(msg)
+        Sr[nanr] = 0.0
+        St[nant] = 0.0
 
     nip = NIP(Sr, shft * Sv)
 
-    #3. Stamp get appropriate nip filter, and stamp on Sn, Se, Sv
+    #3. get appropriate nip filter, and stamp on Sn, Se, Sv
     filt = get_filter(nip, polarization, threshold, width)
 
     nf = istransform(Sn*filt, Fs=fs)
@@ -352,4 +362,3 @@ def NIP_filter(n, e, v, fs, xpr, polarization='retrograde', threshold=0.8, width
     #rf, tf = signal.rotate_NE_RT(nf, ef, baz)
     
     return nf, ef, vf, theta_bar
-
