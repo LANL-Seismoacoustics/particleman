@@ -54,6 +54,14 @@ HALFSCREEN = (SCREEN[0]/2.0, SCREEN[1])
 def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None, arrivals=None,
               flim=None, clim=None, hatch=None, hatchlim=None, dlim=None):
     """
+    Parameters
+    ----------
+    fig : matplotlib.Figure
+    ax1 : matplotlib.axis.Axis
+    T, F, S : numpy.ndarray (rank 2)
+        Time, frequency, S-transform tiles from stockwell.stransform
+    ax2
+
     Returns
     -------
     matplotlib.collections.QuadMesh
