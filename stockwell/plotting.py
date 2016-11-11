@@ -32,11 +32,16 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None,
     T, F, S : numpy.ndarray (ndim 2)
         Time, frequency, S-transform tiles from stockwell.stransform
     d1, d2 : numpy.ndarray (ndim 1)
-        Time-series, plotted black.  Optional d2 plotted gray.
+        Time-series, plotted black.  Optional d2 plotted gray. These need to
+        be registered in time to T.
     arrivals : sequence of (str, float) 2-tuples
         Sequence of arrivals to plot, of the form (label, time_in_seconds)
     dlim : 2-tuple of floats
         Limits on the time-series amplitudes (y axis limits).
+    hatch : numpy.ndarray (ndim 2)
+        Optional tile used for hatch mask.
+    hatchlim : tuple
+        Hatch range used to display mask.  2-tuple of floats (hmin, hmax).
 
     Returns
     -------
@@ -174,9 +179,15 @@ def rotation_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
     v, rs, rd, ts, td : numpy.ndarray (ndim 1)
         The corresponding vertical, radial-scalar, radial-dynamic,
         transverse-scalar, and transverse-dynamic time-series vectors.
+    arrivals : sequence of (str, float) 2-tuples
+        Sequence of arrivals to plot, of the form (label, time_in_seconds)
     flim, clim, dlim, xlim : tuple
         Frequency, stockwell amplitude, time-series amplitude, and time-series
-        time limits.  2-tuples of floats, of the form (min, max).
+        time limits of display.  2-tuples of (min, max) floats.
+    hatch : numpy.ndarray (ndim 2)
+        Optional tile used for hatch mask.
+    hatchlim : tuple
+        Hatch range used to display mask.  2-tuple of floats (hmin, hmax).
 
     Returns
     -------
@@ -208,29 +219,29 @@ def rotation_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
 
     ax31.set_title('Radial, scalar')
     plot_tile(fig, ax31, T, F, Srs, ax32, rs, 'great circle', rd, 'dynamic', 
-            arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
-            hatch=(theta - az_prop), hatchlim=(-20, 20))
+            arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
+            hatchlim=hatchlim)
     #ax31.contour(T, F, theta - az_prop, [20, 0.0, -20], linewidth=1.5, 
     #             colors=['r','w','b'])
     #ax31.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
 
     ax41.set_title('Radial, dynamic')
     plot_tile(fig, ax41, T, F, Srd, ax42, rd, 'dynamic', rs, 'great circle',  
-            arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
-            hatch=(theta - az_prop), hatchlim=(-20, 20))
+            arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
+            hatchlim=hatchlim)
 
     ax51.set_title('Transverse, scalar')
     plot_tile(fig, ax51, T, F, Sts, ax52, ts, 'great circle', td, 'dynamic', 
-            arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
-            hatch=(theta - az_prop), hatchlim=(-20, 20))
+            arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
+            hatchlim=hatchlim)
     #ax51.contour(T, F, theta - az_prop, [40, 0.0, -40], linewidth=1.5, 
     #             colors=['r','w','b'])
     #ax51.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
 
     ax61.set_title('Transverse, dynamic')
     plot_tile(fig, ax61, T, F, Std, ax62, td, 'dynamic', ts, 'great circle',
-            arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
-            hatch=(theta - az_prop), hatchlim=(-20, 20))
+            arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
+            hatchlim=hatchlim)
 
     if xlim:
         ax11.set_xlim(*xlim)
@@ -239,5 +250,67 @@ def rotation_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
         ax41.set_xlim(*xlim)
         ax51.set_xlim(*xlim)
         ax61.set_xlim(*xlim)
+
+    return fig
+
+
+def check_filters(T, F, Sv, Srs, Sts, vsf, rsf, ts, arrivals, flim, clim
+                  dlim, xlim, hatch=None, hatchlim=None, fig=None):
+    """
+    Parameters
+    ----------
+    T, F : numpy.ndarray (ndim 2)
+        The time and freqency domain tiles/grids.
+    Sv, Srs, Sts : numpy.ndarray (ndim 2)
+        The vertical, scalar-rotated radial, and scalar-rotated transverse
+        Stockwell transform tiles.
+    vsf, rsf, ts : numpy.ndarray (ndim 1)
+        The Stockwell NIP-filtered vertical and radial, and transverse
+        time-series vectors.
+    arrivals : sequence of (str, float) 2-tuples
+        Sequence of arrivals to plot, of the form (label, time_in_seconds)
+    dlim : 2-tuple of floats
+        Limits on the time-series amplitudes (y axis limits).
+    hatch : numpy.ndarray (ndim 2)
+        Optional tile used for hatch mask.
+    hatchlim : tuple
+        Hatch range used to display mask.  2-tuple of floats (hmin, hmax).
+    fig : matplotlib.Figure
+
+    Returns
+    -------
+    matplotlib.Figure
+
+    """
+    if not fig:
+        fig = plt.figure()
+
+    gs0 = gridspec.GridSpec(3, 1)
+    gs0.update(hspace=0.15, wspace=0.15, left=0.05, right=0.95, top=0.95,
+               bottom=0.05)
+
+    tile1, tile2, tile3 = make_tiles(fig, gs0)
+    ax11, ax12 = tile1
+    ax21, ax22 = tile2
+    ax31, ax32 = tile3
+
+    ax11.set_title('Vertical, scalar rotation')
+    plot_tile(fig, ax11, T, F, Sv, ax12, vsf, 'filtered', v, 'vertical',
+              arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
+              hatchlim=hatchlim)
+
+    ax21.set_title('Radial, scalar rotation')
+    plot_tile(fig, ax21, T, F, Srs, ax22, rsf, 'filtered', rs, 'radial',
+              arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
+              hatchlim=hatchlim)
+
+    ax31.set_title('Transverse, scalar rotation')
+    plot_tile(fig, ax31, T, F, Sts, ax32, ts, 'transverse', arrivals=arrivals,
+              flim=flim, clim=clim, dlim=dlim, hatch=hatch, hatchlim=hatchlim)
+
+    if xlim:
+        ax11.set_xlim(*xlim)
+        ax21.set_xlim(*xlim)
+        ax31.set_xlim(*xlim)
 
     return fig

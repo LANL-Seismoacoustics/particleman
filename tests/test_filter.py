@@ -211,29 +211,10 @@ plt.close()
 
 ######################## check scalar Rayleigh filters #########################
 fig = plt.figure(figsize=HALFSCREEN)
-gs0 = gridspec.GridSpec(3, 1)
-gs0.update(hspace=0.15, wspace=0.15, left=0.05, right=0.95, top=0.95, bottom=0.05)
-tile1, tile2, tile3 = make_tiles(fig, gs0)
-ax11, ax12 = tile1
-ax21, ax22 = tile2
-ax31, ax32 = tile3
-
-ax11.set_title('Vertical, scalar rotation')
-plot_tile(fig, ax11, T, F, Sv, ax12, vsf, 'filtered', v, 'vertical', arrivals=arrivals, 
-          flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax), hatch=sfilt, hatchlim=(0.0, 0.8))
-ax11.set_xlim(t0, len(v))
-
-ax21.set_title('Radial, scalar rotation')
-plot_tile(fig, ax21, T, F, Srs, ax22, rsf, 'filtered', rs, 'radial', arrivals=arrivals, 
-          flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax), hatch=sfilt, hatchlim=(0.0, 0.8))
-ax21.set_xlim(t0, len(v))
-
-ax31.set_title('Transverse, scalar rotation')
-plot_tile(fig, ax31, T, F, Sts, ax32, ts, 'transverse', arrivals=arrivals, 
-          flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax), hatch=sfilt, hatchlim=(0.0, 0.8))
-ax31.set_xlim(t0, len(v))
-
-
+fig = splt.check_filters(T, F, Sv, Srs, Sts, vsf, rsf, ts, arrivals,
+                         flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
+                         xlim=(t0, len(v), hatch=sfilt, hatchlim=(0.0, 0.8),
+                         fig=fig)
 plt.savefig('filter_rayleigh_scalar.png', dpi=200)
 plt.close()
 
@@ -241,6 +222,11 @@ plt.close()
 
 ######################## check dynamic Rayleigh filters ########################
 fig = plt.figure(figsize=HALFSCREEN)
+# fig = splt.check_filters(T, F, Sv, Srd, Std, vsf, rdf, td, arrivals,
+#                          flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
+#                          xlim=(t0, len(v), hatch=dfilt, hatchlim=(0.0, 0.8),
+#                          fig=fig)
+
 gs0 = gridspec.GridSpec(3, 1)
 gs0.update(hspace=0.15, wspace=0.15, left=0.05, right=0.95, top=0.95, bottom=0.05)
 tile1, tile2, tile3 = make_tiles(fig, gs0)
