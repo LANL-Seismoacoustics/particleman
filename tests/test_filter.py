@@ -41,6 +41,13 @@ from stockwell import stransform, istransform
 import stockwell.filter as filt
 import stockwell.plotting as splt
 
+LANDSCAPE = (11,8.5)
+PORTRAIT = (8.5,11)
+POWERPOINT = (10, 7.5)
+SCREEN = (31, 19)
+HALFSCREEN = (SCREEN[0]/2.0, SCREEN[1])
+
+
 ######################### CALCULATIONS ##################################
 # TODO: put the functions above into a stockwell.plotting module
 
@@ -187,73 +194,17 @@ plt.close()
 
 ########## check dynamic vs inst. rotations #################
 # plot estimated instantaneous azimuth
-plt.figure()
+_ = splt.plot_instantaneous_azimuth(theta, fs, xlim=(t0, len(v)))
 plt.title('Instantaneous azimuth. great circle azimuth = {:.1f}'.format(az_prop))
-plt.imshow(theta, origin='lower', cmap=plt.cm.hsv, extent=[0, theta.shape[1], 0, fs/2], 
-           aspect='auto',interpolation='nearest')
-plt.colorbar()
-plt.axis('tight')
-plt.ylim((fmin,fmax))
-mx = np.nanmax(theta)
-plt.clim(-mx, mx)
-plt.xlim((t0, len(v)))
-
 plt.savefig('instantaneous_azimuth.png', dpi=200)
 plt.close()
 
-# from http://matplotlib.org/1.3.1/users/gridspec.html
+# time-series rotation comparison plot, 6 panels
 fig = plt.figure(figsize=SCREEN)
-gs0 = gridspec.GridSpec(3, 2)
-gs0.update(hspace=0.15, wspace=0.15, left=0.05, right=0.95, top=0.95, bottom=0.05)
-tile1, tile2, tile3, tile4, tile5, tile6 = make_tiles(fig, gs0)
-ax11, ax12 = tile1
-ax21, ax22 = tile2
-ax31, ax32 = tile3
-ax41, ax42 = tile4
-ax51, ax52 = tile5
-ax61, ax62 = tile6
-
-
-ax11.set_title('Vertical')
-plot_tile(fig, ax11, T, F, Sv, ax12, v, 'vertical', arrivals=arrivals, 
-          flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
-ax11.set_xlim(t0, len(v))
-
-ax21.set_title('Vertical')
-plot_tile(fig, ax21, T, F, Sv, ax22, v, 'vertical', arrivals=arrivals, 
-        flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax))
-ax21.set_xlim(t0, len(v))
-
-ax31.set_title('Radial, scalar')
-plot_tile(fig, ax31, T, F, Srs, ax32, rs, 'great circle', rd, 'dynamic', 
-        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
-        hatch=(theta - az_prop), hatchlim=(-20, 20))
-ax31.set_xlim(t0, len(v))
-#ax31.contour(T, F, theta - az_prop, [20, 0.0, -20], linewidth=1.5, 
-#             colors=['r','w','b'])
-#ax31.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
-
-ax41.set_title('Radial, dynamic')
-plot_tile(fig, ax41, T, F, Srd, ax42, rd, 'dynamic', rs, 'great circle',  
-        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
-        hatch=(theta - az_prop), hatchlim=(-20, 20))
-ax41.set_xlim(t0, len(v))
-
-ax51.set_title('Transverse, scalar')
-plot_tile(fig, ax51, T, F, Sts, ax52, ts, 'great circle', td, 'dynamic', 
-        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
-        hatch=(theta - az_prop), hatchlim=(-20, 20))
-ax51.set_xlim(t0, len(v))
-#ax51.contour(T, F, theta - az_prop, [40, 0.0, -40], linewidth=1.5, 
-#             colors=['r','w','b'])
-#ax51.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
-
-ax61.set_title('Transverse, dynamic')
-plot_tile(fig, ax61, T, F, Std, ax62, td, 'dynamic', ts, 'great circle',
-        arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
-        hatch=(theta - az_prop), hatchlim=(-20, 20))
-ax61.set_xlim(t0, len(v))
-
+fig = splt.rotation_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
+                               arrivals, flim=(fmax, fmax), clim=(0.0, cmax),
+                               dlim=(-dmax, dmax), hatch=(theta-az_prop),
+                               hatchlim=(-20, 20), fig=fig, xlim=(t0, len(v)))
 plt.savefig('rotation_comparison.png', dpi=200)
 plt.close()
 

@@ -16,16 +16,27 @@ HALFSCREEN = (SCREEN[0]/2.0, SCREEN[1])
 #plt.ioff()
 
 
-def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None, arrivals=None,
-              flim=None, clim=None, hatch=None, hatchlim=None, dlim=None):
+def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None,
+              arrivals=None, flim=None, clim=None, hatch=None, hatchlim=None,
+              dlim=None):
     """
+    Plot time-frequency pcolormesh tiles above time-aligned aligned time-series.
+
     Parameters
     ----------
     fig : matplotlib.Figure
     ax1 : matplotlib.axis.Axis
-    T, F, S : numpy.ndarray (rank 2)
+        Axis for time-frequency pcolormesh tile and optional hatching.
+    ax2 : matplotlib.axis.Axis
+        Axis for time-series plot.
+    T, F, S : numpy.ndarray (ndim 2)
         Time, frequency, S-transform tiles from stockwell.stransform
-    ax2
+    d1, d2 : numpy.ndarray (ndim 1)
+        Time-series, plotted black.  Optional d2 plotted gray.
+    arrivals : sequence of (str, float) 2-tuples
+        Sequence of arrivals to plot, of the form (label, time_in_seconds)
+    dlim : 2-tuple of floats
+        Limits on the time-series amplitudes (y axis limits).
 
     Returns
     -------
@@ -44,7 +55,9 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None, arrivals
     """
     sciformatter = FormatStrFormatter('%.2e')
 
+    # grab a time vector
     tm = T[0]
+
     # TODO: remove fig from signature?
     ax1.axes.get_xaxis().set_visible(False)
     im = ax1.pcolormesh(T, F, np.abs(S))
@@ -107,6 +120,124 @@ def make_tiles(fig, gs0, skip=[]):
     return axes
 
 
+def plot_instantaneous_azimuth(theta, fs=1.0, ylim=None, xlim=None, fig=None,
+                               outfile=None):
+    """
+    Plot the instantanous azimuth TF tile using imshow.
 
-def instantaneous_azimuth():
+    Parameters
+    ----------
+    theta : numpy.ndarray (ndim 2)
+        Instantaneous azimuth calculated by stockwell.filter.instantanous_azimuth
+    fs : float
+        Sampling rate of data used.
+    ylim : tuple (ymin, ymax)
+        Optional frequency min/max for plot y limits in Hz.
+    xlim : tuple (xmin, xmax)
+        Optional time min/max for plot x limits in sec.
+    fig : matplotlib.Figure instance
 
+    Returns
+    -------
+    matplotlib.Figure
+
+    """
+    if not fig:
+        f = plt.figure()
+
+    plt.imshow(theta, origin='lower', cmap=plt.cm.hsv, aspect='auto',
+               extent=[0, theta.shape[1], 0, fs/2.0], interpolation='nearest')
+    plt.colorbar()
+    plt.axis('tight')
+
+    if ylim:
+        plt.ylim(ylim)
+
+    if xlim:
+        plt.xlim((t0, len(v)))
+
+    mx = np.nanmax(theta)
+    plt.clim(-mx, mx)
+
+    return f
+
+
+def rotation_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
+                        arrivals, flim, clim, dlim, hatch=None, hatchlim=None,
+                        fig=None, xlim=None):
+    """
+    Make a 6-panel side-by-side comparison of scalar versus dynamic rotations.
+
+    Sv, Srs, Srd, Sts, Std : numpy.ndarray (ndim 2)
+        The vertical, radial-scalar, radial-dynamic, transverse-scalar, and
+        transverse-dynamic stockwell transforms.
+    v, rs, rd, ts, td : numpy.ndarray (ndim 1)
+        The corresponding vertical, radial-scalar, radial-dynamic,
+        transverse-scalar, and transverse-dynamic time-series vectors.
+    flim, clim, dlim, xlim : tuple
+        Frequency, stockwell amplitude, time-series amplitude, and time-series
+        time limits.  2-tuples of floats, of the form (min, max).
+
+    Returns
+    -------
+    matplotlib.Figure
+
+    """
+    # from http://matplotlib.org/1.3.1/users/gridspec.html
+    if not fig:
+        fig = plt.figure()
+
+    gs0 = gridspec.GridSpec(3, 2)
+    gs0.update(hspace=0.15, wspace=0.15, left=0.05, right=0.95, top=0.95,
+               bottom=0.05)
+    tile1, tile2, tile3, tile4, tile5, tile6 = make_tiles(fig, gs0)
+    ax11, ax12 = tile1
+    ax21, ax22 = tile2
+    ax31, ax32 = tile3
+    ax41, ax42 = tile4
+    ax51, ax52 = tile5
+    ax61, ax62 = tile6
+
+    ax11.set_title('Vertical')
+    plot_tile(fig, ax11, T, F, Sv, ax12, v, 'vertical', arrivals=arrivals, 
+              flim=flim, clim=clim, dlim=dlim)
+
+    ax21.set_title('Vertical')
+    plot_tile(fig, ax21, T, F, Sv, ax22, v, 'vertical', arrivals=arrivals, 
+            flim=flim, clim=clim, dlim=dlim)
+
+    ax31.set_title('Radial, scalar')
+    plot_tile(fig, ax31, T, F, Srs, ax32, rs, 'great circle', rd, 'dynamic', 
+            arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
+            hatch=(theta - az_prop), hatchlim=(-20, 20))
+    #ax31.contour(T, F, theta - az_prop, [20, 0.0, -20], linewidth=1.5, 
+    #             colors=['r','w','b'])
+    #ax31.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
+
+    ax41.set_title('Radial, dynamic')
+    plot_tile(fig, ax41, T, F, Srd, ax42, rd, 'dynamic', rs, 'great circle',  
+            arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
+            hatch=(theta - az_prop), hatchlim=(-20, 20))
+
+    ax51.set_title('Transverse, scalar')
+    plot_tile(fig, ax51, T, F, Sts, ax52, ts, 'great circle', td, 'dynamic', 
+            arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
+            hatch=(theta - az_prop), hatchlim=(-20, 20))
+    #ax51.contour(T, F, theta - az_prop, [40, 0.0, -40], linewidth=1.5, 
+    #             colors=['r','w','b'])
+    #ax51.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
+
+    ax61.set_title('Transverse, dynamic')
+    plot_tile(fig, ax61, T, F, Std, ax62, td, 'dynamic', ts, 'great circle',
+            arrivals=arrivals, flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
+            hatch=(theta - az_prop), hatchlim=(-20, 20))
+
+    if xlim:
+        ax11.set_xlim(*xlim)
+        ax21.set_xlim(*xlim)
+        ax31.set_xlim(*xlim)
+        ax41.set_xlim(*xlim)
+        ax51.set_xlim(*xlim)
+        ax61.set_xlim(*xlim)
+
+    return fig
