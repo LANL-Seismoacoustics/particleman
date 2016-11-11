@@ -67,7 +67,7 @@ setup(name = 'stockwell',
 Stockwell transform module from the YNiC Analysis and Visualisation Tools
 ''',
        packages = ['stockwell'],
-       py_modules = ['stockwell.smt', 'stockwell.util'],
+       py_modules = ['stockwell.smt', 'stockwell.util', 'stockwell.plotting'],
        ext_modules = ext_modules,
 )
 
