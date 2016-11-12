@@ -27,9 +27,7 @@ python -m cProfile test_filter.py
 """
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.basemap import Basemap
-from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 
 from obspy import read
