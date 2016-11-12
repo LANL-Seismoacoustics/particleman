@@ -88,9 +88,9 @@ def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False):
 
     Returns
     -------
-    S : numpy.ndarray (complex, rank 2)
+    S : numpy.ndarray (numpy.complex128, rank 2)
         Stockwell transform (S) matrix
-    T, F :  numpy.ndarray (real, rank 2), optional
+    T, F :  numpy.ndarray (float64, rank 2), optional
         Time (T) and frequency (F) matrices.
 
     Examples
@@ -110,8 +110,6 @@ def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False):
     # The stockwell transform
     S = st(x,low,high)
 
-    out = S
-
     # Compute our time and frequency matrix with
     # the correct scaling for use with the
     # contour and contourf functions
@@ -125,6 +123,8 @@ def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False):
             t = np.arange(L)
             T, F = np.meshgrid(t, np.arange(int(hp), int(lp), int(lp-hp)/(1.0*S.shape[0])))
         out = (S, T, F)
+    else:
+        out = S
 
     return out
 
