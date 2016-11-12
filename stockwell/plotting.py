@@ -470,36 +470,6 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, r, rf, v, vf, t, arrivals=None,
     _ = plot_tile(fig, ax21, T, F, Sr, ax22, r, 'original', rf, 'filtered',
                   arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
-    # I think this block is superceded by plot_tile
-    # 
-    # im = ax21.pcolormesh(T, F, np.abs(Sr))
-    # # print "images"
-    # # print ax21.get_images()
-    # #plt.colorbar(pc)
-    # #ax21.contourf(T, F, f, [0, 0.8], colors='k', alpha=0.2)
-    # ax21.contourf(T, F, hatch, hatchlim, colors='k', hatches=['x'], alpha=0.0)
-    # ax21.contour(T, F, hatch, [max(hatchlim)], linewidth=1.0, colors='k')
-    # ax21.set_ylim(flim)
-    # ax21.set_ylabel('frequency [Hz]')
-    # divider = make_axes_locatable(ax21)
-    # #cax = divider.append_axes("right", size="5%", pad=0.05)
-    # #cbar = plt.colorbar(im, cax=cax, format='%.2e')
-    # fig.add_subplot(ax21)
-    # # waves and arrivals
-    # ax22.plot(r, 'gray', label='original')
-    # ax22.plot(rf, 'k', label='NIP filtered')
-    # ax22.set_ylabel('amplitude')
-    # leg = ax22.legend(loc='lower left', frameon=False, fontsize=14)
-    # for legobj in leg.legendHandles:
-    #     legobj.set_linewidth(2.0)
-    # ax22.axis('tight')
-    # if arrivals:
-    #     plot_arrivals(ax22, arrivals, r.min(), r.max())
-    # cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax21, ax22],
-    #                     format='%.2e')
-    # ax22.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-    # fig.add_subplot(ax22)
-
     # bottom left: Transverse
     # s transform and filter
     gs3 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[2],
@@ -509,37 +479,6 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, r, rf, v, vf, t, arrivals=None,
     _ = plot_tile(fig, ax31, T, F, St, ax32, t, 'original',
                   arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
-    # I think this block is superceded by plot_tile
-    # 
-    # ax31.axes.get_xaxis().set_visible(False)
-    # im = ax31.pcolormesh(T, F, np.abs(St))
-    # ax31.contourf(T, F, hatch, hatchlim, colors='k', hatches=['x'], alpha=0.0)
-    # ax31.contour(T, F, hatch, [max(hachlim)], linewidth=1.0, colors='k')
-    # ax31.axis('tight')
-    # ax31.set_ylim(flim)
-    # ax31.set_ylabel('frequency [Hz]')
-    # fig.add_subplot(ax31)
-    # # waves and arrivals
-    # ax32 = plt.Subplot(fig, gs3[-1, :], sharex=ax31)
-    # ax32.plot(t, 'gray', label='original')
-    # try:
-    #     ax32.plot(tf, 'k', label='filtered')
-    # except NameError:
-    #     pass
-    # ax32.set_ylabel('amplitude')
-    # leg = ax32.legend(loc='lower left', frameon=False, fontsize=14)
-    # for legobj in leg.legendHandles:
-    #     legobj.set_linewidth(2.0)
-    # ax32.axis('tight')
-    # for arr, itt in arrivals:
-    #     ax32.vlines(itt, t.min(), t.max(), 'k', linestyle='dashed')
-    #     ax32.text(itt, t.max(), arr, fontsize=12, horizontalalignment='left',
-    #               va='top')
-    # cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax31, ax32],
-    #                     format='%.2e')
-    # ax32.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-    # fig.add_subplot(ax32)
-
     # bottom right: Vertical
     # s transform and filter
     gs4 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[3],
@@ -548,30 +487,5 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, r, rf, v, vf, t, arrivals=None,
     ax41.set_title('Vertical')
     _ = plot_tile(fig, ax41, T, F, Sv, ax42, v, 'original', vf, 'filtered',
                   arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
-
-    # I think this block is superceded by plot_tile
-    # 
-    # ax41.axes.get_xaxis().set_visible(False)
-    # im = ax41.pcolormesh(T, F, np.abs(Sv))
-    # ax41.contourf(T, F, hatch, hatchlim, colors='k', hatches=['x'], alpha=0.0)
-    # ax41.contour(T, F, hatch, [max(hatchlim)], linewidth=1.0, colors='k')
-    # ax41.set_ylim(flim)
-    # ax41.set_ylabel('frequency [Hz]')
-    # fig.add_subplot(ax41)
-    # # waves and arrivals
-    # ax42 = plt.Subplot(fig, gs4[-1, :], sharex=ax41)
-    # ax42.plot(v, 'gray', label='original')
-    # ax42.plot(vf, 'k', label='NIP filtered')
-    # ax42.set_ylabel('amplitude')
-    # leg = ax42.legend(loc='lower left', frameon=False, fontsize=14)
-    # for legobj in leg.legendHandles:
-    #     legobj.set_linewidth(2.0)
-    # ax42.axis('tight')
-    # if arrivals:
-    #     plot_arrivals(ax42, arrivals, v.min(), v.max())
-    # cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax41, ax42],
-    #                     format='%.2e')
-    # ax42.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-    # fig.add_subplot(ax42)
 
     return fig
