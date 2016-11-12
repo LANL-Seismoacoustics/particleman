@@ -12,8 +12,8 @@ SCREEN = (31, 19)
 HALFSCREEN = (SCREEN[0]/2.0, SCREEN[1])
 
 
-# save myself some plotting memory for big arrays
-#plt.ioff()
+# TODO: make a **tile_kwargs argument in all calling signatures using plot_tile,
+#    which would include arrivals, flim, clim, dlim, tlim, hatch, hatchlim
 
 
 def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None,
@@ -312,5 +312,253 @@ def check_filters(T, F, Sv, Srs, Sts, vsf, rsf, ts, arrivals, flim, clim
         ax11.set_xlim(*xlim)
         ax21.set_xlim(*xlim)
         ax31.set_xlim(*xlim)
+
+    return fig
+
+
+def plot_NIP(T, F, nips, fs=1.0, flim=None, fig=None):
+    """
+    Plot the normalized inner product tile.
+
+    Parameters
+    ----------
+    T, F, nips : numpy.ndarray (ndim 2)
+        Time, frequency, normalized inner-product tiles.
+    fs : float
+        Sampling frequency of the underlying time-series data.
+    flim : tuple
+        Frequency limits as (fmin, fmax) 2-tuple, in Hz.
+
+    Returns
+    -------
+    matplotlib.Figure
+
+    """
+    if not fig:
+        fig = plt.figure()
+
+    plt.imshow(nips, cmap=plt.cm.seismic, origin='lower',
+               extent=[0,nips.shape[1], 0, fs/2], aspect='auto',
+               interpolation='nearest')
+    plt.colorbar()
+    plt.contour(T, F, nips, [0.8], linewidth=2.0, colors='k')
+    plt.axis('tight')
+    if flim:
+        plt.ylim(flim)
+    plt.ylabel('frequency [Hz]')
+    plt.xlabel('time [sec]')
+
+    return fig
+
+
+def compare_waveforms(v, vsf, rs, rsf, ts, arrivals):
+    """
+    Compare the static and dynamically filtered waveforms.
+
+    A 3-panel waveform plot of 3 components.  Unfiltered waves are in gray,
+    filtered are overplotted in black.
+
+    Parameters
+    ----------
+    v, vsf : numpy.ndarray (rank 1)
+        Unfiltered and static-rotated filtered vertical waveform.
+    rs, rsf : numpy.ndarray (rank 1)
+        Unfiltered and static-rotated filtered radial waveform.
+    ts: numpy.ndarray (rank 1)
+        Unfiltered transverse waveform.
+
+    """
+    plt.subplot(311)
+    plt.title('vertical')
+    plt.plot(v, 'gray', label='original')
+    plt.plot(vsf,'k', label='NIP filtered')
+    plt.legend(loc='lower left')
+
+    plt.subplot(312)
+    plt.title('radial')
+    plt.plot(rs, 'gray', label='original')
+    plt.plot(rsf, 'k', label='NIP filtered')
+    plt.legend(loc='lower left')
+
+    plt.subplot(313)
+    plt.title('transverse')
+    plt.plot(ts, 'gray', label='original')
+    plt.legend(loc='lower left')
+
+    # plot arrivals
+    for arr, itt in arrivals:
+        plt.vlines(itt, v.min(), v.max(), 'k', linestyle='dashed')
+        plt.text(itt, v.max(), arr, fontsize=9, horizontalalignment='left',
+                 va='top')
+
+
+def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, r, rf, v, vf, t, arrivals,
+                     flim=None, hatch=None, hatchlim=None, fig=None):
+    """
+    Quad plot of NIP, and 3 tiles of Stockwell transform with NIP filter hatch
+    and filtered+unfiltered time-series for each component.
+
+    Parameters
+    ----------
+    T, F, nips : numpy.ndarray (ndim 2)
+        Time, frequency, normalized inner-product tiles.
+    nip : numpy.ndarray (ndim 2)
+        Normalized inner-product tile.
+    fs : float
+        Sampling rate of underlying time-series data.
+    flim : tuple
+        Frequency limits as (fmin, fmax) 2-tuple, in Hz.
+    Sr, St : numpy.ndarray (ndim 2)
+        Stockwell transform of the radial, transverse component data.
+    r, rf : numpy.ndarray (ndim 1)
+        Unfiltered and NIP-filtered radial component time-series.
+    v, vf : numpy.ndarray (ndim 1)
+        Unfiltered and NIP-filtered vertical component time-series.
+    t : numpy.ndarray (ndim 1)
+        Unfiltered transverse component time-series.
+    arrivals : sequence of (str, float) 2-tuples
+        Sequence of arrivals to plot, of the form (label, time_in_seconds)
+    hatch : numpy.ndarray (ndim 2)
+        Optional tile used for hatch mask.
+    hatchlim : tuple
+        Hatch range used to display mask.  2-tuple of floats (hmin, hmax).
+    fig : matplotlib.Figure
+
+    """
+    if not fig:
+        fig = plt.figure()
+
+    # course 2x2 grid
+    gs0 = gridspec.GridSpec(2, 2)
+    gs0.update(hspace=0.10, wspace=0.10, left=0.05, right=0.95, top=0.95,
+               bottom=0.05)
+
+    # top left axes: NIP
+    gs1 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[0])
+    ax11 = plt.Subplot(fig, gs1[:, :])
+    ax11.set_title('NIP, retrograde Rayleigh, scalar azimuth')
+    im = ax11.imshow(nip, cmap=plt.cm.seismic, origin='lower',
+                     extent=[0, nip.shape[1], 0, fs/2.0], aspect='auto',
+                     interpolation='nearest')
+    #plt.colorbar(im)
+    ax11.contour(T, F, nip, [0.8], linewidth=2.0, colors='k')
+    ax11.axis('tight')
+    ax11.set_ylim(flim)
+    ax11.set_ylabel('frequency [Hz]')
+    ax11.set_xlabel('time [sec]')
+
+    divider = make_axes_locatable(ax11)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    cbar = plt.colorbar(im, cax=cax)
+    #cbar = plt.colorbar(im, fraction=0.05, ax=ax11, format='%.2e')
+
+    fig.add_subplot(ax11)
+
+    # top right: Radial
+    # s transform and filter
+    gs2 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[1],
+                                           hspace=0.0)
+    ax21 = plt.Subplot(fig, gs2[:-1, :])
+    ax22 = plt.Subplot(fig, gs2[-1, :], sharex=ax21)
+    ax21.set_title('Radial')
+
+    plot_tile(fig, ax21, T, F, Srs, ax22, r, 'original', rf, 'filtered',
+              arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
+
+    im = ax21.pcolormesh(T, F, np.abs(Sr))
+    # print "images"
+    # print ax21.get_images()
+    #plt.colorbar(pc)
+    #ax21.contourf(T, F, f, [0, 0.8], colors='k', alpha=0.2)
+    ax21.contourf(T, F, hatch, hatchlim, colors='k', hatches=['x'], alpha=0.0)
+    ax21.contour(T, F, hatch, [max(hatchlim)], linewidth=1.0, colors='k')
+    ax21.set_ylim(flim)
+    ax21.set_ylabel('frequency [Hz]')
+    divider = make_axes_locatable(ax21)
+    #cax = divider.append_axes("right", size="5%", pad=0.05)
+    #cbar = plt.colorbar(im, cax=cax, format='%.2e')
+    fig.add_subplot(ax21)
+    # waves and arrivals
+    ax22.plot(r, 'gray', label='original')
+    ax22.plot(rf, 'k', label='NIP filtered')
+    ax22.set_ylabel('amplitude')
+    leg = ax22.legend(loc='lower left', frameon=False, fontsize=14)
+    for legobj in leg.legendHandles:
+        legobj.set_linewidth(2.0)
+    ax22.axis('tight')
+    for arr, itt in arrivals:
+        ax22.vlines(itt, r.min(), r.max(), 'k', linestyle='dashed')
+        ax22.text(itt, r.max(), arr, fontsize=12, horizontalalignment='left',
+                  va='top')
+    cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax21, ax22],
+                        format='%.2e')
+    ax22.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+    fig.add_subplot(ax22)
+
+    # bottom left: Transverse
+    # s transform and filter
+    gs3 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[2],
+                                           hspace=0.0)
+    ax31 = plt.Subplot(fig, gs3[:-1, :])
+    ax31.set_title('Transverse S(t,f), scalar azimuth')
+    ax31.axes.get_xaxis().set_visible(False)
+    im = ax31.pcolormesh(T, F, np.abs(St))
+    ax31.contourf(T, F, hatch, hatchlim, colors='k', hatches=['x'], alpha=0.0)
+    ax31.contour(T, F, hatch, [max(hachlim)], linewidth=1.0, colors='k')
+    ax31.axis('tight')
+    ax31.set_ylim(flim)
+    ax31.set_ylabel('frequency [Hz]')
+    fig.add_subplot(ax31)
+    # waves and arrivals
+    ax32 = plt.Subplot(fig, gs3[-1, :], sharex=ax31)
+    ax32.plot(t, 'gray', label='original')
+    try:
+        ax32.plot(tf, 'k', label='filtered')
+    except NameError:
+        pass
+    ax32.set_ylabel('amplitude')
+    leg = ax32.legend(loc='lower left', frameon=False, fontsize=14)
+    for legobj in leg.legendHandles:
+        legobj.set_linewidth(2.0)
+    ax32.axis('tight')
+    for arr, itt in arrivals:
+        ax32.vlines(itt, t.min(), t.max(), 'k', linestyle='dashed')
+        ax32.text(itt, t.max(), arr, fontsize=12, horizontalalignment='left',
+                  va='top')
+    cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax31, ax32],
+                        format='%.2e')
+    ax32.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+    fig.add_subplot(ax32)
+
+    # bottom right: Vertical
+    # s transform and filter
+    gs4 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[3],
+                                           hspace=0.0)
+    ax41 = plt.Subplot(fig, gs4[:-1, :])
+    ax41.set_title('Vertical')
+    ax41.axes.get_xaxis().set_visible(False)
+    im = ax41.pcolormesh(T, F, np.abs(Sv))
+    ax41.contourf(T, F, hatch, hatchlim, colors='k', hatches=['x'], alpha=0.0)
+    ax41.contour(T, F, hatch, [max(hatchlim)], linewidth=1.0, colors='k')
+    ax41.set_ylim(flim)
+    ax41.set_ylabel('frequency [Hz]')
+    fig.add_subplot(ax41)
+    # waves and arrivals
+    ax42 = plt.Subplot(fig, gs4[-1, :], sharex=ax41)
+    ax42.plot(v, 'gray', label='original')
+    ax42.plot(vf, 'k', label='NIP filtered')
+    ax42.set_ylabel('amplitude')
+    leg = ax42.legend(loc='lower left', frameon=False, fontsize=14)
+    for legobj in leg.legendHandles:
+        legobj.set_linewidth(2.0)
+    ax42.axis('tight')
+    for arr, itt in arrivals:
+        ax42.vlines(itt, v.min(), z.max(), 'k', linestyle='dashed')
+        ax42.text(itt, v.max(), arr, fontsize=12, horizontalalignment='left',
+                  va='top')
+    cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax41, ax42],
+                        format='%.2e')
+    ax42.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+    fig.add_subplot(ax42)
 
     return fig
