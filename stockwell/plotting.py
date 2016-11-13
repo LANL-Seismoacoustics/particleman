@@ -1,3 +1,33 @@
+"""
+Plotting functions for Stockwell transforms and normalized inner-product (NIP)
+filtering.
+
+These plotting routines, particularly `tile_comparison` and `NIP_filter_plot`,
+are useful to see how much surface wave energy is in a packet, or how much
+off-great-circle propagation there is.
+
+These functions plot a number of configurations of "tiles." Each tile
+consists of the Stockwell transform on top and an aligned time-series waveform
+below.  The transform may have a hatching overlay that would normally
+correspond to a NIP filter, and the time-series axis may have a reference
+(gray) trace overlayed, which normally corresponds to the unfiltered trace.
+
+
+## Channel nomenclature:
+
+```
+[nevrt][sd][f]
+```
+
+* n : north component
+* e : east
+* v : vertical
+* s : scalar rotation (great circle)
+* d : dynamic rotation (NIP estimate)
+* f : NIP filtered
+
+
+"""
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -174,11 +204,12 @@ def plot_instantaneous_azimuth(theta, fs=1.0, ylim=None, xlim=None, fig=None,
     return f
 
 
-def rotation_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
-                        arrivals, flim, clim, dlim, hatch=None, hatchlim=None,
-                        fig=None, xlim=None):
+def tile_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
+                    arrivals, flim, clim, dlim, hatch=None, hatchlim=None,
+                    fig=None, xlim=None):
     """
-    Make a 6-panel side-by-side comparison of scalar versus dynamic rotations.
+    Make a 6-panel side-by-side comparison of tiles, such as scalar versus
+    dynamic rotations.
 
     Sv, Srs, Srd, Sts, Std : numpy.ndarray (ndim 2)
         The vertical, radial-scalar, radial-dynamic, transverse-scalar, and
