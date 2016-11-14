@@ -19,9 +19,10 @@ To make a normalized inner product (NIP) filter, given azimuth
 References
 ----------
 
-Meza-Fajardo, K. C., Papageorgiou, A. S., and Semblat, J. F. (2015). Identification and 
-Extraction of Surface Waves from Three Component Seismograms Based on the Normalized Inner 
-Product. Bulletin of the Seismological Society of America.
+Meza-Fajardo, K. C., Papageorgiou, A. S., and Semblat, J. F. (2015).
+Identification and Extraction of Surface Waves from Three Component Seismograms
+Based on the Normalized Inner Product. Bulletin of the Seismological Society of
+America.
 
 """
 import warnings
@@ -34,7 +35,8 @@ from .util import stransform, istransform
 
 def get_shift(polarization):
     """
-    Get the appropriate pi/2 phase advance or delay for the provided polarization.
+    Get the appropriate pi/2 phase advance or delay for the provided
+    polarization.
 
     Parameters
     ----------
@@ -45,7 +47,8 @@ def get_shift(polarization):
     Returns
     -------
     numpy.complex128
-        Multiply this value (i or -i) into a complex vertical S-transform to shift its phase.
+        Multiply this value (i or -i) into a complex vertical S-transform to
+        shift its phase.
 
     """
     if polarization is 'retrograde':
@@ -62,11 +65,12 @@ def get_shift(polarization):
 
 def shift_phase(Sv, polarization='retrograde'):
     """
-    Phase-shift an s-transform by the appropriate phase shift for prograde/retrograde motion.
+    Phase-shift an s-transform by the appropriate phase shift for
+    prograde/retrograde motion.
 
-    Shift is done on a complex MxN array by multiplication with either i or -i (imaginary unit).
-    This is mostly a reference for how to do/interpret phase shifts, as it's such a simple thing 
-    to do outside of a function.
+    Shift is done on a complex MxN array by multiplication with either i or -i
+    (imaginary unit).  This is mostly a reference for how to do/interpret phase
+    shifts, as it's such a simple thing to do outside of a function.
 
     Parameters
     ----------
@@ -91,7 +95,8 @@ def shift_phase(Sv, polarization='retrograde'):
 
 def instantaneous_azimuth(Sv, Sn, Se, polarization, xpr):
     """
-    Get instantaneous propagation angle [degrees], under the Rayleigh wave assumption.
+    Get instantaneous propagation angle [degrees], under the Rayleigh wave
+    assumption.
 
     Parameters
     ----------
@@ -102,7 +107,8 @@ def instantaneous_azimuth(Sv, Sn, Se, polarization, xpr):
         'prograde' or 'linear' will apply a pi/2 phase delay
     xpr : int
         Sense of propagation.  1 for eastward, -1 for westward.
-        Try -int(np.sign(np.sin(np.radians(baz)))), unless they're directly N-S from each other.
+        Try -int(np.sign(np.sin(np.radians(baz)))), unless they're directly N-S
+        from each other.
 
     Returns
     -------
