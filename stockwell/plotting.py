@@ -34,20 +34,12 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 
-LANDSCAPE = (11,8.5)
-PORTRAIT = (8.5,11)
-POWERPOINT = (10, 7.5)
-SCREEN = (31, 19)
-HALFSCREEN = (SCREEN[0]/2.0, SCREEN[1])
-
-
 # TODO: make a **tile_kwargs argument in all calling signatures using plot_tile,
 #    which would include arrivals, flim, clim, dlim, tlim, hatch, hatchlim
 
-
-def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None,
-              arrivals=None, flim=None, clim=None, hatch=None, hatchlim=None,
-              dlim=None):
+def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
+              label2=None, arrivals=None, flim=None, clim=None, hatch=None,
+              hatchlim=None, dlim=None):
     """
     Plot time-frequency pcolormesh tiles above time-aligned aligned time-series.
 
@@ -63,10 +55,12 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None,
     d1, d2 : numpy.ndarray (ndim 1)
         Time-series, plotted black.  Optional d2 plotted gray. These need to
         be registered in time to T.
+    color1 : str
+        Color of plotted d1 line.
     label1, label2 : str
         Time-series legend label strings.
-    arrivals : sequence of (str, float) 2-tuples
-        Sequence of arrivals to plot, of the form (label, time_in_seconds)
+    arrivals : dict
+        Sequence of arrivals to plot, of the form {label: time_in_seconds, ...}
     dlim : 2-tuple of floats
         Limits on the time-series amplitudes (y axis limits).
     hatch : numpy.ndarray (ndim 2)
@@ -89,6 +83,9 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None,
         flim=(0.0, fmax), clim=(0.0, 5e-5), hatch=dfilt, hatchlim=(0.0, 0.8))
 
     """
+    if not fig:
+        fig = plt.figure()
+
     sciformatter = FormatStrFormatter('%.2e')
 
     # grab a time vector
@@ -116,9 +113,9 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None,
     if d2 is not None:
         ax2.plot(tm, d2, 'gray', label=label2)
         dmx = max([dmx, np.abs(d2).max()])
-    ax2.plot(tm, d1, 'k', label=label1)
+    ax2.plot(tm, d1, color1, label=label1)
     ax2.set_ylabel('amplitude')
-    leg = ax2.legend(loc='lower left', frameon=False, fontsize=14)
+    leg = ax2.legend(loc='lower right', frameon=False, fontsize=14)
     for legobj in leg.legendHandles:
         legobj.set_linewidth(2.0)
     ax2.set_xlim(tm[0], tm[-1])
@@ -139,7 +136,13 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, d2=None, label2=None,
 
 
 def plot_arrivals(ax, arrivals, dmin, dmax):
-    for arr, itt in arrivals:
+    """
+    arrivals : dict
+        are a dict of {name: seconds}.
+    dmin, dmax : float
+        y value in axis "ax" at which labels are plotted.
+    """
+    for arr, itt in arrivals.items():
         ax.vlines(itt, dmin, dmax, 'k', linestyle='dashed')
         ax.text(itt, dmax, arr, fontsize=12, horizontalalignment='left',
                 va='top')
@@ -154,7 +157,8 @@ def make_tiles(fig, gs0, skip=[]):
         if i in skip:
             pass
         else:
-            iigs = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=igs, hspace=0.0)
+            iigs = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=igs,
+                                                    hspace=0.0)
             ax1 = plt.Subplot(fig, iigs[:-1, :])
             ax2 = plt.Subplot(fig, iigs[-1, :], sharex=ax1)
             axes.append((ax1, ax2))
@@ -256,7 +260,7 @@ def tile_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
             flim=flim, clim=clim, dlim=dlim)
 
     ax31.set_title('Radial, scalar')
-    plot_tile(fig, ax31, T, F, Srs, ax32, rs, 'great circle', rd, 'dynamic', 
+    plot_tile(fig, ax31, T, F, Srs, ax32, rs, 'great circle', 'k', rd, 'dynamic', 
             arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
             hatchlim=hatchlim)
     #ax31.contour(T, F, theta - az_prop, [20, 0.0, -20], linewidth=1.5, 
@@ -264,12 +268,12 @@ def tile_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
     #ax31.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
 
     ax41.set_title('Radial, dynamic')
-    plot_tile(fig, ax41, T, F, Srd, ax42, rd, 'dynamic', rs, 'great circle',  
+    plot_tile(fig, ax41, T, F, Srd, ax42, rd, 'dynamic', 'k', rs, 'great circle',  
             arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
             hatchlim=hatchlim)
 
     ax51.set_title('Transverse, scalar')
-    plot_tile(fig, ax51, T, F, Sts, ax52, ts, 'great circle', td, 'dynamic', 
+    plot_tile(fig, ax51, T, F, Sts, ax52, ts, 'great circle', 'k', td, 'dynamic', 
             arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
             hatchlim=hatchlim)
     #ax51.contour(T, F, theta - az_prop, [40, 0.0, -40], linewidth=1.5, 
@@ -277,7 +281,7 @@ def tile_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
     #ax51.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
 
     ax61.set_title('Transverse, dynamic')
-    plot_tile(fig, ax61, T, F, Std, ax62, td, 'dynamic', ts, 'great circle',
+    plot_tile(fig, ax61, T, F, Std, ax62, td, 'dynamic', 'k', ts, 'great circle',
             arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
             hatchlim=hatchlim)
 
@@ -292,7 +296,7 @@ def tile_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
     return fig
 
 
-def check_filters(T, F, Sv, Srs, Sts, vsf, rsf, ts, arrivals, flim, clim
+def check_filters(T, F, Sv, Srs, Sts, vsf, rsf, ts, arrivals, flim, clim,
                   dlim, xlim, hatch=None, hatchlim=None, fig=None):
     """
     Parameters
@@ -333,12 +337,12 @@ def check_filters(T, F, Sv, Srs, Sts, vsf, rsf, ts, arrivals, flim, clim
     ax31, ax32 = tile3
 
     ax11.set_title('Vertical, scalar rotation')
-    plot_tile(fig, ax11, T, F, Sv, ax12, vsf, 'filtered', v, 'vertical',
+    plot_tile(fig, ax11, T, F, Sv, ax12, vsf, 'filtered', 'k', v, 'vertical',
               arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
               hatchlim=hatchlim)
 
     ax21.set_title('Radial, scalar rotation')
-    plot_tile(fig, ax21, T, F, Srs, ax22, rsf, 'filtered', rs, 'radial',
+    plot_tile(fig, ax21, T, F, Srs, ax22, rsf, 'filtered', 'k', rs, 'radial',
               arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
               hatchlim=hatchlim)
 
@@ -424,13 +428,13 @@ def compare_waveforms(v, vsf, rs, rsf, ts, arrivals):
     plt.legend(loc='lower left')
 
     # plot arrivals
-    for arr, itt in arrivals:
+    for arr, itt in arrivals.items():
         plt.vlines(itt, v.min(), v.max(), 'k', linestyle='dashed')
         plt.text(itt, v.max(), arr, fontsize=9, horizontalalignment='left',
                  va='top')
 
 
-def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, r, rf, v, vf, t, arrivals=None,
+def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
                      flim=None, hatch=None, hatchlim=None, fig=None):
     """
     Quad plot of NIP, and 3 tiles of Stockwell transform with NIP filter hatch
@@ -498,7 +502,7 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, r, rf, v, vf, t, arrivals=None,
     ax21 = plt.Subplot(fig, gs2[:-1, :])
     ax22 = plt.Subplot(fig, gs2[-1, :], sharex=ax21)
     ax21.set_title('Radial')
-    _ = plot_tile(fig, ax21, T, F, Sr, ax22, r, 'original', rf, 'filtered',
+    _ = plot_tile(fig, ax21, T, F, Sr, ax22, rf, 'filtered', 'k', r, 'original',  
                   arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
     # bottom left: Transverse
@@ -507,8 +511,9 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, r, rf, v, vf, t, arrivals=None,
                                            hspace=0.0)
     ax31 = plt.Subplot(fig, gs3[:-1, :])
     ax31.set_title('Transverse S(t,f), scalar azimuth')
-    _ = plot_tile(fig, ax31, T, F, St, ax32, t, 'original',
-                  arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
+    ax32 = plt.Subplot(fig, gs3[-1, :], sharex=ax31)
+    _ = plot_tile(fig, ax31, T, F, St, ax32, t, 'original', 'gray',
+                  arrivals=arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
     # bottom right: Vertical
     # s transform and filter
@@ -516,7 +521,8 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, r, rf, v, vf, t, arrivals=None,
                                            hspace=0.0)
     ax41 = plt.Subplot(fig, gs4[:-1, :])
     ax41.set_title('Vertical')
-    _ = plot_tile(fig, ax41, T, F, Sv, ax42, v, 'original', vf, 'filtered',
+    ax42 = plt.Subplot(fig, gs4[-1, :], sharex=ax41)
+    _ = plot_tile(fig, ax41, T, F, Sv, ax42, vf, 'filtered', 'k', v, 'original',
                   arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
     return fig
