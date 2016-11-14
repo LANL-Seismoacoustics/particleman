@@ -51,38 +51,35 @@ plt.ioff()
 ######################### CALCULATIONS ##################################
 # TODO: put the functions above into a stockwell.plotting module
 
-def get_waves():
-    #st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/aak-ii-00*")
-    #st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/anmo*")
-    #st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/mdj*")
-    #st = read('/wave/seismic2/user_dirs/hans/Mines/Kazakh_Net/Discrim_Study/Waves/Single_Charge_KTS/KURK/BH/1998/19980814074411.KURK.II.BH*', format='SAC')
-    st = read('/wave/seismic2/user_dirs/hans/Mines/Kazakh_Net/Discrim_Study/Waves/Single_Charge_KTS/KURK/BH/1998/19980815024059.KURK.KZ.BH*', format='SAC')
-
-    return st
+#st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/aak-ii-00*")
+#st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/anmo*")
+#st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/mdj*")
+#st = read('/wave/seismic2/user_dirs/hans/Mines/Kazakh_Net/Discrim_Study/Waves/Single_Charge_KTS/KURK/BH/1998/19980814074411.KURK.II.BH*', format='SAC')
+st = read('/wave/seismic2/user_dirs/hans/Mines/Kazakh_Net/Discrim_Study/Waves/Single_Charge_KTS/KURK/BH/1998/19980815024059.KURK.KZ.BH*', format='SAC')
 
 
-def prep_waves(st, fmin=None, fmax=None):
-    # filter band
-    #fmin = 1./80
-    fmin= 1.0/80
-    #fmin= None
 
-    fmax = 1./30
-    #fmax = 1.0/5
-    #fmax = None
+# filter band
+#fmin = 1./80
+fmin= 1.0/80
+#fmin= None
+
+fmax = 1./30
+#fmax = 1.0/5
+#fmax = None
 
 
-    tr = st[0]
-    fs = tr.stats.sampling_rate
-    sac = tr.stats.sac
-    deg, km, az, baz = distaz(sac.evla, sac.evlo, sac.stla, sac.stlo)
-        az_prop = baz + 180
-    if az < 0.0:
-        az += 360.0
-    if baz < 0.0:
-        baz += 360.0
-    if az_prop > 360:
-        az_prop -= 360
+tr = st[0]
+fs = tr.stats.sampling_rate
+sac = tr.stats.sac
+deg, km, az, baz = distaz(sac.evla, sac.evlo, sac.stla, sac.stlo)
+az_prop = baz + 180
+if az < 0.0:
+    az += 360.0
+if baz < 0.0:
+    baz += 360.0
+if az_prop > 360:
+    az_prop -= 360
 
 # cut window and arrivals 
 #vmax = 5.0 
@@ -94,9 +91,11 @@ swmax = km/vmin
 tmin = tr.stats.starttime + swmin
 tmax = tr.stats.starttime + swmax
 tt = taup.getTravelTimes(deg, sac.evdp, model='ak135')
+
 tarrivals = [(itt['phase_name'], itt['time']) for itt in tt]
 swarrivals = [(str(swvel), km/swvel) for swvel in (5.0, 4.0, 3.0, 2.0)]
 tarrivals.extend(swarrivals)
+
 arrivals= []
 for arr, itt in tarrivals:
     if arr in ('P', 'S') or (arr, itt) in swarrivals:
@@ -199,12 +198,12 @@ plt.title('Instantaneous azimuth. great circle azimuth = {:.1f}'.format(az_prop)
 plt.savefig('instantaneous_azimuth.png', dpi=200)
 plt.close()
 
-# time-series rotation comparison plot, 6 panels
+# time-series rotation comparison plot (static vs dynamic), 6 panels
 fig = plt.figure(figsize=SCREEN)
-fig = splt.rotation_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
-                               arrivals, flim=(fmax, fmax), clim=(0.0, cmax),
-                               dlim=(-dmax, dmax), hatch=(theta-az_prop),
-                               hatchlim=(-20, 20), fig=fig, xlim=(t0, len(v)))
+fig = splt.tile_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
+                           arrivals, flim=(fmax, fmax), clim=(0.0, cmax),
+                           dlim=(-dmax, dmax), hatch=(theta-az_prop),
+                           hatchlim=(-20, 20), fig=fig, xlim=(t0, len(v)))
 plt.savefig('rotation_comparison.png', dpi=200)
 plt.close()
 
