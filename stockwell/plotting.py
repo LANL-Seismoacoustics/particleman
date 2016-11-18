@@ -104,6 +104,7 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
         ax1.set_ylim(flim)
     ax1.set_ylabel('frequency [Hz]')
     divider = make_axes_locatable(ax1)
+    ax1.set_yscale('log')
     #cax = divider.append_axes("right", size="5%", pad=0.05)
     #cbar = plt.colorbar(im, cax=cax, format='%.2e')
     fig.add_subplot(ax1)
@@ -479,9 +480,10 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
     gs1 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[0])
     ax11 = plt.Subplot(fig, gs1[:, :])
     ax11.set_title('NIP, retrograde Rayleigh, scalar azimuth')
-    im = ax11.imshow(nip, cmap=plt.cm.seismic, origin='lower',
-                     extent=[0, nip.shape[1], 0, fs/2.0], aspect='auto',
-                     interpolation='nearest')
+    # im = ax11.imshow(nip, cmap=plt.cm.seismic, origin='lower',
+    #                  extent=[0, nip.shape[1], 0, fs/2.0], aspect='auto',
+    #                  interpolation='nearest')
+    im = ax11.pcolormesh(T, F, nip, cmap=plt.cm.seismic)
     #plt.colorbar(im)
     ax11.contour(T, F, nip, [0.8], linewidth=2.0, colors='k')
     ax11.axis('tight')
@@ -492,6 +494,7 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
     divider = make_axes_locatable(ax11)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cbar = plt.colorbar(im, cax=cax)
+    ax11.set_yscale('log')
     #cbar = plt.colorbar(im, fraction=0.05, ax=ax11, format='%.2e')
     fig.add_subplot(ax11)
 
