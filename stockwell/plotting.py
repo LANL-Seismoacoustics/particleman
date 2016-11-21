@@ -37,6 +37,18 @@ import numpy as np
 # TODO: make a **tile_kwargs argument in all calling signatures using plot_tile,
 #    which would include arrivals, flim, clim, dlim, tlim, hatch, hatchlim
 
+def _strip_zero_freq(T, F, S):
+    """
+    Removes the zero-frequency rows from T, F, and S, to facilitate log plotting.
+    """
+    if np.allclose(F[0], np.zeros_like(F[0])):
+        F = F[1:]
+        T = T[1:]
+        S = S[1:]
+
+    return T, F, S
+
+
 def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
               label2=None, arrivals=None, flim=None, clim=None, hatch=None,
               hatchlim=None, dlim=None):

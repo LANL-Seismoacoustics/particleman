@@ -1,3 +1,4 @@
+*.png
 *.so
 *.dylib
 *.py[cod]
