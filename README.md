@@ -69,7 +69,7 @@ plt.draw()
 
 ``` 
 
-![chirp](docs/data/chirp.png "chirp")
+![chirp](docs/src/data/chirp.png "chirp")
 
 
 ### Advanced Filtering
@@ -80,7 +80,7 @@ relationships possible in time-frequency space.  In the example below, we use
 the Normalized Inner Produce filter of Meza-Fajardo et al., (2015) to pass
 retrograde Rayleigh waves (in any frequency) from a particular azimuth.
 
-![filtered retrograde radial](docs/data/stransforms_scalar.png)
+![filtered retrograde radial](docs/src/data/stransforms_scalar.png)
 
 
 ## Installation

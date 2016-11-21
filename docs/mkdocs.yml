@@ -1,0 +1,18 @@
+site_name: PyStockwell
+# site_url: http://www.jkmacc-LANL.github.io/pisces
+site_description: The Stockwell Transform for Seismology
+
+repo_url: https://git.lanl.gov/ees-geophysics/pystockwell
+
+pages:
+- 'Home': 'index.md'
+- 'Comparison to Other Transforms': 'comparison.md'
+- 'Basic Usage': 'basic.md'
+- 'Plotting': 'plotting.md'
+- 'Filtering': 'filtering.md'
+- 'API Documentation': 'api.md'
+- 'License': 'license.md'
+
+docs_dir: 'src'
+site_dir: 'html'
+theme: 'readthedocs'
