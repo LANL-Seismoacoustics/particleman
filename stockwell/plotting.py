@@ -160,19 +160,27 @@ def plot_arrivals(ax, arrivals, dmin, dmax):
         ax.text(itt, dmax, arr, fontsize=12, horizontalalignment='left',
                 va='top')
 
-def make_tiles(fig, gs0, skip=[]):
+def make_tiles(fig, gs0, full=None):
     """
-    Give a list of (ax1, ax2) tuples for each non-skipped SubPlotSpec in gs0.
+    Give a list of (ax_top, ax_bottom) axis tuples for each SubPlotSpec in gs0.
+
+    full : list
+        Integer subplotspec numbers for which the ax_top is to take up the
+        whole tile, so no ax_bottom is to be created.  Returns these tiles'
+        axis handles as (ax_top, None).
 
     """
+    if not full:
+        full = []
+
     axes = []
     for i, igs in enumerate(gs0):
-        if i in skip:
-            pass
+        iigs = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=igs,
+                                                hspace=0.0)
+        ax1 = plt.Subplot(fig, iigs[:-1, :])
+        if i in full:
+            axes.append((ax1, None))
         else:
-            iigs = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=igs,
-                                                    hspace=0.0)
-            ax1 = plt.Subplot(fig, iigs[:-1, :])
             ax2 = plt.Subplot(fig, iigs[-1, :], sharex=ax1)
             axes.append((ax1, ax2))
 
@@ -371,7 +379,7 @@ def check_filters(T, F, Sv, Srs, Sts, vsf, rsf, ts, arrivals, flim, clim,
     return fig
 
 
-def plot_NIP(T, F, nips, fs=1.0, flim=None, fig=None):
+def plot_NIP(T, F, nips, fs=1.0, flim=None, fig=None, ax=None):
     """
     Plot the normalized inner product tile.
 
@@ -395,6 +403,7 @@ def plot_NIP(T, F, nips, fs=1.0, flim=None, fig=None):
     plt.imshow(nips, cmap=plt.cm.seismic, origin='lower',
                extent=[0,nips.shape[1], 0, fs/2], aspect='auto',
                interpolation='nearest')
+    im = ax11.pcolormesh(T, F, nip, cmap=plt.cm.seismic)
     plt.colorbar()
     plt.contour(T, F, nips, [0.8], linewidth=2.0, colors='k')
     plt.axis('tight')
@@ -455,10 +464,8 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
 
     Parameters
     ----------
-    T, F, nips : numpy.ndarray (ndim 2)
+    T, F, nip : numpy.ndarray (ndim 2)
         Time, frequency, normalized inner-product tiles.
-    nip : numpy.ndarray (ndim 2)
-        Normalized inner-product tile.
     fs : float
         Sampling rate of underlying time-series data.
     flim : tuple
@@ -483,18 +490,22 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
     if not fig:
         fig = plt.figure()
 
-    # course 2x2 grid
+    # 2x2 grid of tiles
     gs0 = gridspec.GridSpec(2, 2)
     gs0.update(hspace=0.10, wspace=0.10, left=0.05, right=0.95, top=0.95,
                bottom=0.05)
 
+    tile1, tile2, tile3, tile4 = make_tiles(fig, gs0, full=[1])
+    ax11, ax12 = tile1
+    ax21, ax22 = tile2
+    ax31, ax32 = tile3
+    ax41, ax42 = tile4
+
+
     # top left axes: NIP
     gs1 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[0])
-    ax11 = plt.Subplot(fig, gs1[:, :])
+    # ax11 = plt.Subplot(fig, gs1[:, :])
     ax11.set_title('NIP, retrograde Rayleigh, scalar azimuth')
-    # im = ax11.imshow(nip, cmap=plt.cm.seismic, origin='lower',
-    #                  extent=[0, nip.shape[1], 0, fs/2.0], aspect='auto',
-    #                  interpolation='nearest')
     im = ax11.pcolormesh(T, F, nip, cmap=plt.cm.seismic)
     #plt.colorbar(im)
     ax11.contour(T, F, nip, [0.8], linewidth=2.0, colors='k')
@@ -503,7 +514,7 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
     ax11.set_ylabel('frequency [Hz]')
     ax11.set_xlabel('time [sec]')
 
-    divider = make_axes_locatable(ax11)
+    # divider = make_axes_locatable(ax11)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cbar = plt.colorbar(im, cax=cax)
     ax11.set_yscale('log')
