@@ -81,7 +81,7 @@ def shift_phase(Sv, polarization='retrograde'):
 
     Returns
     -------
-    numpy.ndarray (real, rank 3)
+    numpy.ndarray (real, rank 2)
 
     References
     ----------
