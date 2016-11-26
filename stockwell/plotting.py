@@ -474,7 +474,7 @@ def compare_waveforms(v, vsf, rs, rsf, ts, arrivals):
                  va='top')
 
 
-def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
+def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
                      flim=None, hatch=None, hatchlim=None, fig=None):
     """
     Quad plot of NIP, and 3 tiles of Stockwell transform with NIP filter hatch
@@ -482,8 +482,8 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
 
     Parameters
     ----------
-    T, F, nip : numpy.ndarray (ndim 2)
-        Time, frequency, normalized inner-product tiles.
+    T, F, theta: numpy.ndarray (ndim 2)
+        Time, frequency, instantaneous azimuth tiles.
     fs : float
         Sampling rate of underlying time-series data.
     flim : tuple
@@ -521,7 +521,7 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
 
 
     # top left axes: NIP
-    gs1 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[0])
+    # gs1 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[0])
     # ax11 = plt.Subplot(fig, gs1[:, :])
     ax11.set_title('NIP, retrograde Rayleigh, scalar azimuth')
     im = ax11.pcolormesh(T, F, nip, cmap=plt.cm.seismic)
@@ -536,36 +536,40 @@ def NIP_filter_plots(T, F, nip, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cbar = plt.colorbar(im, cax=cax)
     ax11.set_yscale('log')
-    #cbar = plt.colorbar(im, fraction=0.05, ax=ax11, format='%.2e')
+    cbar = plt.colorbar(im, fraction=0.05, ax=ax11, format='%.2e')
     fig.add_subplot(ax11)
+
+    _ = plot_tile(fig, ax11, T, F, theta, ax12,
+                  np.average(theta, axis=1, weights=hatch), 'weighted mean', 'k',
+                  r, 'original',  arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
     # top right: Radial
     # s transform and filter
-    gs2 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[1],
-                                           hspace=0.0)
-    ax21 = plt.Subplot(fig, gs2[:-1, :])
-    ax22 = plt.Subplot(fig, gs2[-1, :], sharex=ax21)
+    # gs2 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[1],
+    #                                        hspace=0.0)
+    # ax21 = plt.Subplot(fig, gs2[:-1, :])
+    # ax22 = plt.Subplot(fig, gs2[-1, :], sharex=ax21)
     ax21.set_title('Radial')
     _ = plot_tile(fig, ax21, T, F, Sr, ax22, rf, 'filtered', 'k', r, 'original',  
                   arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
     # bottom left: Transverse
     # s transform and filter
-    gs3 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[2],
-                                           hspace=0.0)
-    ax31 = plt.Subplot(fig, gs3[:-1, :])
+    # gs3 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[2],
+    #                                        hspace=0.0)
+    # ax31 = plt.Subplot(fig, gs3[:-1, :])
+    # ax32 = plt.Subplot(fig, gs3[-1, :], sharex=ax31)
     ax31.set_title('Transverse S(t,f), scalar azimuth')
-    ax32 = plt.Subplot(fig, gs3[-1, :], sharex=ax31)
     _ = plot_tile(fig, ax31, T, F, St, ax32, t, 'original', 'gray',
                   arrivals=arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
     # bottom right: Vertical
     # s transform and filter
-    gs4 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[3],
-                                           hspace=0.0)
-    ax41 = plt.Subplot(fig, gs4[:-1, :])
+    # gs4 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[3],
+    #                                        hspace=0.0)
+    # ax41 = plt.Subplot(fig, gs4[:-1, :])
+    # ax42 = plt.Subplot(fig, gs4[-1, :], sharex=ax41)
     ax41.set_title('Vertical')
-    ax42 = plt.Subplot(fig, gs4[-1, :], sharex=ax41)
     _ = plot_tile(fig, ax41, T, F, Sv, ax42, vf, 'filtered', 'k', v, 'original',
                   arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
