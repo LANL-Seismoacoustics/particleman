@@ -193,7 +193,7 @@ plt.close()
 
 ########## check dynamic vs inst. rotations #################
 # plot estimated instantaneous azimuth
-_ = splt.plot_instantaneous_azimuth(theta, fs, xlim=(t0, len(v)))
+_ = splt.plot_instantaneous_azimuth(T, F, theta, fs, dlim=(t0, len(v)))
 plt.title('Instantaneous azimuth. great circle azimuth = {:.1f}'.format(az_prop))
 plt.savefig('instantaneous_azimuth.png', dpi=200)
 plt.close()
