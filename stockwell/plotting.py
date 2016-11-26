@@ -163,8 +163,45 @@ def make_tiles(fig, gs0, full=None):
     return axes
 
 
-def plot_instantaneous_azimuth(theta, fs=1.0, ylim=None, xlim=None, fig=None,
-                               outfile=None):
+
+def plot_image(T, F, C, fs=1.0, hatch=None, hatchlim=None, flim=None, clim=None,
+               fig=None, ax=None):
+    """
+    Plot a fime-frequency image, optionally with a hatched mask.
+
+    Returns
+    -------
+    image
+
+    """
+    if not fig:
+        fig = plt.figure()
+    if not ax:
+        ax = fig.gca()
+
+    ax.axes.get_xaxis().set_visible(False)
+
+    im = ax.pcolormesh(T, F, C, cmap=plt.cm.seismic)
+
+    if flim:
+        ax.set_ylim(flim)
+
+    if clim:
+        im.set_clim(clim)
+
+    if (hatch is not None) and hatchlim:
+        # ax1.contourf(T, F, hatch, hatchlim, colors='w', alpha=0.2)
+        ax.contourf(T, F, hatch, hatchlim, colors='k', hatches=['x'], alpha=0.0)
+        ax.contour(T, F, hatch, [max(hatchlim)], linewidth=1.0, colors='k')
+
+    ax.set_ylabel('frequency [Hz]')
+    fig.add_subplot(ax1)
+
+    return im
+
+
+def plot_instantaneous_azimuth(T, F, theta, fs=1.0, flim=None, dlim=None,
+                               clim=None, fig=None, ax=None):
     """
     Plot the instantanous azimuth TF tile using imshow.
 
