@@ -36,6 +36,8 @@ import numpy as np
 
 # TODO: make a **tile_kwargs argument in all calling signatures using plot_tile,
 #    which would include arrivals, flim, clim, dlim, tlim, hatch, hatchlim
+# TODO: make a plot_image function, and use it as an argument in the plot_tile
+#    function.
 
 def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
               label2=None, arrivals=None, flim=None, clim=None, hatch=None,
@@ -92,22 +94,8 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
     tm = T[0]
 
     # TODO: remove fig from signature?
-    ax1.axes.get_xaxis().set_visible(False)
-    im = ax1.pcolormesh(T, F, np.abs(S))
-    if clim:
-        im.set_clim(clim)
-    if (hatch is not None) and hatchlim:
-        # ax1.contourf(T, F, hatch, hatchlim, colors='w', alpha=0.2)
-        ax1.contourf(T, F, hatch, hatchlim, colors='k', hatches=['x'], alpha=0.0)
-        ax1.contour(T, F, hatch, [max(hatchlim)], linewidth=1.0, colors='k')
-    if flim:
-        ax1.set_ylim(flim)
-    ax1.set_ylabel('frequency [Hz]')
-    divider = make_axes_locatable(ax1)
-    ax1.set_yscale('log')
-    #cax = divider.append_axes("right", size="5%", pad=0.05)
-    #cbar = plt.colorbar(im, cax=cax, format='%.2e')
-    fig.add_subplot(ax1)
+    im = plot_image(T, F, np.abs(S), hatch=hatch, hatchlim=hatchlim, flim=flim,
+                    clim=clim, fig=fig, ax=ax1)
 
     # waves and arrivals
     dmx = np.abs(d1).max()
