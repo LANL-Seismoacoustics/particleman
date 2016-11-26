@@ -155,10 +155,10 @@ def make_tiles(fig, gs0, full=None):
                                                 hspace=0.0)
         ax1 = plt.Subplot(fig, iigs[:-1, :])
         if i in full:
-            axes.append((ax1, None))
+            ax2 = None
         else:
             ax2 = plt.Subplot(fig, iigs[-1, :], sharex=ax1)
-            axes.append((ax1, ax2))
+        axes.append((ax1, ax2))
 
     return axes
 
@@ -207,15 +207,15 @@ def plot_instantaneous_azimuth(T, F, theta, fs=1.0, flim=None, dlim=None,
 
     Parameters
     ----------
-    theta : numpy.ndarray (ndim 2)
-        Instantaneous azimuth calculated by stockwell.filter.instantanous_azimuth
+    T, F, theta : numpy.ndarray (ndim 2)
+        Time [sec], frequency [Hz], and instantaneous azimuth calculated by
+        stockwell.filter.instantanous_azimuth
     fs : float
         Sampling rate of data used.
-    ylim : tuple (ymin, ymax)
-        Optional frequency min/max for plot y limits in Hz.
-    xlim : tuple (xmin, xmax)
-        Optional time min/max for plot x limits in sec.
+    flim, dlim, clim : tuple (min, max)
+        Optional frequency [Hz], time [sec], or color min/max limits for plots.
     fig : matplotlib.Figure instance
+    ax : matplotlib.axis.Axis instance
 
     Returns
     -------
@@ -225,19 +225,21 @@ def plot_instantaneous_azimuth(T, F, theta, fs=1.0, flim=None, dlim=None,
     if not fig:
         f = plt.figure()
 
-    plt.imshow(theta, origin='lower', cmap=plt.cm.hsv, aspect='auto',
-               extent=[0, theta.shape[1], 0, fs/2.0], interpolation='nearest')
+    # plt.imshow(theta, origin='lower', cmap=plt.cm.hsv, aspect='auto',
+    #            extent=[0, theta.shape[1], 0, fs/2.0], interpolation='nearest')
+    plt.pcolormesh(T, F, theta)
     plt.colorbar()
     plt.axis('tight')
 
-    if ylim:
-        plt.ylim(ylim)
+    if flim:
+        plt.ylim(flim)
 
-    if xlim:
-        plt.xlim((t0, len(v)))
+    if dlim:
+        plt.xlim(dlim)
 
-    mx = np.nanmax(theta)
-    plt.clim(-mx, mx)
+    if not clim:
+        mx = np.nanmax(theta)
+        plt.clim(-mx, mx)
 
     return f
 
@@ -413,10 +415,13 @@ def plot_NIP(T, F, nips, fs=1.0, flim=None, fig=None, ax=None):
     if not fig:
         fig = plt.figure()
 
-    plt.imshow(nips, cmap=plt.cm.seismic, origin='lower',
-               extent=[0,nips.shape[1], 0, fs/2], aspect='auto',
-               interpolation='nearest')
-    im = ax11.pcolormesh(T, F, nip, cmap=plt.cm.seismic)
+    # plt.imshow(nips, cmap=plt.cm.seismic, origin='lower',
+    #            extent=[0,nips.shape[1], 0, fs/2], aspect='auto',
+    #            interpolation='nearest')
+    if ax:
+        im = ax.pcolormesh(T, F, nip, cmap=plt.cm.seismic)
+    else:
+        im = plt.pcolormesh(T, F, nip, cmap=plt.cm.seismic)
     plt.colorbar()
     plt.contour(T, F, nips, [0.8], linewidth=2.0, colors='k')
     plt.axis('tight')
