@@ -41,7 +41,7 @@ import numpy as np
 
 def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
               label2=None, arrivals=None, flim=None, clim=None, hatch=None,
-              hatchlim=None, dlim=None):
+              hatchlim=None, dlim=None, amp_fmt='%.2e', cmap=None):
     """
     Plot time-frequency pcolormesh tiles above time-aligned aligned time-series.
 
@@ -69,6 +69,9 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
         Optional tile used for hatch mask.
     hatchlim : tuple
         Hatch range used to display mask.  2-tuple of floats (hmin, hmax).
+    amp_fmt : str
+        Matplotlib format string used for amplitudes in colorbars and axes.
+    cmap : matplotlib.colors.Colormap
 
     Returns
     -------
@@ -88,14 +91,16 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
     if not fig:
         fig = plt.figure()
 
-    sciformatter = FormatStrFormatter('%.2e')
+    sciformatter = FormatStrFormatter(amp_fmt)
 
     # grab a time vector
     tm = T[0]
 
     # TODO: remove fig from signature?
     im = plot_image(T, F, np.abs(S), hatch=hatch, hatchlim=hatchlim, flim=flim,
-                    clim=clim, fig=fig, ax=ax1)
+                    clim=clim, fig=fig, ax=ax1, cmap=cmap)
+    cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax1, ax2],
+                        format=amp_fmt)
 
     # waves and arrivals
     dmx = np.abs(d1).max()
@@ -110,13 +115,12 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
     ax2.set_xlim(tm[0], tm[-1])
     if not dlim:
         dlim = (-dmx, dmx)
+    # XXX: assumes symmetry about zero.
     ax2.set_ylim(dlim)
 
     if arrivals:
         plot_arrivals(ax2, arrivals, d1.min(), d1.max())
 
-    cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax1, ax2],
-                        format='%.2e')
     #ax2.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
     ax2.yaxis.set_major_formatter(sciformatter)
     fig.add_subplot(ax2)
@@ -164,14 +168,14 @@ def make_tiles(fig, gs0, full=None):
 
 
 
-def plot_image(T, F, C, fs=1.0, hatch=None, hatchlim=None, flim=None, clim=None,
-               fig=None, ax=None):
+def plot_image(T, F, C, hatch=None, hatchlim=None, flim=None, clim=None,
+               fig=None, ax=None, cmap=None):
     """
     Plot a fime-frequency image, optionally with a hatched mask.
 
     Returns
     -------
-    image
+    matplotlib.collections.QuadMesh from pcolormesh
 
     """
     if not fig:
@@ -181,7 +185,9 @@ def plot_image(T, F, C, fs=1.0, hatch=None, hatchlim=None, flim=None, clim=None,
 
     ax.axes.get_xaxis().set_visible(False)
 
-    im = ax.pcolormesh(T, F, C, cmap=plt.cm.seismic)
+    if not cmap:
+        cmap = plt.cm.viridis
+    im = ax.pcolormesh(T, F, C, cmap=cmap)
 
     if flim:
         ax.set_ylim(flim)
@@ -195,7 +201,8 @@ def plot_image(T, F, C, fs=1.0, hatch=None, hatchlim=None, flim=None, clim=None,
         ax.contour(T, F, hatch, [max(hatchlim)], linewidth=1.0, colors='k')
 
     ax.set_ylabel('frequency [Hz]')
-    fig.add_subplot(ax1)
+    ax.set_yscale('log')
+    fig.add_subplot(ax)
 
     return im
 
@@ -513,64 +520,37 @@ def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None
     gs0.update(hspace=0.10, wspace=0.10, left=0.05, right=0.95, top=0.95,
                bottom=0.05)
 
-    tile1, tile2, tile3, tile4 = make_tiles(fig, gs0, full=[1])
+    tile1, tile2, tile3, tile4 = make_tiles(fig, gs0)
     ax11, ax12 = tile1
     ax21, ax22 = tile2
     ax31, ax32 = tile3
     ax41, ax42 = tile4
 
 
-    # top left axes: NIP
-    # gs1 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[0])
-    # ax11 = plt.Subplot(fig, gs1[:, :])
-    ax11.set_title('NIP, retrograde Rayleigh, scalar azimuth')
-    im = ax11.pcolormesh(T, F, nip, cmap=plt.cm.seismic)
-    #plt.colorbar(im)
-    ax11.contour(T, F, nip, [0.8], linewidth=2.0, colors='k')
-    ax11.axis('tight')
-    ax11.set_ylim(flim)
-    ax11.set_ylabel('frequency [Hz]')
-    ax11.set_xlabel('time [sec]')
-
-    # divider = make_axes_locatable(ax11)
-    cax = divider.append_axes("right", size="5%", pad=0.05)
-    cbar = plt.colorbar(im, cax=cax)
-    ax11.set_yscale('log')
-    cbar = plt.colorbar(im, fraction=0.05, ax=ax11, format='%.2e')
-    fig.add_subplot(ax11)
-
-    _ = plot_tile(fig, ax11, T, F, theta, ax12,
-                  np.average(theta, axis=1, weights=hatch), 'weighted mean', 'k',
-                  r, 'original',  arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
+    # top left axes: Instantaneous and weighted mean azimuth
+    mean_theta = np.ma.average(theta, axis=0, weights=hatch)
+    ax11.set_title('Instantaneous propagation azimuth')
+    _ = plot_tile(fig, ax11, T, F, theta, ax12, mean_theta, 'weighted mean',
+                  'k', arrivals=arrivals, flim=flim, 
+                  dlim=[mean_theta.min(), mean_theta.max()], hatch=hatch,
+                  hatchlim=hatchlim, amp_fmt='%d', cmap=plt.cm.spectral)
 
     # top right: Radial
     # s transform and filter
-    # gs2 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[1],
-    #                                        hspace=0.0)
-    # ax21 = plt.Subplot(fig, gs2[:-1, :])
-    # ax22 = plt.Subplot(fig, gs2[-1, :], sharex=ax21)
     ax21.set_title('Radial')
     _ = plot_tile(fig, ax21, T, F, Sr, ax22, rf, 'filtered', 'k', r, 'original',  
                   arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
     # bottom left: Transverse
     # s transform and filter
-    # gs3 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[2],
-    #                                        hspace=0.0)
-    # ax31 = plt.Subplot(fig, gs3[:-1, :])
-    # ax32 = plt.Subplot(fig, gs3[-1, :], sharex=ax31)
     ax31.set_title('Transverse S(t,f), scalar azimuth')
     _ = plot_tile(fig, ax31, T, F, St, ax32, t, 'original', 'gray',
                   arrivals=arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
     # bottom right: Vertical
     # s transform and filter
-    # gs4 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[3],
-    #                                        hspace=0.0)
-    # ax41 = plt.Subplot(fig, gs4[:-1, :])
-    # ax42 = plt.Subplot(fig, gs4[-1, :], sharex=ax41)
     ax41.set_title('Vertical')
     _ = plot_tile(fig, ax41, T, F, Sv, ax42, vf, 'filtered', 'k', v, 'original',
                   arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
-    return fig
+    return [tile1, tile2, tile3, tile4]
