@@ -63,7 +63,7 @@ def get_shift(polarization):
     return shft
 
 
-def shift_phase(Sv, polarization='retrograde'):
+def shift_phase(Sv, polarization):
     """
     Phase-shift an s-transform by the appropriate phase shift for
     prograde/retrograde motion.
@@ -76,7 +76,7 @@ def shift_phase(Sv, polarization='retrograde'):
     ----------
     Sv : numpy.ndarray (complex, rank 2)
     polarization : str, {'retrograde', 'prograde', 'linear'}
-        'retrograde' will apply a pi/2 phase advance.
+        'retrograde' will apply a pi/2 phase advance (normal Rayleigh waves)
         'prograde' or 'linear' will apply a pi/2 phase delay
 
     Returns
@@ -210,6 +210,7 @@ def NIP(Sr, Sv, polarization=None, eps=None):
     if polarization:
         Svhat = shift_phase(Sv, polarization)
     else:
+        # Just a literal inner product, no shift.
         Svhat = Sv
 
     Avhat = np.abs(Svhat)
@@ -224,7 +225,7 @@ def NIP(Sr, Sv, polarization=None, eps=None):
 
 
 
-def get_filter(nip, polarization, threshold=0.8, width=0.1):
+def get_filter(nip, polarization, threshold=None, width=0.1):
     """
     Get an NIP-based filter that will pass waves of the specified type.
     
@@ -239,7 +240,9 @@ def get_filter(nip, polarization, threshold=0.8, width=0.1):
         The type of polarization that was used to calculate the provided NIP.
         'retrograde', 'prograde', or 'linear'.  See "NIP" function.
     threshold, width : float
-        The cosine taper critical/crossover value ("x_r") and width ("\Delta x")
+        The cosine taper critical/crossover value ("x_r") and width ("\Delta x").
+        If not supplied, the default for retrograde polarization is 0.8, and for
+        prograde or linear polarization is 0.2.
 
     Returns
     -------
@@ -252,13 +255,17 @@ def get_filter(nip, polarization, threshold=0.8, width=0.1):
     Equation (27) and (28) from Meza-Fajardo et al. (2015)
 
     """
-    if polarization is 'retrograde':
+    if polarization in ('retrograde', 'prograde'):
+        if threshold is None:
+            threshold = 0.8
         filt = np.zeros(nip.shape)
         mid = (threshold - width < nip) & (nip < threshold)
         high = threshold < nip
         filt[mid] = 0.5 * np.cos((np.pi*(nip[mid]-threshold))/width) + 0.5
         filt[high] = 1.0
-    elif polarization in ('prograde', 'linear'):
+    elif polarization == 'linear':
+        if threshold is None:
+            threshold = 0.2
         filt = np.ones(nip.shape)
         mid = (threshold < nip) & (nip < threshold + width)
         high = threshold + width < nip 
@@ -270,7 +277,7 @@ def get_filter(nip, polarization, threshold=0.8, width=0.1):
     return filt
 
 
-def NIP_filter(n, e, v, fs, xpr, polarization='retrograde', threshold=0.8, width=0.1, eps=None):
+def NIP_filter(n, e, v, fs, xpr, polarization, threshold=0.8, width=0.1, eps=None):
     """
     Filter a 3-component seismogram based on the NIP criterion.
 
