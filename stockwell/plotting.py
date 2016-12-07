@@ -53,7 +53,7 @@ def _strip_zero_freq(T, F, S):
 
 def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
               label2=None, arrivals=None, flim=None, clim=None, hatch=None,
-              hatchlim=None, dlim=None, amp_fmt='%.2e', cmap=None):
+              hatchlim=None, dlim=None, amp_fmt='%.2e', cmap=None, alpha=None):
     """
     Plot time-frequency pcolormesh tiles above time-aligned aligned time-series.
 
@@ -84,6 +84,9 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
     amp_fmt : str
         Matplotlib format string used for amplitudes in colorbars and axes.
     cmap : matplotlib.colors.Colormap
+    alpha: float
+        Optionally, use a white transparency mask for overlying the hatch, with
+        the given alpha value.
 
     Returns
     -------
@@ -110,28 +113,31 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
 
     # TODO: remove fig from signature?
     im = plot_image(T, F, np.abs(S), hatch=hatch, hatchlim=hatchlim, flim=flim,
-                    clim=clim, fig=fig, ax=ax1, cmap=cmap)
+                    clim=clim, fig=fig, ax=ax1, cmap=cmap, alpha=alpha)
     cbar = plt.colorbar(im, fraction=0.05, pad=0.01, ax=[ax1, ax2],
                         format=amp_fmt)
 
     # waves and arrivals
-    dmx = np.abs(d1).max()
-    if d2 is not None:
-        ax2.plot(tm, d2, 'gray', label=label2)
-        dmx = max([dmx, np.abs(d2).max()])
     ax2.plot(tm, d1, color1, label=label1)
-    ax2.set_ylabel('amplitude')
+    # ax2.set_ylabel('amplitude')
+    ax2.set_xlabel('time [seconds]')
     leg = ax2.legend(loc='lower right', frameon=False, fontsize=14)
     for legobj in leg.legendHandles:
         legobj.set_linewidth(2.0)
     ax2.set_xlim(tm[0], tm[-1])
+    # set view limits
+    dmx = d1.max()
+    dmn = d1.min()
+    if d2 is not None:
+        ax2.plot(tm, d2, 'gray', label=label2, zorder=1)
+        dmx = max([dmx, d2.max()])
+        dmn = min([dmn, d2.min()])
     if not dlim:
-        dlim = (-dmx, dmx)
-    # XXX: assumes symmetry about zero.
+        dlim = (dmn, dmx)
     ax2.set_ylim(dlim)
 
     if arrivals:
-        plot_arrivals(ax2, arrivals, d1.min(), d1.max())
+        plot_arrivals(ax2, arrivals, dmn, dmx)
 
     #ax2.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
     ax2.yaxis.set_major_formatter(sciformatter)
@@ -181,9 +187,18 @@ def make_tiles(fig, gs0, full=None):
 
 
 def plot_image(T, F, C, hatch=None, hatchlim=None, flim=None, clim=None,
-               fig=None, ax=None, cmap=None):
+               fig=None, ax=None, cmap=None, alpha=None):
     """
     Plot a fime-frequency image, optionally with a hatched mask.
+
+    T, F, C : numpy.ndarray (ndim 2)
+        Time and frequency domain arrays, and data arrays.
+    hatch : numpy.ndarray (rank 2)
+        Optional array mask for hatching or for opacity.
+    hatchlim : float
+        Optional hatch value cutoff for masking, above which masking is not
+        done.  If hatch is provided but hatchlim is not, hatch will be used as
+        an opacity mask, and it values are assumed to be between 0 and  1.
 
     Returns
     -------
@@ -208,12 +223,15 @@ def plot_image(T, F, C, hatch=None, hatchlim=None, flim=None, clim=None,
         im.set_clim(clim)
 
     if (hatch is not None) and hatchlim:
-        # ax1.contourf(T, F, hatch, hatchlim, colors='w', alpha=0.2)
-        ax.contourf(T, F, hatch, hatchlim, colors='k', hatches=['x'], alpha=0.0)
-        ax.contour(T, F, hatch, [max(hatchlim)], linewidth=1.0, colors='k')
+        if alpha:
+            ax.contourf(T, F, hatch, hatchlim, colors='w', alpha=alpha)
+        else:
+            ax.contourf(T, F, hatch, hatchlim, colors='k', linewidth=0.5, hatches=['x'], alpha=0.0)
+            ax.contour(T, F, hatch, [max(hatchlim)], linewidth=0.5, colors='k')
 
     ax.set_ylabel('frequency [Hz]')
     ax.set_yscale('log')
+    ax.get_yaxis().set_tick_params(direction='out', which='both')
     fig.add_subplot(ax)
 
     return im
@@ -523,13 +541,22 @@ def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None
         Hatch range used to display mask.  2-tuple of floats (hmin, hmax).
     fig : matplotlib.Figure
 
+    Returns
+    -------
+    tiles : list
+        List of two-tuples of axes objects (axis_top, axis_bottom) of each tile,
+        clockwise from top-left.  Can be unpacked to get all axes as follows:
+
+    >>> tiles = NIP_filter_plots(...)
+    >>> (ax11, ax12), (ax21, ax22), (ax31, ax32), (ax41, ax42) = tiles
+
     """
     if not fig:
         fig = plt.figure()
 
     # 2x2 grid of tiles
     gs0 = gridspec.GridSpec(2, 2)
-    gs0.update(hspace=0.10, wspace=0.10, left=0.05, right=0.95, top=0.95,
+    gs0.update(hspace=0.10, wspace=0.12, left=0.04, right=0.96, top=0.95,
                bottom=0.05)
 
     tile1, tile2, tile3, tile4 = make_tiles(fig, gs0)
@@ -541,11 +568,12 @@ def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None
 
     # top left axes: Instantaneous and weighted mean azimuth
     mean_theta = np.ma.average(theta, axis=0, weights=hatch)
+    # opacity_mask = np.array([np.abs(S) / np.abs(S).max() for S in (Sr, St, Sv)]).mean(axis=0)
     ax11.set_title('Instantaneous propagation azimuth')
-    _ = plot_tile(fig, ax11, T, F, theta, ax12, mean_theta, 'weighted mean',
+    _ = plot_tile(fig, ax11, T, F, theta, ax12, mean_theta, 'filter-weighted mean',
                   'k', arrivals=arrivals, flim=flim, 
                   dlim=[mean_theta.min(), mean_theta.max()], hatch=hatch,
-                  hatchlim=hatchlim, amp_fmt='%d', cmap=plt.cm.spectral)
+                  hatchlim=hatchlim, amp_fmt='%d', cmap=plt.cm.spectral, alpha=1.0)
 
     # top right: Radial
     # s transform and filter
