@@ -11,11 +11,14 @@ Produce filter of [Meza-Fajardo et al., (2015)] to pass retrograde Rayleigh wave
 ```python
 from obspy import read
 
-st = read()
 st = read("tests/data/mdj-ic-00-lh[rtz]-2010-01-10-00-27.sac", format='SAC')
+
 rs = st.select(component='R')[0].data
 ts = st.select(component='T')[0].data
 v = st.select(component='Z')[0].data
+
+tr = st[0]
+fs = tr.stats.sampling_rate
 
 ```
 
