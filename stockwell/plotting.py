@@ -121,9 +121,6 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
     ax2.plot(tm, d1, color1, label=label1)
     # ax2.set_ylabel('amplitude')
     ax2.set_xlabel('time [seconds]')
-    leg = ax2.legend(loc='lower right', frameon=False, fontsize=14)
-    for legobj in leg.legendHandles:
-        legobj.set_linewidth(2.0)
     ax2.set_xlim(tm[0], tm[-1])
     # set view limits
     dmx = d1.max()
@@ -135,6 +132,10 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
     if not dlim:
         dlim = (dmn, dmx)
     ax2.set_ylim(dlim)
+
+    leg = ax2.legend(loc='lower right', frameon=False, fontsize=14)
+    for legobj in leg.legendHandles:
+        legobj.set_linewidth(2.0)
 
     if arrivals:
         plot_arrivals(ax2, arrivals, dmn, dmx)
@@ -511,8 +512,8 @@ def compare_waveforms(v, vsf, rs, rsf, ts, arrivals):
                  va='top')
 
 
-def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None,
-                     flim=None, hatch=None, hatchlim=None, fig=None):
+def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
+                     arrivals=None, flim=None, hatch=None, hatchlim=None, fig=None):
     """
     Quad plot of NIP, and 3 tiles of Stockwell transform with NIP filter hatch
     and filtered+unfiltered time-series for each component.
@@ -531,8 +532,8 @@ def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, arrivals=None
         Unfiltered and NIP-filtered radial component time-series.
     v, vf : numpy.ndarray (ndim 1)
         Unfiltered and NIP-filtered vertical component time-series.
-    t : numpy.ndarray (ndim 1)
-        Unfiltered transverse component time-series.
+    t, tf : numpy.ndarray (ndim 1)
+        Unfiltered/filtered transverse component time-series.
     arrivals : sequence of (str, float) 2-tuples
         Sequence of arrivals to plot, of the form (label, time_in_seconds)
     hatch : numpy.ndarray (ndim 2)
