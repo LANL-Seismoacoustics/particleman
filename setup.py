@@ -24,7 +24,7 @@ import numpy as np
 try:
     import numpy
 except ImportError:
-    print "We require the numpy python module to build"
+    print("We require the numpy python module to build")
     sys.exit(1)
 
 from numpy.distutils.system_info import get_info, system_info
