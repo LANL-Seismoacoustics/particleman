@@ -44,7 +44,7 @@ if not fftw:
     fftw = get_info('fftw')
 
 if not fftw:
-    print "We require either fftw3 or fftw to be present in order to build"
+    print("We require either fftw3 or fftw to be present in order to build")
     sys.exit(1)
 
 #define_macros = fftw['define_macros'],
