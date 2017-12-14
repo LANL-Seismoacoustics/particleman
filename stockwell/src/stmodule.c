@@ -135,8 +135,9 @@ static PyMethodDef Methods[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
-void initst()
+PyMODINIT_FUNC
+initst(void)
 {
-	Py_InitModule("st", Methods);
+	(void)Py_InitModule("st", Methods);
 	import_array();
 }

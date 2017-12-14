@@ -48,8 +48,9 @@ static PyMethodDef Methods[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
-void initsine()
+PyMODINIT_FUNC
+initsine(void)
 {
-	Py_InitModule("sine", Methods);
+	(void)Py_InitModule("sine", Methods);
 	import_array();
 }
