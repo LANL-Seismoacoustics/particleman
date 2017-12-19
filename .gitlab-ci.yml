@@ -1,0 +1,11 @@
+image: continuumio/miniconda3:latest
+
+before_script:
+ - conda env create -f environment.yml
+ - source activate bulletproof
+ - pip install .
+
+tests:
+ stage: test
+ script:
+   - py.test -v

@@ -1,0 +1,8 @@
+name: pystockwell
+channels: !!python/tuple
+- !!python/unicode
+  'defaults'
+dependencies:
+- python=3
+- pytest
+- pip
