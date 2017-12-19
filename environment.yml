@@ -1,8 +1,11 @@
 name: pystockwell
-channels: !!python/tuple
-- !!python/unicode
-  'defaults'
+channels:
+- jsandhu
+- conda-forge
+- defaults
 dependencies:
+- fftw
 - python=3
+- numpy
 - pytest
 - pip
