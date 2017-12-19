@@ -1,6 +1,5 @@
 name: pystockwell
 channels:
-- jsandhu
 - conda-forge
 - defaults
 dependencies:
