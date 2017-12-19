@@ -3,6 +3,8 @@
 # This file is part of the NeuroImaging Analysis Framework
 # For copyright and redistribution details, please see the COPYING file
 
+# https://github.com/synergetics/stockwell_transform
+
 import sys
 try:
     import setuptools
@@ -20,13 +22,9 @@ except ImportError:
 #
 # Find the numpy headers
 #
-incdirs = system_info().get_include_dirs()
-libdirs = system_info().get_lib_dirs()
-
-# Extension modules
-incdirs += [np.get_include() + '/numpy']
-
-ext_modules = []
+info = system_info()
+incdirs = info.get_include_dirs()
+libdirs = info.get_lib_dirs()
 
 fftw = get_info('fftw3') or get_info('fftw')
 
@@ -35,14 +33,11 @@ if not fftw:
     sys.exit(1)
 
 #define_macros = fftw['define_macros'],
-ext_modules += [Extension('stockwell.st',
-                          include_dirs=incdirs + fftw['include_dirs'],
-                          libraries=fftw['libraries'],
-                          library_dirs=fftw['library_dirs'],
-                          sources=['stockwell/src/stmodule.c', 'stockwell/src/st.c'])]
-ext_modules += [Extension('stockwell.sine',
-                          include_dirs=incdirs,
-                          sources=['stockwell/src/sinemodule.c'])]
+ext_modules = [Extension('stockwell.libst',
+                         include_dirs=incdirs + fftw['include_dirs'],
+                         libraries=fftw['libraries'],
+                         library_dirs=fftw['library_dirs'],
+                         sources=['stockwell/src/st.c'])]
 
 
 setup(name='stockwell',
@@ -54,6 +49,6 @@ setup(name='stockwell',
 Stockwell transform module from the YNiC Analysis and Visualisation Tools
 ''',
       packages=['stockwell'],
-      py_modules=['stockwell.smt', 'stockwell.util', 'stockwell.plotting'],
+      py_modules=['stockwell.util', 'stockwell.plotting', 'stockwell.st'],
       ext_modules=ext_modules,
      )
