@@ -9,13 +9,14 @@ Stockwell transforms for seismology.
 import os
 import sys
 
-from numpy.distutils.core import setup, Extension
 from numpy.distutils.system_info import get_info, system_info
 
 try:
     import setuptools
 except ImportError:
     pass
+
+from distutils.core import setup, Extension
 
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -58,9 +59,4 @@ setup(name='stockwell',
       py_modules=['stockwell.util', 'stockwell.plotting', 'stockwell.st'],
       ext_modules=ext_modules,
       data_files=[('tests/data', ['tests/data/BW.RJOB..EHZ.txt'])],
-      classifiers=[
-          'Development Status :: 3 - Alpha',
-          'License :: OSI Approved :: GPL License',
-          'Programming Language :: Python :: 3',
-      ],
      )
