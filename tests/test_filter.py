@@ -31,8 +31,8 @@ from mpl_toolkits.basemap import Basemap
 import numpy as np
 
 from obspy import read
-from obspy.signal import rotate_RT_NE
-from obspy.taup import taup
+from obspy.signal.rotate import rotate_rt_ne
+from obspy.taup import TauPyModel
 
 from distaz import distaz
 from stockwell import stransform, istransform
@@ -90,9 +90,10 @@ swmin = km/vmax
 swmax = km/vmin
 tmin = tr.stats.starttime + swmin
 tmax = tr.stats.starttime + swmax
-tt = taup.getTravelTimes(deg, sac.evdp, model='ak135')
+ak135 = TauPyModel(model='ak135')
+tt = ak135.get_travel_times(sac.evdp, deg)
 
-tarrivals = [(itt['phase_name'], itt['time']) for itt in tt]
+tarrivals = [(itt.name, itt.time) for itt in tt]
 swarrivals = [(str(swvel), km/swvel) for swvel in (5.0, 4.0, 3.0, 2.0)]
 tarrivals.extend(swarrivals)
 
@@ -130,7 +131,7 @@ Sv = stransform(v, fs)
 Srs = stransform(rs, fs)
 Sts = stransform(ts, fs)
 
-n, e = rotate_RT_NE(rs, ts, baz)
+n, e = rotate_rt_ne(rs, ts, baz)
 
 Sn, T, F = stransform(n, fs, return_time_freq=True)
 Se = stransform(e, fs)
@@ -212,7 +213,7 @@ plt.close()
 fig = plt.figure(figsize=HALFSCREEN)
 fig = splt.check_filters(T, F, Sv, Srs, Sts, vsf, rsf, ts, arrivals,
                          flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
-                         xlim=(t0, len(v), hatch=sfilt, hatchlim=(0.0, 0.8),
+                         xlim=(t0, len(v)), hatch=sfilt, hatchlim=(0.0, 0.8),
                          fig=fig)
 plt.savefig('filter_rayleigh_scalar.png', dpi=200)
 plt.close()
@@ -223,7 +224,7 @@ plt.close()
 fig = plt.figure(figsize=HALFSCREEN)
 fig = splt.check_filters(T, F, Sv, Srd, Std, vsf, rdf, td, arrivals,
                          flim=(fmin, fmax), clim=(0.0, cmax), dlim=(-dmax, dmax),
-                         xlim=(t0, len(v), hatch=dfilt, hatchlim=(0.0, 0.8),
+                         xlim=(t0, len(v)), hatch=dfilt, hatchlim=(0.0, 0.8),
                          fig=fig)
 plt.savefig('filter_rayleigh_dynamic.png', dpi=200)
 plt.close()
@@ -393,7 +394,3 @@ for arr, itt in arrivals:
 plt.axis('tight')
 plt.savefig('waves_inst.png', dpi=200)
 plt.close()
-
-
-if __name__ == '__main__':
-    

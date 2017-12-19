@@ -1,7 +1,0 @@
-*.png
-*.so
-*.dylib
-*.py[cod]
-*.egg-info/
-build
-eggs
