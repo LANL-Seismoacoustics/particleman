@@ -7,14 +7,19 @@ import os
 import numpy as np
 
 ext, = sysconfig.get_config_vars('SO')
-libst = ctypes.CDLL(os.path.dirname(__file__) + '/src/st' + ext)
+libst = ctypes.CDLL(os.path.dirname(__file__) + '/libst' + ext)
 
 # void st(int len, int lo, int hi, double *data, double *result)
 libst.st.restype = None
-libst.st.argtypes = [ctypes.c_int, ctypes.c_int,
-                     ctypes.pointer(ctypes.c_double),
-                     ctypes.pointer(ctypes.c_double)]
+libst.st.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int,
+                     ctypes.POINTER(ctypes.c_double),
+                     ctypes.POINTER(ctypes.c_double)]
 
+# void ist(int len, int lo, int hi, double *data, double *result)
+libst.ist.restype = None
+libst.ist.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int,
+                      ctypes.POINTER(ctypes.c_double),
+                      ctypes.POINTER(ctypes.c_double)]
 
 def st(data, lo=None, hi=None):
     """
@@ -33,19 +38,46 @@ def st(data, lo=None, hi=None):
     N = data.shape[0]
 
     if (lo is None) and (hi is None):
-        # uses C division, following the old stmodule.c
-        hi = divmod(N / 2)
+        # use C division, following the old stmodule.c
+        hi = N % 2
 
     M = hi - lo + 1
 
     data = np.ascontiguousarray(data, dtype=np.double)
-    results = np.empty((N, M), dtype=np.complex)
+
+    # this works, even though M x N doesn't seem big enough, because a complex
+    # NumPy array is actually two arrays back-to-back.  The first one is
+    # interpreted as real, and the second one interpreted as imaginary.
+    # NumPy complex apparently interprets the underlying array in the same way
+    # that FFTW fills the real and imaginary parts.
+    results = np.zeros((M, N), dtype=np.complex)
 
     # void st(int len, int lo, int hi, double *data, double *result)
-    libst.st(N, lo, hi, data.ctypes.data_as(ctypes.pointer(ctypes.c_double)),
-             results.ctypes.data_as(ctypes.pointer(ctypes.c_double)))
+    libst.st(N, lo, hi,
+             data.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+             results.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+            )
 
     return results
 
-def ist():
-    pass
+
+def ist(X, lo=None, hi=None):
+    X = np.ascontiguousarray(X, dtype=np.complex)
+
+    N, M = X.shape
+
+    if (lo is None) and (hi is None):
+        hi = M % 2
+
+    if hi - lo + 1 != N:
+        raise ValueError("Inconsistent dimensions")
+
+    results = np.zeros(M, dtype=np.double)
+
+    # void ist(int len, int lo, int hi, double *data, double *result)
+    libst.ist(M, lo, hi,
+              X.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+              results.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+             )
+
+    return results
