@@ -1,27 +1,33 @@
-# vim: set expandtab ts=4 sw=4:
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+PyStockwell
 
-# This file is part of the NeuroImaging Analysis Framework
-# For copyright and redistribution details, please see the COPYING file
+Stockwell transforms for seismology.
 
-# https://github.com/synergetics/stockwell_transform
-
+"""
+import os
 import sys
+
+from numpy.distutils.core import setup, Extension
+from numpy.distutils.system_info import get_info, system_info
+
 try:
     import setuptools
 except ImportError:
     pass
 
-try:
-    import numpy as np
-    from numpy.distutils.core import setup, Extension
-    from numpy.distutils.system_info import get_info, system_info
-except ImportError:
-    print("We require the numpy python module to build")
-    sys.exit(1)
+here = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+    readme = f.read()
 
-#
-# Find the numpy headers
-#
+try:
+    import pypandoc
+    readme = pypandoc.convert(readme, 'md', 'rst')
+except ImportError:
+    pass
+
+# Find the fftw3 headers
 info = system_info()
 incdirs = info.get_include_dirs()
 libdirs = info.get_lib_dirs()
@@ -41,14 +47,19 @@ ext_modules = [Extension('stockwell.libst',
 
 
 setup(name='stockwell',
-      version='0.0.1',
-      description='Stockwell module from the NeuroImaging Analysis Framework',
-      author='YNiC Staff',
-      author_email='ynic-devel@ynic.york.ac.uk',
-      long_description='''
-Stockwell transform module from the YNiC Analysis and Visualisation Tools
-''',
+      version='0.2.0',
+      description='Stockwell transforms and applications in seismology',
+      long_description=readme,
+      url='http://github.com/lanl-seismoacoustics/bulletproof',
+      author='Jonathan MacCarthy',
+      author_email='jkmacc@lanl.gov',
+      install_requires=['numpy'],
       packages=['stockwell'],
       py_modules=['stockwell.util', 'stockwell.plotting', 'stockwell.st'],
       ext_modules=ext_modules,
+      classifiers=[
+          'Development Status :: 3 - Alpha',
+          'License :: OSI Approved :: GPL License',
+          'Programming Language :: Python :: 3',
+      ],
      )
