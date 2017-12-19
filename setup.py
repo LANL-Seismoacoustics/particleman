@@ -57,6 +57,7 @@ setup(name='stockwell',
       packages=['stockwell'],
       py_modules=['stockwell.util', 'stockwell.plotting', 'stockwell.st'],
       ext_modules=ext_modules,
+      data_files=[('tests/data', ['tests/data/BW.RJOB..EHZ.txt'])],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'License :: OSI Approved :: GPL License',
