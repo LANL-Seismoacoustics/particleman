@@ -2,8 +2,11 @@ image: continuumio/conda_builder_linux
 
 before_script:
  - export PATH="/opt/miniconda/bin:$PATH"
+ - conda update conda
  - conda env create -f environment.yml
  - source activate pystockwell
+ - echo "$PATH"
+ - conda list
  - pip install .
 
 tests:
