@@ -5,9 +5,9 @@ channels: !!python/tuple
 - !!python/unicode
   'conda-forge'
 dependencies:
+- gcc
 - fftw
 - python=3
 - numpy
 - pytest
 - pip
-
