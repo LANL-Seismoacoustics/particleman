@@ -1,7 +1,7 @@
 name: pystockwell
 channels:
+- defaults # prioritize defaults
 - conda-forge
-- defaults
 dependencies:
 - fftw
 - python=3
