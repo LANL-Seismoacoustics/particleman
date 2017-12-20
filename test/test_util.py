@@ -1,5 +1,5 @@
 """
-Test core stockwell functionality.abs
+Test core stockwell functionality.
 
 """
 import os
