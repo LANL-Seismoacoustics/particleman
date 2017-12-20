@@ -1,7 +1,9 @@
 name: pystockwell
-channels:
-- conda-forge
-- defaults
+channels: !!python/tuple
+- !!python/unicode
+  'defaults'
+- !!python/unicode
+  'conda-forge'
 dependencies:
 - fftw
 - python=3
