@@ -58,5 +58,4 @@ setup(name='stockwell',
       packages=['stockwell'],
       py_modules=['stockwell.util', 'stockwell.plotting', 'stockwell.st'],
       ext_modules=ext_modules,
-      data_files=[('test/data', ['test/data/BW.RJOB..EHZ.txt'])],
      )
