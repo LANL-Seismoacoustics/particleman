@@ -2,8 +2,7 @@
 
 The Stockwell transform, and its inverse, implemented in C and NumPy.
 
-
-All credit goes to the authors (not me).  Please see LICENSE.txt.
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 
 ## Example
@@ -85,23 +84,31 @@ retrograde Rayleigh waves (in any frequency) from a particular azimuth.
 
 ## Installation
 
-
-...should hopefully be easy.
-
 ### Dependencies
 
 * NumPy
 * gcc
 * fftw3
 
-On a Mac, gcc from XCode should work fine.  Getting fttw3 is easy with [homebrew](http://brew.sh/).
-To install, just:
+### Using Conda
+
+The `environment.yml` file will install everything you need into a `pystockwell`
+environment: `conda env create -f environment.yml`.  To install PyStockwell into
+an existing Conda environment, make sure you've got the dependencies you need installed
+and available, and just use `pip` to install it from source.
+
+### Manually on a Mac
+
+`gcc` from XCode should work fine.  Getting fttw3 is easy with [homebrew](http://brew.sh/) (`brew install fftw`)
+or with Conda (`conda install -c conda-forge fftw`).
+
+To PyStockwell install from source, just:
 
 ```bash
-python setup.py install
+pip install .
 ```
 
-...or
+...or from the remote repo:
 
 ```bash
 pip install git+https://git.lanl.gov/ees-geophysics/pystockwell.git
