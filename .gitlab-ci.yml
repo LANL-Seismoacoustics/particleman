@@ -1,4 +1,4 @@
-image: conda/miniconda3-centos7
+image: continuumio/conda_builder_linux
 
 before_script:
  - conda env create -f environment.yml
