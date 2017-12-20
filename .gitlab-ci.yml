@@ -1,4 +1,4 @@
-image: continuumio/miniconda3:latest
+image: conda/miniconda3-centos7
 
 before_script:
  - conda env create -f environment.yml
@@ -9,3 +9,4 @@ tests:
  stage: test
  script:
    - py.test -v
+# when: manual
