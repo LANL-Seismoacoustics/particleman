@@ -1,4 +1,12 @@
-# PyStockwell
+# **P**article **Man**
+
+**Particle** **m**otion **an**alysis of seismic surface waves using the Stockwell Transform.
+
+Seismic surface waves can be detected and extracted from three-component
+data through particle motion polarization analysis.  Particle Man is a
+software package that employs the Stockwell Transform to perform surface wave
+filtering/extraction and display for multifrequency analysis.
+
 
 
 The [Stockwell transform](https://en.wikipedia.org/wiki/S_transform) is like a
