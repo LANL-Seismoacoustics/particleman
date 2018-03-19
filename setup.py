@@ -6,7 +6,6 @@ Particle Man: particle motion analysis of seismic surface waves
 """
 import os
 import sys
-from distutils.core import setup, Extension
 
 from numpy.distutils.system_info import get_info, system_info
 
@@ -14,6 +13,9 @@ try:
     import setuptools
 except ImportError:
     pass
+
+# This needs to be below the setuptools import
+from distutils.core import setup, Extension
 
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
