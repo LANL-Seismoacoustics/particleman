@@ -56,6 +56,6 @@ setup(name='stockwell',
       author_email='jkmacc@lanl.gov',
       install_requires=['numpy'],
       packages=['stockwell'],
-      py_modules=['stockwell.util', 'stockwell.plotting', 'stockwell.st'],
+      py_modules=['stockwell.core', 'stockwell.plotting', 'stockwell.st'],
       ext_modules=ext_modules,
      )
