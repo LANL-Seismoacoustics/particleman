@@ -8,6 +8,7 @@ Stockwell transforms for seismology.
 """
 import os
 import sys
+from distutils.core import setup, Extension
 
 from numpy.distutils.system_info import get_info, system_info
 
@@ -15,8 +16,6 @@ try:
     import setuptools
 except ImportError:
     pass
-
-from distutils.core import setup, Extension
 
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -44,18 +43,18 @@ ext_modules = [Extension('stockwell.libst',
                          include_dirs=incdirs + fftw['include_dirs'],
                          libraries=fftw['libraries'],
                          library_dirs=fftw['library_dirs'],
-                         sources=['stockwell/src/st.c'])]
+                         sources=['particleman/src/st.c'])]
 
 
-setup(name='stockwell',
+setup(name='particleman',
       version='0.2.0',
-      description='Stockwell transforms and applications in seismology',
+      description='Particle motion analysis for seismic surface waves',
       long_description=readme,
-      url='http://github.com/lanl-seismoacoustics/bulletproof',
+      url='http://github.com/lanl-seismoacoustics/particleman',
       author='Jonathan MacCarthy',
       author_email='jkmacc@lanl.gov',
       install_requires=['numpy'],
-      packages=['stockwell'],
-      py_modules=['stockwell.core', 'stockwell.plotting', 'stockwell.st'],
+      packages=['particleman'],
+      py_modules=['particleman.core', 'particleman.plotting', 'particleman.st'],
       ext_modules=ext_modules,
      )
