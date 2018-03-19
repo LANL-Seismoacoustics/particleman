@@ -108,7 +108,7 @@ def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False):
     low, high, lp = _get_lo_hi(len(x), hp, lp, Fs)
 
     # The stockwell transform
-    S = st(x,low,high)
+    S = st(x, low, high)
 
     # Compute our time and frequency matrix with
     # the correct scaling for use with the
@@ -130,8 +130,7 @@ def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False):
 
 
 def istransform(X, Fs=0, hp=0, lp=0):
-    """Perform inverse Stockwell transform on 
-
+    """Perform inverse Stockwell transform
     """
     #XXX: untested
     low, high, lp = _get_lo_hi(X.shape[1], hp, lp, Fs)
@@ -139,5 +138,3 @@ def istransform(X, Fs=0, hp=0, lp=0):
     x = ist(X, low, high)
 
     return x
-
-
