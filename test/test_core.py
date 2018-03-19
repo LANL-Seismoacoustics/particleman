@@ -6,7 +6,7 @@ import os
 
 import numpy as np
 from numpy.fft import fft
-from stockwell import stransform, istransform
+from particleman import stransform, istransform
 
 here = os.path.dirname(os.path.abspath(__file__))
 data = np.loadtxt(os.path.sep.join([here, 'data', 'BW.RJOB..EHZ.txt']))

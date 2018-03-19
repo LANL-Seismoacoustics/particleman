@@ -491,7 +491,7 @@ def compare_waveforms(v, vsf, rs, rsf, ts, arrivals):
     plt.subplot(311)
     plt.title('vertical')
     plt.plot(v, 'gray', label='original')
-    plt.plot(vsf,'k', label='NIP filtered')
+    plt.plot(vsf, 'k', label='NIP filtered')
     plt.legend(loc='lower left')
 
     plt.subplot(312)

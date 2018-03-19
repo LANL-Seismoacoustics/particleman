@@ -29,7 +29,7 @@ Features:
 
 ## Installation
 
-PyStockwell has been tested on a Mac.  I suspect Linux will also work.
+Particle Man has been tested on a Mac.  I suspect Linux will also work.
 
 
 ### Dependencies
