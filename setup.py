@@ -1,9 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-PyStockwell
+Particle Man
 
-Stockwell transforms for seismology.
+Particle motional analysis of seismic surface waves.
 
 """
 import os
@@ -39,7 +39,7 @@ if not fftw:
     sys.exit(1)
 
 #define_macros = fftw['define_macros'],
-ext_modules = [Extension('stockwell.libst',
+ext_modules = [Extension('particleman.libst',
                          include_dirs=incdirs + fftw['include_dirs'],
                          libraries=fftw['libraries'],
                          library_dirs=fftw['library_dirs'],
@@ -55,6 +55,7 @@ setup(name='particleman',
       author_email='jkmacc@lanl.gov',
       install_requires=['numpy'],
       packages=['particleman'],
-      py_modules=['particleman.core', 'particleman.plotting', 'particleman.st'],
+      py_modules=['particleman.core', 'particleman.plotting', 'particleman.st',
+                  'particleman.filter'],
       ext_modules=ext_modules,
      )
