@@ -1,4 +1,6 @@
-""" ctypes interface to st.c
+"""
+ctypes interface to st.c
+
 """
 import ctypes
 from distutils import sysconfig
