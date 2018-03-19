@@ -1,8 +1,8 @@
-site_name: PyStockwell
-# site_url: http://www.jkmacc-LANL.github.io/pisces
-site_description: The Stockwell Transform for Seismology
+site_name: Particle Man
+site_url: https://lanl-seismoacoustics.github.io/particleman
+site_description: Particle Motion Analysis of Seismic Surface Waves
 
-repo_url: https://git.lanl.gov/ees-geophysics/pystockwell
+repo_url: http://github.com/lanl-seismoacoustics/particleman
 
 pages:
 - 'Home': 'index.md'
