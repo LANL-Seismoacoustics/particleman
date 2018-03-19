@@ -31,7 +31,7 @@ import warnings
 import numpy as np
 
 
-from .util import stransform, istransform
+from .core import stransform, istransform
 
 def get_shift(polarization):
     """

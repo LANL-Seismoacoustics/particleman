@@ -6,7 +6,7 @@ used simply, as in the following example.
 ```python
 import numpy as np
 from scipy.signal import chirp
-from stockwell import stransform
+from particleman import stransform
 
 sample_rate = 40.0  #[Hz]
 total_sec = 30.0
