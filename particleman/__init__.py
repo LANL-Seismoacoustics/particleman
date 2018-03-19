@@ -2,4 +2,4 @@
 Stockwell transform and its inverse.
 
 """
-from .util import stransform, istransform
+from .core import stransform, istransform
