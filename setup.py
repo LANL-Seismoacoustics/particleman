@@ -1,9 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Particle Man
-
-Particle motional analysis of seismic surface waves.
+Particle Man: particle motion analysis of seismic surface waves
 
 """
 import os
