@@ -33,11 +33,12 @@ import numpy as np
 from obspy import read
 from obspy.signal.rotate import rotate_rt_ne
 from obspy.taup import TauPyModel
+from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
-from distaz import distaz
-from stockwell import stransform, istransform
-import stockwell.filter as filt
-import stockwell.plotting as splt
+# from distaz import distaz
+from particleman import stransform, istransform
+import particleman.filter as filt
+import particleman.plotting as splt
 
 LANDSCAPE = (11,8.5)
 PORTRAIT = (8.5,11)
@@ -49,7 +50,7 @@ HALFSCREEN = (SCREEN[0]/2.0, SCREEN[1])
 plt.ioff()
 
 ######################### CALCULATIONS ##################################
-# TODO: put the functions above into a stockwell.plotting module
+# TODO: put the functions above into a particleman.plotting module
 
 #st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/aak-ii-00*")
 #st = read("tests/data/SampleWaveforms/E2010-01-10-00-27-39/Dsp/anmo*")
@@ -72,7 +73,10 @@ fmax = 1./30
 tr = st[0]
 fs = tr.stats.sampling_rate
 sac = tr.stats.sac
-deg, km, az, baz = distaz(sac.evla, sac.evlo, sac.stla, sac.stlo)
+# deg, km, az, baz = distaz(sac.evla, sac.evlo, sac.stla, sac.stlo)
+dist_meters, az, baz = gps2dist_azimuth(sac.evla, sac.evlo, sac.stla, sac.stlo)
+km = dist_meters / 1000.0
+deg = kilometer2degrees(km)
 az_prop = baz + 180
 if az < 0.0:
     az += 360.0
