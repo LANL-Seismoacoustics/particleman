@@ -1,4 +1,4 @@
-name: pystockwell
+name: particleman
 channels:
 - defaults # prioritize defaults
 - conda-forge
