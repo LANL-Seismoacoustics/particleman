@@ -326,38 +326,38 @@ def tile_comparison(T, F, Sv, Srs, Srd, Sts, Std, v, rs, rd, ts, td,
     ax61, ax62 = tile6
 
     ax11.set_title('Vertical')
-    plot_tile(fig, ax11, T, F, Sv, ax12, v, 'vertical', arrivals=arrivals, 
+    plot_tile(fig, ax11, T, F, Sv, ax12, v, 'vertical', arrivals=arrivals,
               flim=flim, clim=clim, dlim=dlim)
 
     ax21.set_title('Vertical')
-    plot_tile(fig, ax21, T, F, Sv, ax22, v, 'vertical', arrivals=arrivals, 
-            flim=flim, clim=clim, dlim=dlim)
+    plot_tile(fig, ax21, T, F, Sv, ax22, v, 'vertical', arrivals=arrivals,
+              flim=flim, clim=clim, dlim=dlim)
 
     ax31.set_title('Radial, scalar')
-    plot_tile(fig, ax31, T, F, Srs, ax32, rs, 'great circle', 'k', rd, 'dynamic', 
-            arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
-            hatchlim=hatchlim)
+    plot_tile(fig, ax31, T, F, Srs, ax32, rs, 'great circle', 'k', rd, 'dynamic',
+              arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
+              hatchlim=hatchlim)
     #ax31.contour(T, F, theta - az_prop, [20, 0.0, -20], linewidth=1.5, 
     #             colors=['r','w','b'])
     #ax31.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
 
     ax41.set_title('Radial, dynamic')
-    plot_tile(fig, ax41, T, F, Srd, ax42, rd, 'dynamic', 'k', rs, 'great circle',  
-            arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
-            hatchlim=hatchlim)
+    plot_tile(fig, ax41, T, F, Srd, ax42, rd, 'dynamic', 'k', rs, 'great circle', 
+              arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
+              hatchlim=hatchlim)
 
     ax51.set_title('Transverse, scalar')
-    plot_tile(fig, ax51, T, F, Sts, ax52, ts, 'great circle', 'k', td, 'dynamic', 
-            arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
-            hatchlim=hatchlim)
+    plot_tile(fig, ax51, T, F, Sts, ax52, ts, 'great circle', 'k', td, 'dynamic',
+              arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
+              hatchlim=hatchlim)
     #ax51.contour(T, F, theta - az_prop, [40, 0.0, -40], linewidth=1.5, 
     #             colors=['r','w','b'])
     #ax51.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)
 
     ax61.set_title('Transverse, dynamic')
     plot_tile(fig, ax61, T, F, Std, ax62, td, 'dynamic', 'k', ts, 'great circle',
-            arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
-            hatchlim=hatchlim)
+              arrivals=arrivals, flim=flim, clim=clim, dlim=dlim, hatch=hatch,
+              hatchlim=hatchlim)
 
     if xlim:
         ax11.set_xlim(*xlim)
@@ -572,14 +572,14 @@ def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
     # opacity_mask = np.array([np.abs(S) / np.abs(S).max() for S in (Sr, St, Sv)]).mean(axis=0)
     ax11.set_title('Instantaneous propagation azimuth')
     _ = plot_tile(fig, ax11, T, F, theta, ax12, mean_theta, 'filter-weighted mean',
-                  'k', arrivals=arrivals, flim=flim, 
+                  'k', arrivals=arrivals, flim=flim,
                   dlim=[mean_theta.min(), mean_theta.max()], hatch=hatch,
                   hatchlim=hatchlim, amp_fmt='%d', cmap=plt.cm.spectral, alpha=1.0)
 
     # top right: Radial
     # s transform and filter
     ax21.set_title('Radial')
-    _ = plot_tile(fig, ax21, T, F, Sr, ax22, rf, 'filtered', 'k', r, 'original',  
+    _ = plot_tile(fig, ax21, T, F, Sr, ax22, rf, 'filtered', 'k', r, 'original',
                   arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
     # bottom left: Transverse

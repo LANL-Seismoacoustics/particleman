@@ -37,12 +37,15 @@ def st(data, lo=None, hi=None):
     For the default values of lo and hi, n is len / 2 + 1.
 
     """
+    # number of time samples
     N = data.shape[0]
 
     if (lo is None) and (hi is None):
         # use C division, following the old stmodule.c
+        # XXX: this doesn't seem right
         hi = N % 2
 
+    # number of frequencies
     M = hi - lo + 1
 
     data = np.ascontiguousarray(data, dtype=np.double)
@@ -50,8 +53,8 @@ def st(data, lo=None, hi=None):
     # this works, even though M x N doesn't seem big enough, because a complex
     # NumPy array is actually two arrays back-to-back.  The first one is
     # interpreted as real, and the second one interpreted as imaginary.
-    # NumPy complex apparently interprets the underlying array in the same way
-    # that FFTW fills the real and imaginary parts.
+    # NumPy complex apparently interprets the underlying array(s) in the same way
+    # that FFTW fills in the real and imaginary parts.
     results = np.zeros((M, N), dtype=np.complex)
 
     # void st(int len, int lo, int hi, double *data, double *result)

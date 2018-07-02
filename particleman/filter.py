@@ -96,7 +96,7 @@ def shift_phase(Sv, polarization):
 def instantaneous_azimuth(Sv, Sn, Se, polarization, xpr):
     """
     Get instantaneous propagation angle [degrees], under the Rayleigh wave
-    assumption.
+    assumption, using the Meza-Fajardo et al. Normalized Inner Product criterion.
 
     Parameters
     ----------
@@ -119,6 +119,10 @@ def instantaneous_azimuth(Sv, Sn, Se, polarization, xpr):
     ----------
     Equations (19), (20), and (21) from Meza-Fajardo et al. (2015)
 
+    "Let us emphatically note that if the sense of propagation of the phase
+    under investigation is not established, prograde or retrograde motion
+    cannot be defined without ambiguity."
+
     """
     Svhat = shift_phase(Sv, polarization)
 
@@ -137,11 +141,17 @@ def instantaneous_azimuth(Sv, Sn, Se, polarization, xpr):
 
 def scalar_azimuth(e, n, vhat):
     """
-    Estimate the scalar/average azimuth, in degrees.
+    Time domain estimation the scalar/average azimuth, in degrees.
 
     References
     ----------
     Equations (10) and (12) from Meza-Fajardo et al. (2015)
+
+    "If the extracted signal is composed of more than one dispersive wave
+    propagating in dis- tinct, albeit similar, directions, then, equations
+    (10)–(12) should be applied independently to each one of them. By
+    inspecting the Stockwell transform of the signal, the analyst can observe
+    if there are several wavetrains."
 
     """
     theta_r = np.arctan( np.dot(e, vhat) / np.dot(n, vhat) )
