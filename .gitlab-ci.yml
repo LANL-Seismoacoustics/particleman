@@ -7,7 +7,7 @@ before_script:
  - export PATH="/opt/miniconda/bin:$PATH"
  - conda update conda
  - conda env create -f environment.yml
- - source activate pystockwell
+ - source activate particleman
  - echo "$PATH"
  - conda list
  - pip install .
