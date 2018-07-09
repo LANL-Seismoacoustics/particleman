@@ -574,7 +574,7 @@ def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
     _ = plot_tile(fig, ax11, T, F, theta, ax12, mean_theta, 'filter-weighted mean',
                   'k', arrivals=arrivals, flim=flim,
                   dlim=[mean_theta.min(), mean_theta.max()], hatch=hatch,
-                  hatchlim=hatchlim, amp_fmt='%d', cmap=plt.cm.spectral, alpha=1.0)
+                  hatchlim=hatchlim, amp_fmt='%d', cmap=plt.cm.nipy_spectral, alpha=1.0)
 
     # top right: Radial
     # s transform and filter
