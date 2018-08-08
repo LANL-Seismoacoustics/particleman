@@ -47,7 +47,7 @@ ext_modules = [Extension('particleman.libst',
 
 
 setup(name='particleman',
-      version='0.2.0',
+      version='0.3.0',
       description='Particle motion analysis for seismic surface waves',
       long_description=readme,
       url='http://github.com/lanl-seismoacoustics/particleman',
