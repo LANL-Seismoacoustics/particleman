@@ -227,8 +227,8 @@ def plot_image(T, F, C, hatch=None, hatchlim=None, flim=None, clim=None,
         if alpha:
             ax.contourf(T, F, hatch, hatchlim, colors='w', alpha=alpha)
         else:
-            ax.contourf(T, F, hatch, hatchlim, colors='k', linewidth=0.5, hatches=['x'], alpha=0.0)
-            ax.contour(T, F, hatch, [max(hatchlim)], linewidth=0.5, colors='k')
+            ax.contourf(T, F, hatch, hatchlim, colors='k', linewidths=0.5, hatches=['x'], alpha=0.0)
+            ax.contour(T, F, hatch, [max(hatchlim)], linewidths=0.5, colors='k')
 
     ax.set_ylabel('frequency [Hz]')
     ax.set_yscale('log')
@@ -461,7 +461,7 @@ def plot_NIP(T, F, nips, fs=1.0, flim=None, fig=None, ax=None):
     else:
         im = plt.pcolormesh(T, F, nip, cmap=plt.cm.seismic)
     plt.colorbar()
-    plt.contour(T, F, nips, [0.8], linewidth=2.0, colors='k')
+    plt.contour(T, F, nips, [0.8], linewidths=2.0, colors='k')
     plt.axis('tight')
     if flim:
         plt.ylim(flim)
@@ -584,7 +584,7 @@ def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
 
     # bottom left: Transverse
     # s transform and filter
-    ax31.set_title('Transverse S(t,f), scalar azimuth')
+    ax31.set_title('Transverse S(t,f)')
     _ = plot_tile(fig, ax31, T, F, St, ax32, t, 'original', 'gray',
                   arrivals=arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
