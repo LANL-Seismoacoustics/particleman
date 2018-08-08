@@ -148,13 +148,13 @@ def scalar_azimuth(e, n, vhat):
     Equations (10) and (12) from Meza-Fajardo et al. (2015)
 
     "If the extracted signal is composed of more than one dispersive wave
-    propagating in dis- tinct, albeit similar, directions, then, equations
+    propagating in distinct, albeit similar, directions, then, equations
     (10)–(12) should be applied independently to each one of them. By
     inspecting the Stockwell transform of the signal, the analyst can observe
     if there are several wavetrains."
 
     """
-    theta_r = np.arctan( np.dot(e, vhat) / np.dot(n, vhat) )
+    theta_r = np.arctan(np.dot(e, vhat) / np.dot(n, vhat))
     theta = theta_r + np.pi*(1 - np.sign(np.sin(theta_r))) + \
               np.pi*(1 - np.sign(np.cos(theta_r))) * np.sign(np.sin(theta_r))/2
 
@@ -197,7 +197,7 @@ def NIP(Sr, Sv, polarization=None, eps=None):
     Parameters
     ----------
     Sr, Sv: numpy.ndarray (complex, rank 2)
-        The radial and vertical component s-transforms. If the polarization argument is omitted, 
+        The radial and vertical component s-transforms. If the polarization argument is omitted,
         Sv is assumed to be phase-shifted according to the desired polarization.
     polarization : str, optional
         If provided, the Sv will be phase-shifted according to this string before calculating the NIP.
@@ -224,7 +224,7 @@ def NIP(Sr, Sv, polarization=None, eps=None):
         Svhat = Sv
 
     Avhat = np.abs(Svhat)
-    if eps:
+    if eps is not None:
         mask = (Avhat / Avhat.max()) < eps
         Avhat[mask] += eps*Avhat.max()
 
@@ -238,7 +238,7 @@ def NIP(Sr, Sv, polarization=None, eps=None):
 def get_filter(nip, polarization, threshold=None, width=0.1):
     """
     Get an NIP-based filter that will pass waves of the specified type.
-    
+
     The filter is made from the NIP and cosine taper for the specified wave type.
     The nip and the polarization type must match.
 
@@ -335,12 +335,10 @@ def NIP_filter(n, e, v, fs, xpr, polarization, threshold=0.8, width=0.1, eps=Non
 
 
     """
-    # TODO: rewrite this to get rid of all the potentially huge intermediate arrays
-    #1. Get instantaneous theta from Sn, Se, Svhat
-    #2. Rotate Sn, Se through theta, and get nip from Svhat and Sr
-    #3. Stamp get appropriate nip filter, and stamp on Sn, Se, Sv
-    #4. Invert filtered Sn, Se, Sv back to time
-    #5. Get average scalar theta from filtered e, n, vhat
+    # TODO:
+    # * rewrite this to get rid of all the potentially huge intermediate arrays
+    # * Allow user to specify a scalar theta propagation azimuth, and sidestep
+    #   the instantaneous calculation.
 
     shft = get_shift(polarization)
 
@@ -348,7 +346,7 @@ def NIP_filter(n, e, v, fs, xpr, polarization, threshold=0.8, width=0.1, eps=Non
     Sn = stransform(n, Fs=fs)
     Se = stransform(e, Fs=fs)
     Sv = stransform(v, Fs=fs)
-    
+
     theta = instantaneous_azimuth(Sv, Sn, Se, polarization, xpr)
 
     #2. Rotate Sn, Se through theta, and get nip from Svhat and Sr
@@ -363,7 +361,7 @@ def NIP_filter(n, e, v, fs, xpr, polarization, threshold=0.8, width=0.1, eps=Non
         Sr[nanr] = 0.0
         St[nant] = 0.0
 
-    nip = NIP(Sr, shft * Sv)
+    nip = NIP(Sr, shft * Sv, eps=eps)
 
     #3. get appropriate nip filter, and stamp on Sn, Se, Sv
     filt = get_filter(nip, polarization, threshold, width)
@@ -383,5 +381,5 @@ def NIP_filter(n, e, v, fs, xpr, polarization, threshold=0.8, width=0.1, eps=Non
 
     #import obspy.signal as signal
     #rf, tf = signal.rotate_NE_RT(nf, ef, baz)
-    
+
     return nf, ef, vf, theta_bar
