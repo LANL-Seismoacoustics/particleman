@@ -118,13 +118,19 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
                         format=amp_fmt)
 
     # waves and arrivals
-    ax2.plot(tm, d1, color1, label=label1)
-    # ax2.set_ylabel('amplitude')
-    ax2.set_xlabel('time [seconds]')
-    ax2.set_xlim(tm[0], tm[-1])
-    # set view limits
-    dmx = d1.max()
-    dmn = d1.min()
+    if d1 is not None:
+        ax2.plot(tm, d1, color1, label=label1)
+        # ax2.set_ylabel('amplitude')
+        ax2.set_xlabel('time [seconds]')
+        ax2.set_xlim(tm[0], tm[-1])
+        # set view limits
+        dmx = d1.max()
+        dmn = d1.min()
+    else:
+        # XXX
+        dmx = d2.max()
+        dmn = d2.min()
+
     if d2 is not None:
         ax2.plot(tm, d2, 'gray', label=label2, zorder=1)
         dmx = max([dmx, d2.max()])
@@ -512,9 +518,10 @@ def compare_waveforms(v, vsf, rs, rsf, ts, arrivals):
                  va='top')
 
 
-def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
+def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, r, t, v, rf, tf=None, vf=None,
                      arrivals=None, flim=None, hatch=None, hatchlim=None, fig=None):
     """
+def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
     Quad plot of NIP, and 3 tiles of Stockwell transform with NIP filter hatch
     and filtered+unfiltered time-series for each component.
 
@@ -524,20 +531,18 @@ def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
         Time, frequency, instantaneous azimuth tiles.
     fs : float
         Sampling rate of underlying time-series data.
-    flim : tuple
-        Frequency limits as (fmin, fmax) 2-tuple, in Hz.
-    Sr, St : numpy.ndarray (ndim 2)
-        Stockwell transform of the radial, transverse component data.
-    r, rf : numpy.ndarray (ndim 1)
-        Unfiltered and NIP-filtered radial component time-series.
-    v, vf : numpy.ndarray (ndim 1)
-        Unfiltered and NIP-filtered vertical component time-series.
-    t, tf : numpy.ndarray (ndim 1)
-        Unfiltered/filtered transverse component time-series.
+    Sr, St, Sv : numpy.ndarray (ndim 2, complex)
+        Stockwell transform of the radial, transverse, and vertical component data.
+    r, t, v: numpy.ndarray (ndim 1)
+        Unfiltered radial, transverse, and vertical component time-series.
+    rf, tf, vf : numpy.ndarray (ndim 1)
+        NIP-filtered radial, transverse, and vertical component time-series.
     arrivals : sequence of (str, float) 2-tuples
         Sequence of arrivals to plot, of the form (label, time_in_seconds)
+    flim : tuple
+        Frequency limits as (fmin, fmax) 2-tuple, in Hz.
     hatch : numpy.ndarray (ndim 2)
-        Optional tile used for hatch mask.
+        Optional tile used for cross-hatch visual mask.
     hatchlim : tuple
         Hatch range used to display mask.  2-tuple of floats (hmin, hmax).
     fig : matplotlib.Figure
@@ -561,10 +566,10 @@ def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
                bottom=0.05)
 
     tile1, tile2, tile3, tile4 = make_tiles(fig, gs0)
-    ax11, ax12 = tile1
-    ax21, ax22 = tile2
-    ax31, ax32 = tile3
-    ax41, ax42 = tile4
+    ax11, ax12 = tile1 #top left
+    ax21, ax22 = tile2 #top right
+    ax31, ax32 = tile3 #bottom left
+    ax41, ax42 = tile4 #bottom right
 
 
     # top left axes: Instantaneous and weighted mean azimuth
@@ -576,22 +581,22 @@ def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
                   dlim=[mean_theta.min(), mean_theta.max()], hatch=hatch,
                   hatchlim=hatchlim, amp_fmt='%d', cmap=plt.cm.nipy_spectral, alpha=1.0)
 
-    # top right: Radial
+    # top right: Vertical
     # s transform and filter
-    ax21.set_title('Radial')
-    _ = plot_tile(fig, ax21, T, F, Sr, ax22, rf, 'filtered', 'k', r, 'original',
+    ax21.set_title('Vertical')
+    _ = plot_tile(fig, ax21, T, F, Sv, ax22, vf, 'filtered', 'k', v, 'original',
+                  arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
+
+    # bottom right: Radial
+    # s transform and filter
+    ax41.set_title('Radial')
+    _ = plot_tile(fig, ax41, T, F, Sr, ax42, rf, 'filtered', 'k', r, 'original',
                   arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
     # bottom left: Transverse
     # s transform and filter
-    ax31.set_title('Transverse S(t,f)')
-    _ = plot_tile(fig, ax31, T, F, St, ax32, t, 'original', 'gray',
+    ax31.set_title('Transverse')
+    _ = plot_tile(fig, ax31, T, F, St, ax32, tf, 'filtered', 'k', t, 'original',
                   arrivals=arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
-
-    # bottom right: Vertical
-    # s transform and filter
-    ax41.set_title('Vertical')
-    _ = plot_tile(fig, ax41, T, F, Sv, ax42, vf, 'filtered', 'k', v, 'original',
-                  arrivals, flim=flim, hatch=hatch, hatchlim=hatchlim)
 
     return [tile1, tile2, tile3, tile4]
