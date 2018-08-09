@@ -6,17 +6,26 @@ import os
 
 import numpy as np
 from numpy.fft import fft
+import pytest
+
 from particleman import stransform, istransform
 
-here = os.path.dirname(os.path.abspath(__file__))
-data = np.loadtxt(os.path.sep.join([here, 'data', 'BW.RJOB..EHZ.txt']))
+def test_stransform(synthetic_data):
+    """
+    The forward/inverse S transform roundtrip gives me back what I started with.
+    """
+    fs, n, e, v = synthetic_data
 
-def test_stransform():
-    S = stransform(data, Fs=100)
-    s = istransform(S, Fs=100)
-    assert np.allclose(s, data)
+    Sn = stransform(n, Fs=fs)
+    n_roundtrip = istransform(Sn, Fs=fs)
+
+    assert np.allclose(n_roundtrip, n)
+
 
 def test_fft():
+    """
+    The S transform is the same as a time-integrated FFT.
+    """
     sample_rate = 40.0  # [Hz]
     total_sec = 30.0
     t = np.arange(0.0, total_sec, 1.0 / sample_rate)

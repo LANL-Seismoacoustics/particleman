@@ -92,6 +92,23 @@ def shift_phase(Sv, polarization):
 
     return Sv * shft
 
+def xpr(az):
+    """
+    Get the Meza-Fajardo "xpr" sense-of-motion from the event-to-station
+    propagation azimuth.
+
+    Returns
+    -------
+    1 for eastward propagation
+    -1 for westward
+
+    Notes
+    -----
+    If the azimuth is 0 or 180, polarization type may be ambiguous.
+
+    """
+    return int(np.sign(np.sin(np.radians(az))))
+
 
 def instantaneous_azimuth(Sv, Sn, Se, polarization, xpr):
     """
