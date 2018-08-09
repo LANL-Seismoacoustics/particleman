@@ -10,10 +10,6 @@ import pytest
 
 from particleman import stransform, istransform
 
-here = os.path.dirname(os.path.abspath(__file__))
-data = np.loadtxt(os.path.sep.join([here, 'data', 'BW.RJOB..EHZ.txt']))
-
-
 def test_stransform(synthetic_data):
     """
     The forward/inverse S transform roundtrip gives me back what I started with.
