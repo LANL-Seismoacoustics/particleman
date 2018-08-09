@@ -6,7 +6,7 @@ def synthetic_data():
     """
     Follows Meza-Fajardo et al. 2015 synthetic data.
     """
-    fs = 40 # sampling frequency
+    fs = 20 # sampling frequency
     dt = 1 / fs
     t = np.arange(0, 20, dt)
 
