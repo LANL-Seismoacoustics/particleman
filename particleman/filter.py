@@ -92,9 +92,10 @@ def shift_phase(Sv, polarization):
 
     return Sv * shft
 
+
 def xpr(az):
     """
-    Get the Meza-Fajardo "xpr" sense-of-motion from the event-to-station
+    Get the Meza-Fajardo "xpr" sense-of-propagation of wavefield.
     propagation azimuth.
 
     Returns
@@ -295,7 +296,7 @@ def get_filter(nip, polarization, threshold=None, width=0.1):
             threshold = 0.2
         filt = np.ones(nip.shape)
         mid = (threshold < nip) & (nip < threshold + width)
-        high = threshold + width < nip 
+        high = threshold + width < nip
         filt[mid] = 0.5 * np.cos((np.pi*(nip[mid]-threshold))/width) + 0.5
         filt[high] = 0.0
     else:
