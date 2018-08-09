@@ -32,7 +32,7 @@ def synthetic_data():
     theta = np.radians(az)
     R = np.array([[np.cos(theta), -np.sin(theta)],
                   [np.sin(theta), np.cos(theta)]])
-    N, E = R @ np.array([y, x])
-    V = z
+    n, e = R @ np.array([y, x])
+    v = z
 
-    return fs, N, E, V
+    return n, e, v, fs, az_retro
