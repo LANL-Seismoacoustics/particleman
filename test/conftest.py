@@ -29,7 +29,7 @@ def synthetic_data():
 
     # rotate through rotation matrix
     az_retro = 60
-    theta = np.radians(az)
+    theta = np.radians(az_retro)
     R = np.array([[np.cos(theta), -np.sin(theta)],
                   [np.sin(theta), np.cos(theta)]])
     n, e = R @ np.array([y, x])

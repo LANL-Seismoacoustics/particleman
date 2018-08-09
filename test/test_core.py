@@ -14,7 +14,7 @@ def test_stransform(synthetic_data):
     """
     The forward/inverse S transform roundtrip gives me back what I started with.
     """
-    fs, n, e, v = synthetic_data
+    n, e, v, fs, az_retro = synthetic_data
 
     Sn = stransform(n, Fs=fs)
     n_roundtrip = istransform(Sn, Fs=fs)
