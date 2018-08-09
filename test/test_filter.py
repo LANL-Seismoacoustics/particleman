@@ -9,7 +9,7 @@ def test_xpr():
 
 def test_instantaneous_azimuth(synthetic_data):
     n, e, v, fs, az_retro = synthetic_data
-    Sn, T, F = stransform(n, Fs=0, return_time_freq=True)
+    Sn, T, F = stransform(n, Fs=fs, return_time_freq=True)
     Se = stransform(e, Fs=fs)
     Sv = stransform(v, Fs=fs)
 
