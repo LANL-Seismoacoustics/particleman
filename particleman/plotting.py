@@ -121,8 +121,6 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
     if d1 is not None:
         ax2.plot(tm, d1, color1, label=label1)
         # ax2.set_ylabel('amplitude')
-        ax2.set_xlabel('time [seconds]')
-        ax2.set_xlim(tm[0], tm[-1])
         # set view limits
         dmx = d1.max()
         dmn = d1.min()
@@ -138,6 +136,8 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
     if not dlim:
         dlim = (dmn, dmx)
     ax2.set_ylim(dlim)
+    ax2.set_xlabel('time [seconds]')
+    ax2.set_xlim(tm[0], tm[-1])
 
     leg = ax2.legend(loc='lower right', frameon=False, fontsize=14)
     for legobj in leg.legendHandles:
