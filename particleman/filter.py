@@ -25,6 +25,7 @@ Based on the Normalized Inner Product. Bulletin of the Seismological Society of
 America.
 
 """
+from functools import lru_cache
 import warnings
 # TODO: consider moving the nip argument to inside get_filter.  People may only 
 #   rarely want to see the NIP, and they can do so directly, using NIP.
@@ -252,7 +253,6 @@ def NIP(Sr, Sv, polarization=None, eps=None):
     return ip/n
 
 
-
 def get_filter(nip, polarization, threshold=None, width=0.1):
     """
     Get an NIP-based filter that will pass waves of the specified type.
@@ -401,3 +401,61 @@ def NIP_filter(n, e, v, fs, xpr, polarization, threshold=0.8, width=0.1, eps=Non
     #rf, tf = signal.rotate_NE_RT(nf, ef, baz)
 
     return nf, ef, vf, theta_bar
+
+
+class NIPFilter:
+    """Filter data according to the normalized inner product.
+
+    Examples
+    --------
+    Filter a 40 samples-per-second radial, vertical between 1 and 10 Hz.
+    The transverse is passed back unaltered b/c it's not involved in the filtering.
+    >>> retro_east = NIPFilter('retrograde', 'eastward')
+    >>> rf, t, vf = retro_east.filter(r, t, v, fs=40, fmin=1.0, fmax=10.0)
+
+    Filter a 40 samples-per-second radial, vertical between 1 and 10 Hz
+    The radial and vertical are passed back unaltered b/c they're not involved in the filtering.
+    >>> linear = NIPFilter('linear')
+    >>> r, tf, v = linear.filter(r, t, v, fs=40, freqmin=5, freqmax=15)
+
+    """
+    def __init__(self, polarization, threshold=None, width=0.1, eps=None):
+        polarization = polarization.lower()
+
+        if polarization in ('retrograde', 'prograde'):
+            threshold = threshold or 0.8
+        elif polarization == 'linear':
+            threshold = threshold or 0.2
+        else:
+            msg = "polarization '{}' not recognized".format(polarization) 
+            raise ValueError(msg)
+
+        self.threshold = threshold
+        self.polarization = polarization
+        self.width = width
+        self.eps = eps
+
+    def __repr__(self):
+        out = "NIPFilter('{}', threshold={}, width={}, eps={})"
+        return out.format(self.polarization, self.threshold, self.width, self.eps)
+
+    # Cache such that repeat calls to the last set of inputs aren't recalculated.
+    # Could be useful for plotting calls?
+    # @lru_cache(maxsize=1)
+    def filter(self, radial, transverse, vertical, fs=None, freqmin=None,
+               freqmax=None):
+        """Filter time series data for polarization.
+        """
+        pass
+
+    def rotate(self, e, n, v, sense_of_motion):
+    # Rotate data into the instantaneous propagation azimuth
+        """Rotate time series data according to the instantaneous azimuth.
+        """
+        if sense_of_motion == 'eastward':
+            xpr = 1
+        elif sense_of_motion == 'westward':
+            xpr = -1
+        else:
+            msg = "Unrecognized sense_of_motion: {}".format(sense_of_motion)
+            raise ValueError(msg)
