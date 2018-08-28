@@ -1,0 +1,14 @@
+name: particleman
+channels:
+- defaults # prioritize defaults
+- conda-forge
+dependencies:
+- recommonmark
+- setuptools>=38.6
+- sphinx
+- sphinx_rtd_theme
+- fftw
+- python=3
+- numpy
+- pytest
+- pip
