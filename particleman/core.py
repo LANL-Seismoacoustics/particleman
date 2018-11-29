@@ -95,14 +95,15 @@ def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False):
 
     Examples
     --------
-    # for a 100 Hz time series
+    Transform a 100 Hz time series
+
     >>> S, T, F = stransform(data, Fs=100, return_time_freq=True)
     >>> plt.contourf(T, F, abs(S))
 
     References
     ----------
-    http://vcs.ynic.york.ac.uk/docs/naf/intro/concepts/timefreq.html
-    http://kurage.nimh.nih.gov/meglab/Meg/Stockwell
+    * http://vcs.ynic.york.ac.uk/docs/naf/intro/concepts/timefreq.html
+    * http://kurage.nimh.nih.gov/meglab/Meg/Stockwell
 
     """
     low, high, lp = _get_lo_hi(len(x), hp, lp, Fs)
