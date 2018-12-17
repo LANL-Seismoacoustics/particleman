@@ -1,10 +1,13 @@
 import numpy as np
 import pytest
+from particleman import stransform
 
 @pytest.fixture
 def synthetic_data():
     """
-    Follows Meza-Fajardo et al. 2015 synthetic data.
+    Follows Meza-Fajardo et al. 2015 "Extraction of Retrograde Rayleigh Wave"
+    synthetic example, and figure 4.
+
     """
     fs = 20 # sampling frequency
     dt = 1 / fs
@@ -35,4 +38,4 @@ def synthetic_data():
     n, e = R @ np.array([y, x])
     v = z
 
-    return n, e, v, fs, az_retro
+    return az_retro, n, e, v, fs
