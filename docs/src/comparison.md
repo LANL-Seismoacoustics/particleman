@@ -1,4 +1,6 @@
-## Comparison to Spectrogram 
+# Comparison to Other Transforms
+
+## Spectrogram
 
 The Stockwell transform retains both broad-scale and fine-scale structure,
 compared to a spectrogram, whose frequency resolution is is limited by the
@@ -12,7 +14,7 @@ moving window size chosen.
 ![spectrogram](data/spectrogram.png "spectrogram")
 
 
-## Comparison to Morlet Transform
+## Morlet Transform
 
 Wavelet transforms like the Morlet transform, for example, also do this, but
 the y-dimension of the 'scalogram' is not frequency, it is "scale".

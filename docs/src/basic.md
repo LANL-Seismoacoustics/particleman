@@ -1,7 +1,9 @@
+# Basic Usage
+
 The main transform functions are `stransform` and `istransform`.  They can be
 used simply, as in the following example.
 
-### Forward transform
+## Forward transform
 
 ```python
 import numpy as np
@@ -35,7 +37,7 @@ This is useful if you know the frequency band of interest, or the return tile(s)
 are unmanageably large.
 
 
-### Inverse transform
+## Inverse transform
 
 The inverse transform has very similar syntax:
 
