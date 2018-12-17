@@ -1,4 +1,4 @@
-### Plotting
+# Plotting
 
 Plotting a transform is easy using Matplotlib's `pcolormesh`.  We'll use our
 chirp example from earlier.
@@ -45,7 +45,7 @@ plt.draw()
 ![chirp and FFT](data/chirp.png)
 
 
-### Filter Plotting
+## Filter Plotting
 
 This example makes plots of advanced NIP-filtered seismic data.  Please see
 the [filtering section](filtering.md) to read about advanced filtering using
