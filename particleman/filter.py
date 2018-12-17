@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Time-frequency filtering for seismic waves.
 
@@ -99,6 +100,11 @@ def xpr(az):
     Get the Meza-Fajardo "xpr" sense-of-propagation of wavefield.
     propagation azimuth.
 
+    Parameters
+    ----------
+    az : int or float
+        Propagation direction in degrees.
+
     Returns
     -------
     1 for eastward propagation
@@ -147,8 +153,13 @@ def instantaneous_azimuth(Sv, Sn, Se, polarization, xpr):
 
     num = (Se.real * Svhat.real) + (Se.imag * Svhat.imag)
     denom = (Sn.real * Svhat.real) + (Sn.imag * Svhat.imag)
-    theta_r = np.arctan(num / denom)
-    #theta_r = np.arctan2(num, denom)
+
+    # zeros will become nans, then propate in bad ways.
+    # put a tiny number in the denominator where both the numberator and denominator are zero.
+    denom[ np.logical_and(num == 0.0, denom == 0.0) ] = np.finfo(float).eps
+    
+    theta_r = np.arctan(num / denom) # [-pi/2, pi/2]
+    # theta_r = np.arctan2(num, denom)
 
     theta_I = theta_r + np.pi*(1 - np.sign(np.sin(theta_r))) + \
         np.pi*(1 - np.sign(np.cos(theta_r))) * np.sign(np.sin(theta_r))/2
@@ -174,6 +185,7 @@ def scalar_azimuth(e, n, vhat):
 
     """
     theta_r = np.arctan(np.dot(e, vhat) / np.dot(n, vhat))
+    # theta_r = np.arctan2(np.dot(e, vhat), np.dot(n, vhat))
     theta = theta_r + np.pi*(1 - np.sign(np.sin(theta_r))) + \
               np.pi*(1 - np.sign(np.cos(theta_r))) * np.sign(np.sin(theta_r))/2
 
@@ -254,7 +266,7 @@ def NIP(Sr, Sv, polarization=None, eps=None):
 
 
 def get_filter(nip, polarization, threshold=None, width=0.1):
-    """
+    r"""
     Get an NIP-based filter that will pass waves of the specified type.
 
     The filter is made from the NIP and cosine taper for the specified wave type.
@@ -306,7 +318,7 @@ def get_filter(nip, polarization, threshold=None, width=0.1):
 
 
 def NIP_filter(n, e, v, fs, xpr, polarization, threshold=0.8, width=0.1, eps=None):
-    """
+    r"""
     Filter a 3-component seismogram based on the NIP criterion.
 
     This is a composite convenience routine that uses sane defaults.
