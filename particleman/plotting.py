@@ -571,6 +571,15 @@ def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
     ax31, ax32 = tile3 #bottom left
     ax41, ax42 = tile4 #bottom right
 
+    # common params: T, F, arrivals=None, flim=None, dlim=None
+    # each tile: S, title, cmap, clim, hatch, hatchlim, [(d1, color1, label1), (d1, color1, label1)]
+    # tile_data = [
+    #              ...
+    #              (np.abs(Sr), 'Radial, prograde', None, None, dfilt, 0.8, [(r, 'gray', 'original'), (rf, 'k', 'filtered')]),
+    #              (np.abs(St), 'Transverse, linear', None, None, dfilt, 0.2, [(t, 'gray', 'original'), (tf, 'k', 'filtered')]),
+    #              (np.abs(Sv), 'Vertical, prograde', none, None, dfilt, 0.8, [(v, 'gray', 'original'), (vf, 'k', 'filtered')])
+    # ]
+    # NIP_filter_plots(T, F, tile_data, arrivals=None)
 
     # top left axes: Instantaneous and weighted mean azimuth
     mean_theta = np.ma.average(theta, axis=0, weights=hatch)
