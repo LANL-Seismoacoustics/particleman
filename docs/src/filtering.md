@@ -26,3 +26,25 @@ fs = tr.stats.sampling_rate
 
 
 [Meza-Fajardo et al., (2015)]: http://www.bssaonline.org/content/105/1/210.abstract
+
+
+```python
+from particleman import stransform, istransform
+import particleman.filter as filt
+
+# Get the Stockwell transforms
+Sr = stransform(radial, fs)
+Sv = stransform(vertical, fs)
+
+# Advance the phase of the vertical transform
+Sv_advanced = filt.shift_phase(Sv, polarization='retrograde')
+
+# Get the normalized inner product and use it to make a filter
+nip = filt.NIP(Sr, Sv_advanced)
+retro_filter = filt.get_filter(nips, polarization='retrograde')
+
+# Apply the filter to the transforms, and return to the time-domain
+rf = istransform(Sr * retro_filter, Fs=fs)
+vf = istransform(Sv * retro_filter, Fs=fs)
+
+```
