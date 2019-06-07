@@ -4,6 +4,15 @@
 #include <math.h>
 #include <fftw3.h>
 
+/*
+ * Copyright (c) NIMH lab / Tom Holroyd
+ *
+ * It's GPL---sorry I usually forget to put that in there. Since I'm a federal
+ * employee and everything was developed using taxpayer money, I guess all the
+ * code is really public domain ... but GPL (v2) is fine.  I don't know much
+ * about v3 actually, or if that's relevant to python modules.
+ */
+
 char *Wisfile = NULL;
 char *Wistemplate = "%s/.fftwis";
 #define WISLEN 8
