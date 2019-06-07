@@ -6,6 +6,8 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 [![pipeline status](https://git.lanl.gov/ees-geophysics/particleman/badges/master/pipeline.svg)](https://git.lanl.gov/ees-geophysics/particleman/commits/master)
 
+* [Documentation](https://lanl-seismoacoustics.github.io/particleman)
+
 Seismic surface waves can be detected and extracted from three-component
 data through particle motion polarization analysis.  Particle Man is a
 software package that employs the Stockwell Transform to perform surface wave
