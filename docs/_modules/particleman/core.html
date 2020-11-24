@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>particleman.core &mdash; particleman 0.3.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> particleman
+          
+
+          
+            
+            <img src="../../_static/lanl_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../comparison.html">Comparison to Other Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filtering.html">Advanced Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/LANL-Seismoacoustics/particleman">Repository</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">particleman</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>particleman.core</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for particleman.core</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Core Stockwell transform and inverse transform functions.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">.st</span> <span class="kn">import</span> <span class="n">st</span><span class="p">,</span> <span class="n">ist</span>
+
+<span class="k">def</span> <span class="nf">_get_lo_hi</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">hp</span><span class="p">,</span> <span class="n">lp</span><span class="p">,</span> <span class="n">Fs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get context-appropriate representation of hp, lp.</span>
+
+<span class="sd">    L : int</span>
+<span class="sd">        Length of time series.</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">Fs</span><span class="p">:</span>
+        <span class="c1"># If the sample rate has been specified then</span>
+        <span class="c1"># we low-pass at the nyquist frequency.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">lp</span><span class="p">:</span>
+            <span class="n">lp</span> <span class="o">=</span> <span class="n">Fs</span><span class="o">/</span><span class="mf">2.0</span>
+
+        <span class="c1"># Providing the sample rate also means that the</span>
+        <span class="c1"># filter parameters are in Hz, so we convert</span>
+        <span class="c1"># them to the appropriate number of samples</span>
+        <span class="n">low</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">hp</span><span class="o">/</span><span class="p">(</span><span class="n">Fs</span><span class="o">/</span><span class="n">L</span><span class="p">)))</span>
+        <span class="n">high</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">lp</span><span class="o">/</span><span class="p">(</span><span class="n">Fs</span><span class="o">/</span><span class="n">L</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Since we don&#39;t have a sampling rate then</span>
+        <span class="c1"># everything will be expressed in samples</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">lp</span><span class="p">:</span>
+            <span class="n">lp</span> <span class="o">=</span> <span class="n">L</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">low</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hp</span><span class="p">)</span>
+        <span class="n">high</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lp</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">lp</span>
+
+
+<div class="viewcode-block" id="get_TF_arrays"><a class="viewcode-back" href="../../api/particleman.html#particleman.core.get_TF_arrays">[docs]</a><span class="k">def</span> <span class="nf">get_TF_arrays</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">hp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">lp</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Make the Stockwell time, frequency arrays for plotting.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    N : int</span>
+<span class="sd">        Number of samples in the time series.</span>
+<span class="sd">    hp : float</span>
+<span class="sd">        high-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)</span>
+<span class="sd">    lp : float</span>
+<span class="sd">        low-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)</span>
+<span class="sd">    Fs : float</span>
+<span class="sd">        sampling rate in Hz</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    T, F : numpy.ndarray (complex, rank 2)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># XXX: doesn&#39;t work yet.  still needs &quot;S&quot;, the transform tile</span>
+    <span class="k">if</span> <span class="n">Fs</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">Fs</span> <span class="c1"># Length of one sample</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span> <span class="c1"># List of time values</span>
+        <span class="n">T</span><span class="p">,</span> <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">hp</span><span class="p">,</span> <span class="n">lp</span><span class="p">,</span> <span class="p">(</span><span class="n">lp</span><span class="o">-</span><span class="n">hp</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">T</span><span class="p">,</span> <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">hp</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">lp</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">lp</span><span class="o">-</span><span class="n">hp</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">*</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+
+    <span class="k">return</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span></div>
+
+
+
+<div class="viewcode-block" id="stransform"><a class="viewcode-back" href="../../api/particleman.html#particleman.core.stransform">[docs]</a><span class="k">def</span> <span class="nf">stransform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">hp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">lp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">return_time_freq</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Perform a Stockwell transform on a time-series.</span>
+
+<span class="sd">    Returns the transform (S), and time (T) and frequency (F)</span>
+<span class="sd">    matrices suitable for use with the contour/contourf functions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : numpy.ndarray</span>
+<span class="sd">        array containing time-series data</span>
+<span class="sd">    hp : float</span>
+<span class="sd">        high-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)</span>
+<span class="sd">    lp : float</span>
+<span class="sd">        low-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)</span>
+<span class="sd">    Fs : float</span>
+<span class="sd">        sampling rate in Hz</span>
+<span class="sd">    return_time_freq : bool</span>
+<span class="sd">        If True, also return the correct-sized time and frequency domain tiles.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    S : numpy.ndarray (numpy.complex128, rank 2)</span>
+<span class="sd">        Stockwell transform (S) matrix</span>
+<span class="sd">    T, F :  numpy.ndarray (float64, rank 2), optional</span>
+<span class="sd">        Time (T) and frequency (F) matrices.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Transform a 100 Hz time series</span>
+
+<span class="sd">    &gt;&gt;&gt; S, T, F = stransform(data, Fs=100, return_time_freq=True)</span>
+<span class="sd">    &gt;&gt;&gt; plt.contourf(T, F, abs(S))</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    * http://vcs.ynic.york.ac.uk/docs/naf/intro/concepts/timefreq.html</span>
+<span class="sd">    * http://kurage.nimh.nih.gov/meglab/Meg/Stockwell</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">lp</span> <span class="o">=</span> <span class="n">_get_lo_hi</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">hp</span><span class="p">,</span> <span class="n">lp</span><span class="p">,</span> <span class="n">Fs</span><span class="p">)</span>
+
+    <span class="c1"># The stockwell transform</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">st</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+
+    <span class="c1"># Compute our time and frequency matrix with</span>
+    <span class="c1"># the correct scaling for use with the</span>
+    <span class="c1"># contour and contourf functions</span>
+    <span class="k">if</span> <span class="n">return_time_freq</span><span class="p">:</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Fs</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">Fs</span> <span class="c1"># Length of one sample</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">L</span><span class="p">)</span><span class="o">*</span><span class="n">t</span> <span class="c1"># List of time values</span>
+            <span class="n">T</span><span class="p">,</span> <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">hp</span><span class="p">,</span> <span class="n">lp</span><span class="p">,</span> <span class="p">(</span><span class="n">lp</span><span class="o">-</span><span class="n">hp</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">*</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+            <span class="n">T</span><span class="p">,</span> <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">hp</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">lp</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">lp</span><span class="o">-</span><span class="n">hp</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">*</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">S</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="istransform"><a class="viewcode-back" href="../../api/particleman.html#particleman.core.istransform">[docs]</a><span class="k">def</span> <span class="nf">istransform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">hp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">lp</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Perform inverse Stockwell transform</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#XXX: untested</span>
+    <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">lp</span> <span class="o">=</span> <span class="n">_get_lo_hi</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">hp</span><span class="p">,</span> <span class="n">lp</span><span class="p">,</span> <span class="n">Fs</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">ist</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Jonathan MacCarthy
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,901 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>particleman package &mdash; particleman 0.3.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="License" href="../license.html" />
+    <link rel="prev" title="API Reference" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> particleman
+          
+
+          
+            
+            <img src="../_static/lanl_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../comparison.html">Comparison to Other Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../filtering.html">Advanced Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">particleman package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-particleman.core">particleman.core module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-particleman.filter">particleman.filter module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-particleman.plotting">particleman.plotting module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-particleman.st">particleman.st module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-particleman">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/LANL-Seismoacoustics/particleman">Repository</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">particleman</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">API Reference</a> &raquo;</li>
+        
+      <li>particleman package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/particleman.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="particleman-package">
+<h1>particleman package<a class="headerlink" href="#particleman-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-particleman.core">
+<span id="particleman-core-module"></span><h2>particleman.core module<a class="headerlink" href="#module-particleman.core" title="Permalink to this headline">¶</a></h2>
+<p>Core Stockwell transform and inverse transform functions.</p>
+<dl class="py function">
+<dt id="particleman.core.get_TF_arrays">
+<code class="sig-prename descclassname">particleman.core.</code><code class="sig-name descname">get_TF_arrays</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N</span></em>, <em class="sig-param"><span class="n">Fs</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">hp</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">lp</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/core.html#get_TF_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.core.get_TF_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make the Stockwell time, frequency arrays for plotting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>N</strong> (<em>int</em>) – Number of samples in the time series.</p></li>
+<li><p><strong>hp</strong> (<em>float</em>) – high-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)</p></li>
+<li><p><strong>lp</strong> (<em>float</em>) – low-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)</p></li>
+<li><p><strong>Fs</strong> (<em>float</em>) – sampling rate in Hz</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>T, F</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray (complex, rank 2)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.core.istransform">
+<code class="sig-prename descclassname">particleman.core.</code><code class="sig-name descname">istransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">Fs</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">hp</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">lp</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/core.html#istransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.core.istransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform inverse Stockwell transform</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.core.stransform">
+<code class="sig-prename descclassname">particleman.core.</code><code class="sig-name descname">stransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">Fs</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">hp</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">lp</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">return_time_freq</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/core.html#stransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.core.stransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a Stockwell transform on a time-series.</p>
+<p>Returns the transform (S), and time (T) and frequency (F)
+matrices suitable for use with the contour/contourf functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – array containing time-series data</p></li>
+<li><p><strong>hp</strong> (<em>float</em>) – high-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)</p></li>
+<li><p><strong>lp</strong> (<em>float</em>) – low-pass point in samples (if Fs is not specified) or in Hz (if Fs is specified)</p></li>
+<li><p><strong>Fs</strong> (<em>float</em>) – sampling rate in Hz</p></li>
+<li><p><strong>return_time_freq</strong> (<em>bool</em>) – If True, also return the correct-sized time and frequency domain tiles.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>S</strong> (<em>numpy.ndarray (numpy.complex128, rank 2)</em>) – Stockwell transform (S) matrix</p></li>
+<li><p><strong>T, F</strong> (<em>numpy.ndarray (float64, rank 2), optional</em>) – Time (T) and frequency (F) matrices.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Transform a 100 Hz time series</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span> <span class="o">=</span> <span class="n">stransform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">return_time_freq</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">S</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://vcs.ynic.york.ac.uk/docs/naf/intro/concepts/timefreq.html">http://vcs.ynic.york.ac.uk/docs/naf/intro/concepts/timefreq.html</a></p></li>
+<li><p><a class="reference external" href="http://kurage.nimh.nih.gov/meglab/Meg/Stockwell">http://kurage.nimh.nih.gov/meglab/Meg/Stockwell</a></p></li>
+</ul>
+</dd></dl>
+
+</div>
+<div class="section" id="module-particleman.filter">
+<span id="particleman-filter-module"></span><h2>particleman.filter module<a class="headerlink" href="#module-particleman.filter" title="Permalink to this headline">¶</a></h2>
+<p>Time-frequency filtering for seismic waves.</p>
+<p>To estimate propagation azimuth for a prograde/retrograde Rayleigh wavetrain:</p>
+<ol class="arabic simple">
+<li><p>Make complex component s-transforms, Sn, Se, Sv</p></li>
+<li><p>Apply phase delay to Sv for normal retrograde motion, advance for prograde motion</p></li>
+<li><p>Convert complex transforms into MxNx2 real (“vector”) arrays</p></li>
+<li><p>Calculate theta from theta_r and theta_l</p></li>
+</ol>
+<p>To make a normalized inner product (NIP) filter, given azimuth</p>
+<ol class="arabic simple" start="5">
+<li><p>Rotate Sn, Se through theta, into radial (Sr) and transverse (St) component transforms</p></li>
+<li><p>Calculate NIP using the vector Sr and phase-shifted vector Sv</p></li>
+<li><p>Extract surface waves using NIP &gt;= 0.8 (smoothed) as a filter on Sr, St, Sv, and invert to time domain.
+Rayleigh waves will be on the time-domain radial, Love on the time-domain transverse.</p></li>
+</ol>
+<p class="rubric">References</p>
+<p>Meza-Fajardo, K. C., Papageorgiou, A. S., and Semblat, J. F. (2015).
+Identification and Extraction of Surface Waves from Three Component Seismograms
+Based on the Normalized Inner Product. Bulletin of the Seismological Society of
+America.</p>
+<dl class="py function">
+<dt id="particleman.filter.NIP">
+<code class="sig-prename descclassname">particleman.filter.</code><code class="sig-name descname">NIP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sr</span></em>, <em class="sig-param"><span class="n">Sv</span></em>, <em class="sig-param"><span class="n">polarization</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eps</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/filter.html#NIP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.filter.NIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the normalized inner product of two complex MxN stockwell transforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sr</strong> (<em>numpy.ndarray</em><em> (</em><em>complex</em><em>, </em><em>rank 2</em><em>)</em>) – The radial and vertical component s-transforms. If the polarization argument is omitted,
+Sv is assumed to be phase-shifted according to the desired polarization.</p></li>
+<li><p><strong>Sv</strong> (<em>numpy.ndarray</em><em> (</em><em>complex</em><em>, </em><em>rank 2</em><em>)</em>) – The radial and vertical component s-transforms. If the polarization argument is omitted,
+Sv is assumed to be phase-shifted according to the desired polarization.</p></li>
+<li><p><strong>polarization</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided, the Sv will be phase-shifted according to this string before calculating the NIP.
+‘retrograde’ will apply a pi/2 phase advance (1j * Sv)
+‘prograde’ or ‘linear’ will apply a pi/2 phase delay (-1j * Sv)</p></li>
+<li><p><strong>eps</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance for small denominator values, for numerical stability.
+Useful for synthetic noise-free data.  Authors used 0.04.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>nip</strong> – MxN array of floats between -1 and 1.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray (rank 2)</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Equation (16) and (26) from Meza-Fajardo et al. (2015)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.filter.NIP_filter">
+<code class="sig-prename descclassname">particleman.filter.</code><code class="sig-name descname">NIP_filter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">fs</span></em>, <em class="sig-param"><span class="n">xpr</span></em>, <em class="sig-param"><span class="n">polarization</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">0.8</span></em>, <em class="sig-param"><span class="n">width</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">eps</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/filter.html#NIP_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.filter.NIP_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter a 3-component seismogram based on the NIP criterion.</p>
+<p>This is a composite convenience routine that uses sane defaults.
+If you want to get intermediate products, call internal routines individually.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>numpy.ndarray</em><em> (</em><em>rank 1</em><em>)</em>) – Equal-length data arrays for North, East, and Vertical components, respectively.</p></li>
+<li><p><strong>e</strong> (<em>numpy.ndarray</em><em> (</em><em>rank 1</em><em>)</em>) – Equal-length data arrays for North, East, and Vertical components, respectively.</p></li>
+<li><p><strong>v</strong> (<em>numpy.ndarray</em><em> (</em><em>rank 1</em><em>)</em>) – Equal-length data arrays for North, East, and Vertical components, respectively.</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – Sampling frequency [Hz]</p></li>
+<li><p><strong>xpr</strong> (<em>int</em>) – Sense of wave propagation. -1 for westward, 1 for eastward.
+Try -int(np.sign(np.sin(np.radians(baz)))), unless they’re directly N-S from each other.</p></li>
+<li><p><strong>polarization</strong> (<em>str</em>) – ‘retrograde’ to extract normal retrograde Rayleigh waves
+‘prograde’ to extract prograde Rayleigh waves
+‘linear’ to extract Love waves</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – The critical value (“x_r”) and width (“Delta x”) for the NIP filter (cosine) taper.</p></li>
+<li><p><strong>width</strong> (<em>float</em>) – The critical value (“x_r”) and width (“Delta x”) for the NIP filter (cosine) taper.</p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – Tolerance for small NIP denominator values, for numerical stability.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>n, e, v</strong> (<em>numpy.ndarray (rank 1)</em>) – Filtered north, east, and vertical components.</p></li>
+<li><p><strong>theta</strong> (<em>float</em>) – Average propagation azimuth for the given polarization [degrees].
+Use this angle to rotate the data to radial and transverse.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p># compare filtered north, east, vertical to original
+&gt;&gt;&gt; import obspy.signal as signal
+&gt;&gt;&gt; nf, ef, vf, theta = NIP_filter(n, e, v, fs, xpr)
+&gt;&gt;&gt; if theta &gt; 180:</p>
+<blockquote>
+<div><blockquote>
+<div><p>nip_baz = theta - 180</p>
+</div></blockquote>
+<dl class="simple">
+<dt>else:</dt><dd><p>nip_baz = theta + 180</p>
+</dd>
+</dl>
+</div></blockquote>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span><span class="p">,</span> <span class="n">tf</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">rotate_NE_RT</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="n">ef</span><span class="p">,</span> <span class="n">nip_baz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">rotate_NE_RT</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">baz</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.filter.get_filter">
+<code class="sig-prename descclassname">particleman.filter.</code><code class="sig-name descname">get_filter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nip</span></em>, <em class="sig-param"><span class="n">polarization</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">width</span><span class="o">=</span><span class="default_value">0.1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/filter.html#get_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.filter.get_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an NIP-based filter that will pass waves of the specified type.</p>
+<p>The filter is made from the NIP and cosine taper for the specified wave type.
+The nip and the polarization type must match.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nip</strong> (<em>numpy.ndarray</em><em> (</em><em>real</em><em>, </em><em>rank 2</em><em>)</em>) – The NIP array [-1.0, 1.0]</p></li>
+<li><p><strong>polarization</strong> (<em>str</em>) – The type of polarization that was used to calculate the provided NIP.
+‘retrograde’, ‘prograde’, or ‘linear’.  See “NIP” function.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – The cosine taper critical/crossover value (“x_r”) and width (“Delta x”).
+If not supplied, the default for retrograde polarization is 0.8, and for
+prograde or linear polarization is 0.2.</p></li>
+<li><p><strong>width</strong> (<em>float</em>) – The cosine taper critical/crossover value (“x_r”) and width (“Delta x”).
+If not supplied, the default for retrograde polarization is 0.8, and for
+prograde or linear polarization is 0.2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The NIP-based filter array [0.0, 1.0] to multiply into the complex Stockwell arrays,
+before inverse transforming to the time-domain.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray (real, rank 2)</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Equation (27) and (28) from Meza-Fajardo et al. (2015)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.filter.get_shift">
+<code class="sig-prename descclassname">particleman.filter.</code><code class="sig-name descname">get_shift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">polarization</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/filter.html#get_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.filter.get_shift" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the appropriate pi/2 phase advance or delay for the provided
+polarization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>polarization</strong> (<em>str</em><em>, </em><em>{'retrograde'</em><em>, </em><em>'prograde'</em><em>, </em><em>'linear'}</em>) – ‘retrograde’ returns i, for a pi/2 phase advance.
+‘prograde’ or ‘linear’ returns -i, for a pi/2 phase delay</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Multiply this value (i or -i) into a complex vertical S-transform to
+shift its phase.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.complex128</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.filter.instantaneous_azimuth">
+<code class="sig-prename descclassname">particleman.filter.</code><code class="sig-name descname">instantaneous_azimuth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sv</span></em>, <em class="sig-param"><span class="n">Sn</span></em>, <em class="sig-param"><span class="n">Se</span></em>, <em class="sig-param"><span class="n">polarization</span></em>, <em class="sig-param"><span class="n">xpr</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/filter.html#instantaneous_azimuth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.filter.instantaneous_azimuth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get instantaneous propagation angle [degrees], under the Rayleigh wave
+assumption, using the Meza-Fajardo et al. Normalized Inner Product criterion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sv</strong> (<em>numpy.ndarray</em><em> (</em><em>complex</em><em>, </em><em>rank 2</em><em>)</em>) – The vertical, North, and East component equal-sized complex s-transforms.</p></li>
+<li><p><strong>Sn</strong> (<em>numpy.ndarray</em><em> (</em><em>complex</em><em>, </em><em>rank 2</em><em>)</em>) – The vertical, North, and East component equal-sized complex s-transforms.</p></li>
+<li><p><strong>Se</strong> (<em>numpy.ndarray</em><em> (</em><em>complex</em><em>, </em><em>rank 2</em><em>)</em>) – The vertical, North, and East component equal-sized complex s-transforms.</p></li>
+<li><p><strong>polarization</strong> (<em>str</em><em>, </em><em>{'retrograde'</em><em>, </em><em>'prograde'</em><em>, </em><em>'linear'}</em>) – ‘retrograde’ will apply a pi/2 phase advance.
+‘prograde’ or ‘linear’ will apply a pi/2 phase delay</p></li>
+<li><p><strong>xpr</strong> (<em>int</em>) – Sense of propagation.  1 for eastward, -1 for westward.
+Try -int(np.sign(np.sin(np.radians(baz)))), unless they’re directly N-S
+from each other.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>az</strong> – Instantaneous Rayleigh wave propagation angle [degrees]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray (real, rank 2)</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Equations (19), (20), and (21) from Meza-Fajardo et al. (2015)</p>
+<p>“Let us emphatically note that if the sense of propagation of the phase
+under investigation is not established, prograde or retrograde motion
+cannot be defined without ambiguity.”</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.filter.rotate_NE_RT">
+<code class="sig-prename descclassname">particleman.filter.</code><code class="sig-name descname">rotate_NE_RT</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sn</span></em>, <em class="sig-param"><span class="n">Se</span></em>, <em class="sig-param"><span class="n">az</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/filter.html#rotate_NE_RT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.filter.rotate_NE_RT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate North and East s-transforms to radial and transverse, through the propagation angle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sn</strong> (<em>numpy.ndarray</em><em> (</em><em>complex</em><em>, </em><em>rank 2</em><em>)</em>) – Complex, equal-sized s-transform arrays, for North and East components, respectively.</p></li>
+<li><p><strong>Se</strong> (<em>numpy.ndarray</em><em> (</em><em>complex</em><em>, </em><em>rank 2</em><em>)</em>) – Complex, equal-sized s-transform arrays, for North and East components, respectively.</p></li>
+<li><p><strong>az</strong> (<em>float</em>) – Rotation angle [degrees].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Sr, St</strong> – Complex s-transform arrays for radial and transverse components, respectively.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray (rank 2)</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Equation (17) from Meta-Fajardo et al. (2015)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.filter.scalar_azimuth">
+<code class="sig-prename descclassname">particleman.filter.</code><code class="sig-name descname">scalar_azimuth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">vhat</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/filter.html#scalar_azimuth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.filter.scalar_azimuth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time domain estimation the scalar/average azimuth, in degrees.</p>
+<p class="rubric">References</p>
+<p>Equations (10) and (12) from Meza-Fajardo et al. (2015)</p>
+<p>“If the extracted signal is composed of more than one dispersive wave
+propagating in distinct, albeit similar, directions, then, equations
+(10)–(12) should be applied independently to each one of them. By
+inspecting the Stockwell transform of the signal, the analyst can observe
+if there are several wavetrains.”</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.filter.shift_phase">
+<code class="sig-prename descclassname">particleman.filter.</code><code class="sig-name descname">shift_phase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sv</span></em>, <em class="sig-param"><span class="n">polarization</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/filter.html#shift_phase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.filter.shift_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Phase-shift an s-transform by the appropriate phase shift for
+prograde/retrograde motion.</p>
+<p>Shift is done on a complex MxN array by multiplication with either i or -i
+(imaginary unit).  This is mostly a reference for how to do/interpret phase
+shifts, as it’s such a simple thing to do outside of a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sv</strong> (<em>numpy.ndarray</em><em> (</em><em>complex</em><em>, </em><em>rank 2</em><em>)</em>) – </p></li>
+<li><p><strong>polarization</strong> (<em>str</em><em>, </em><em>{'retrograde'</em><em>, </em><em>'prograde'</em><em>, </em><em>'linear'}</em>) – ‘retrograde’ will apply a pi/2 phase advance (normal Rayleigh waves)
+‘prograde’ or ‘linear’ will apply a pi/2 phase delay</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray (real, rank 2)</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Pages 5 and 10 from Meta-Fajardo et al. (2015)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.filter.xpr">
+<code class="sig-prename descclassname">particleman.filter.</code><code class="sig-name descname">xpr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">az</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/filter.html#xpr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.filter.xpr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the Meza-Fajardo “xpr” sense-of-propagation of wavefield.
+propagation azimuth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>az</strong> (<em>int</em><em> or </em><em>float</em>) – Propagation direction in degrees.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>1 for eastward propagation</em></p></li>
+<li><p><em>-1 for westward</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>If the azimuth is 0 or 180, polarization type may be ambiguous.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-particleman.plotting">
+<span id="particleman-plotting-module"></span><h2>particleman.plotting module<a class="headerlink" href="#module-particleman.plotting" title="Permalink to this headline">¶</a></h2>
+<p>Plotting functions for Stockwell transforms and normalized inner-product (NIP)
+filtering.</p>
+<p>These plotting routines, particularly <cite>tile_comparison</cite> and <cite>NIP_filter_plot</cite>,
+are useful to see how much surface wave energy is in a packet, or how much
+off-great-circle propagation there is.</p>
+<p>These functions plot a number of configurations of “tiles.” Each tile
+consists of the Stockwell transform on top and an aligned time-series waveform
+below.  The transform may have a hatching overlay that would normally
+correspond to a NIP filter, and the time-series axis may have a reference
+(gray) trace overlayed, which normally corresponds to the unfiltered trace.</p>
+<p>## Channel nomenclature:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">[nevrt][sd][f]</span>
+<span class="pre">`</span></code></p>
+<ul class="simple">
+<li><p>n : north component</p></li>
+<li><p>e : east</p></li>
+<li><p>v : vertical</p></li>
+<li><p>s : scalar rotation (great circle)</p></li>
+<li><p>d : dynamic rotation (NIP estimate)</p></li>
+<li><p>f : NIP filtered</p></li>
+</ul>
+<dl class="py function">
+<dt id="particleman.plotting.NIP_filter_plots">
+<code class="sig-prename descclassname">particleman.plotting.</code><code class="sig-name descname">NIP_filter_plots</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">fs</span></em>, <em class="sig-param"><span class="n">Sr</span></em>, <em class="sig-param"><span class="n">St</span></em>, <em class="sig-param"><span class="n">Sv</span></em>, <em class="sig-param"><span class="n">r</span></em>, <em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">rf</span></em>, <em class="sig-param"><span class="n">tf</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vf</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">arrivals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hatch</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hatchlim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fig</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/plotting.html#NIP_filter_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.plotting.NIP_filter_plots" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,</dt><dd><p>Quad plot of NIP, and 3 tiles of Stockwell transform with NIP filter hatch
+and filtered+unfiltered time-series for each component.</p>
+<dl class="simple">
+<dt>T, F, theta: numpy.ndarray (ndim 2)</dt><dd><p>Time, frequency, instantaneous azimuth tiles.</p>
+</dd>
+<dt>fs<span class="classifier">float</span></dt><dd><p>Sampling rate of underlying time-series data.</p>
+</dd>
+<dt>Sr, St, Sv<span class="classifier">numpy.ndarray (ndim 2, complex)</span></dt><dd><p>Stockwell transform of the radial, transverse, and vertical component data.</p>
+</dd>
+<dt>r, t, v: numpy.ndarray (ndim 1)</dt><dd><p>Unfiltered radial, transverse, and vertical component time-series.</p>
+</dd>
+<dt>rf, tf, vf<span class="classifier">numpy.ndarray (ndim 1)</span></dt><dd><p>NIP-filtered radial, transverse, and vertical component time-series.</p>
+</dd>
+<dt>arrivals<span class="classifier">sequence of (str, float) 2-tuples</span></dt><dd><p>Sequence of arrivals to plot, of the form (label, time_in_seconds)</p>
+</dd>
+<dt>flim<span class="classifier">tuple</span></dt><dd><p>Frequency limits as (fmin, fmax) 2-tuple, in Hz.</p>
+</dd>
+<dt>hatch<span class="classifier">numpy.ndarray (ndim 2)</span></dt><dd><p>Optional tile used for cross-hatch visual mask.</p>
+</dd>
+<dt>hatchlim<span class="classifier">tuple</span></dt><dd><p>Hatch range used to display mask.  2-tuple of floats (hmin, hmax).</p>
+</dd>
+</dl>
+<p>fig : matplotlib.Figure</p>
+<dl class="simple">
+<dt>tiles<span class="classifier">list</span></dt><dd><p>List of two-tuples of axes objects (axis_top, axis_bottom) of each tile,
+clockwise from top-left.  Can be unpacked to get all axes as follows:</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tiles</span> <span class="o">=</span> <span class="n">NIP_filter_plots</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">ax11</span><span class="p">,</span> <span class="n">ax12</span><span class="p">),</span> <span class="p">(</span><span class="n">ax21</span><span class="p">,</span> <span class="n">ax22</span><span class="p">),</span> <span class="p">(</span><span class="n">ax31</span><span class="p">,</span> <span class="n">ax32</span><span class="p">),</span> <span class="p">(</span><span class="n">ax41</span><span class="p">,</span> <span class="n">ax42</span><span class="p">)</span> <span class="o">=</span> <span class="n">tiles</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.plotting.check_filters">
+<code class="sig-prename descclassname">particleman.plotting.</code><code class="sig-name descname">check_filters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">Sv</span></em>, <em class="sig-param"><span class="n">Srs</span></em>, <em class="sig-param"><span class="n">Sts</span></em>, <em class="sig-param"><span class="n">vsf</span></em>, <em class="sig-param"><span class="n">rsf</span></em>, <em class="sig-param"><span class="n">ts</span></em>, <em class="sig-param"><span class="n">arrivals</span></em>, <em class="sig-param"><span class="n">flim</span></em>, <em class="sig-param"><span class="n">clim</span></em>, <em class="sig-param"><span class="n">dlim</span></em>, <em class="sig-param"><span class="n">xlim</span></em>, <em class="sig-param"><span class="n">hatch</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hatchlim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fig</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/plotting.html#check_filters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.plotting.check_filters" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – The time and freqency domain tiles/grids.</p></li>
+<li><p><strong>F</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – The time and freqency domain tiles/grids.</p></li>
+<li><p><strong>Sv</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – The vertical, scalar-rotated radial, and scalar-rotated transverse
+Stockwell transform tiles.</p></li>
+<li><p><strong>Srs</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – The vertical, scalar-rotated radial, and scalar-rotated transverse
+Stockwell transform tiles.</p></li>
+<li><p><strong>Sts</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – The vertical, scalar-rotated radial, and scalar-rotated transverse
+Stockwell transform tiles.</p></li>
+<li><p><strong>vsf</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 1</em><em>)</em>) – The Stockwell NIP-filtered vertical and radial, and transverse
+time-series vectors.</p></li>
+<li><p><strong>rsf</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 1</em><em>)</em>) – The Stockwell NIP-filtered vertical and radial, and transverse
+time-series vectors.</p></li>
+<li><p><strong>ts</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 1</em><em>)</em>) – The Stockwell NIP-filtered vertical and radial, and transverse
+time-series vectors.</p></li>
+<li><p><strong>arrivals</strong> (<em>sequence of</em><em> (</em><em>str</em><em>, </em><em>float</em><em>) </em><em>2-tuples</em>) – Sequence of arrivals to plot, of the form (label, time_in_seconds)</p></li>
+<li><p><strong>dlim</strong> (<em>2-tuple of floats</em>) – Limits on the time-series amplitudes (y axis limits).</p></li>
+<li><p><strong>hatch</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – Optional tile used for hatch mask.</p></li>
+<li><p><strong>hatchlim</strong> (<em>tuple</em>) – Hatch range used to display mask.  2-tuple of floats (hmin, hmax).</p></li>
+<li><p><strong>fig</strong> (<em>matplotlib.Figure</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.plotting.compare_waveforms">
+<code class="sig-prename descclassname">particleman.plotting.</code><code class="sig-name descname">compare_waveforms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">vsf</span></em>, <em class="sig-param"><span class="n">rs</span></em>, <em class="sig-param"><span class="n">rsf</span></em>, <em class="sig-param"><span class="n">ts</span></em>, <em class="sig-param"><span class="n">arrivals</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/plotting.html#compare_waveforms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.plotting.compare_waveforms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare the static and dynamically filtered waveforms.</p>
+<p>A 3-panel waveform plot of 3 components.  Unfiltered waves are in gray,
+filtered are overplotted in black.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v</strong> (<em>numpy.ndarray</em><em> (</em><em>rank 1</em><em>)</em>) – Unfiltered and static-rotated filtered vertical waveform.</p></li>
+<li><p><strong>vsf</strong> (<em>numpy.ndarray</em><em> (</em><em>rank 1</em><em>)</em>) – Unfiltered and static-rotated filtered vertical waveform.</p></li>
+<li><p><strong>rs</strong> (<em>numpy.ndarray</em><em> (</em><em>rank 1</em><em>)</em>) – Unfiltered and static-rotated filtered radial waveform.</p></li>
+<li><p><strong>rsf</strong> (<em>numpy.ndarray</em><em> (</em><em>rank 1</em><em>)</em>) – Unfiltered and static-rotated filtered radial waveform.</p></li>
+<li><p><strong>ts</strong> (<em>numpy.ndarray</em><em> (</em><em>rank 1</em><em>)</em>) – Unfiltered transverse waveform.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.plotting.make_tiles">
+<code class="sig-prename descclassname">particleman.plotting.</code><code class="sig-name descname">make_tiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fig</span></em>, <em class="sig-param"><span class="n">gs0</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/plotting.html#make_tiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.plotting.make_tiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give a list of (ax_top, ax_bottom) axis tuples for each SubPlotSpec in gs0.</p>
+<dl class="simple">
+<dt>full<span class="classifier">list</span></dt><dd><p>Integer subplotspec numbers for which the ax_top is to take up the
+whole tile, so no ax_bottom is to be created.  Returns these tiles’
+axis handles as (ax_top, None).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.plotting.plot_NIP">
+<code class="sig-prename descclassname">particleman.plotting.</code><code class="sig-name descname">plot_NIP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">nips</span></em>, <em class="sig-param"><span class="n">fs</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">flim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fig</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/plotting.html#plot_NIP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.plotting.plot_NIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the normalized inner product tile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – Time, frequency, normalized inner-product tiles.</p></li>
+<li><p><strong>F</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – Time, frequency, normalized inner-product tiles.</p></li>
+<li><p><strong>nips</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – Time, frequency, normalized inner-product tiles.</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – Sampling frequency of the underlying time-series data.</p></li>
+<li><p><strong>flim</strong> (<em>tuple</em>) – Frequency limits as (fmin, fmax) 2-tuple, in Hz.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.plotting.plot_arrivals">
+<code class="sig-prename descclassname">particleman.plotting.</code><code class="sig-name descname">plot_arrivals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">arrivals</span></em>, <em class="sig-param"><span class="n">dmin</span></em>, <em class="sig-param"><span class="n">dmax</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/plotting.html#plot_arrivals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.plotting.plot_arrivals" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>arrivals<span class="classifier">dict</span></dt><dd><p>are a dict of {name: seconds}.</p>
+</dd>
+<dt>dmin, dmax<span class="classifier">float</span></dt><dd><p>y value in axis “ax” at which labels are plotted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.plotting.plot_image">
+<code class="sig-prename descclassname">particleman.plotting.</code><code class="sig-name descname">plot_image</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">hatch</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hatchlim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">clim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fig</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/plotting.html#plot_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.plotting.plot_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a fime-frequency image, optionally with a hatched mask.</p>
+<dl class="simple">
+<dt>T, F, C<span class="classifier">numpy.ndarray (ndim 2)</span></dt><dd><p>Time and frequency domain arrays, and data arrays.</p>
+</dd>
+<dt>hatch<span class="classifier">numpy.ndarray (rank 2)</span></dt><dd><p>Optional array mask for hatching or for opacity.</p>
+</dd>
+<dt>hatchlim<span class="classifier">float</span></dt><dd><p>Optional hatch value cutoff for masking, above which masking is not
+done.  If hatch is provided but hatchlim is not, hatch will be used as
+an opacity mask, and it values are assumed to be between 0 and  1.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>matplotlib.collections.QuadMesh from pcolormesh</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.plotting.plot_instantaneous_azimuth">
+<code class="sig-prename descclassname">particleman.plotting.</code><code class="sig-name descname">plot_instantaneous_azimuth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">fs</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">flim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dlim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">clim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fig</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/plotting.html#plot_instantaneous_azimuth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.plotting.plot_instantaneous_azimuth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the instantanous azimuth TF tile using imshow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – Time [sec], frequency [Hz], and instantaneous azimuth calculated by
+stockwell.filter.instantanous_azimuth</p></li>
+<li><p><strong>F</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – Time [sec], frequency [Hz], and instantaneous azimuth calculated by
+stockwell.filter.instantanous_azimuth</p></li>
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – Time [sec], frequency [Hz], and instantaneous azimuth calculated by
+stockwell.filter.instantanous_azimuth</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – Sampling rate of data used.</p></li>
+<li><p><strong>flim</strong> (<em>tuple</em><em> (</em><em>min</em><em>, </em><em>max</em><em>)</em>) – Optional frequency [Hz], time [sec], or color min/max limits for plots.</p></li>
+<li><p><strong>dlim</strong> (<em>tuple</em><em> (</em><em>min</em><em>, </em><em>max</em><em>)</em>) – Optional frequency [Hz], time [sec], or color min/max limits for plots.</p></li>
+<li><p><strong>clim</strong> (<em>tuple</em><em> (</em><em>min</em><em>, </em><em>max</em><em>)</em>) – Optional frequency [Hz], time [sec], or color min/max limits for plots.</p></li>
+<li><p><strong>fig</strong> (<em>matplotlib.Figure instance</em>) – </p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axis.Axis instance</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.plotting.plot_tile">
+<code class="sig-prename descclassname">particleman.plotting.</code><code class="sig-name descname">plot_tile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fig</span></em>, <em class="sig-param"><span class="n">ax1</span></em>, <em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">S</span></em>, <em class="sig-param"><span class="n">ax2</span></em>, <em class="sig-param"><span class="n">d1</span></em>, <em class="sig-param"><span class="n">label1</span></em>, <em class="sig-param"><span class="n">color1</span><span class="o">=</span><span class="default_value">'k'</span></em>, <em class="sig-param"><span class="n">d2</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">label2</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">arrivals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">clim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hatch</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hatchlim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dlim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">amp_fmt</span><span class="o">=</span><span class="default_value">'%.2e'</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/plotting.html#plot_tile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.plotting.plot_tile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot time-frequency pcolormesh tiles above time-aligned aligned time-series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib.Figure</em>) – </p></li>
+<li><p><strong>ax1</strong> (<em>matplotlib.axis.Axis</em>) – Axis for time-frequency pcolormesh tile and optional hatching.</p></li>
+<li><p><strong>ax2</strong> (<em>matplotlib.axis.Axis</em>) – Axis for time-series plot.</p></li>
+<li><p><strong>T</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – Time, frequency, S-transform tiles from stockwell.stransform</p></li>
+<li><p><strong>F</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – Time, frequency, S-transform tiles from stockwell.stransform</p></li>
+<li><p><strong>S</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – Time, frequency, S-transform tiles from stockwell.stransform</p></li>
+<li><p><strong>d1</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 1</em><em>)</em>) – Time-series, plotted black.  Optional d2 plotted gray. These need to
+be registered in time to T.</p></li>
+<li><p><strong>d2</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 1</em><em>)</em>) – Time-series, plotted black.  Optional d2 plotted gray. These need to
+be registered in time to T.</p></li>
+<li><p><strong>color1</strong> (<em>str</em>) – Color of plotted d1 line.</p></li>
+<li><p><strong>label1</strong> (<em>str</em>) – Time-series legend label strings.</p></li>
+<li><p><strong>label2</strong> (<em>str</em>) – Time-series legend label strings.</p></li>
+<li><p><strong>arrivals</strong> (<em>dict</em>) – Sequence of arrivals to plot, of the form {label: time_in_seconds, …}</p></li>
+<li><p><strong>dlim</strong> (<em>2-tuple of floats</em>) – Limits on the time-series amplitudes (y axis limits).</p></li>
+<li><p><strong>hatch</strong> (<em>numpy.ndarray</em><em> (</em><em>ndim 2</em><em>)</em>) – Optional tile used for hatch mask.</p></li>
+<li><p><strong>hatchlim</strong> (<em>tuple</em>) – Hatch range used to display mask.  2-tuple of floats (hmin, hmax).</p></li>
+<li><p><strong>amp_fmt</strong> (<em>str</em>) – Matplotlib format string used for amplitudes in colorbars and axes.</p></li>
+<li><p><strong>cmap</strong> (<em>matplotlib.colors.Colormap</em>) – </p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Optionally, use a white transparency mask for overlying the hatch, with
+the given alpha value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The ax1 image from pcolormesh.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib.collections.QuadMesh</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p># filtered versus unfiltered radial, and set color limits
+&gt;&gt;&gt; plot_tile(fig, ax21, T, F, Srs, ax22, rs, ‘unfiltered’, rsf, ‘NIP filtered’,</p>
+<blockquote>
+<div><p>arrivals=arrivals, flim=(0.0, fmax), clim=(0.0, 5e-5), hatch=sfilt, hatchlim=(0.0, 0.8))</p>
+</div></blockquote>
+<p># scalar versus dynamic rotated radial
+&gt;&gt;&gt; plot_tile(fig, ax21, T, F, Srs, ax22, rs, ‘scalar’, rd, ‘dynamic’, arrivals</p>
+<blockquote>
+<div><p>flim=(0.0, fmax), clim=(0.0, 5e-5), hatch=dfilt, hatchlim=(0.0, 0.8))</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="particleman.plotting.tile_comparison">
+<code class="sig-prename descclassname">particleman.plotting.</code><code class="sig-name descname">tile_comparison</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">Sv</span></em>, <em class="sig-param"><span class="n">Srs</span></em>, <em class="sig-param"><span class="n">Srd</span></em>, <em class="sig-param"><span class="n">Sts</span></em>, <em class="sig-param"><span class="n">Std</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">rs</span></em>, <em class="sig-param"><span class="n">rd</span></em>, <em class="sig-param"><span class="n">ts</span></em>, <em class="sig-param"><span class="n">td</span></em>, <em class="sig-param"><span class="n">arrivals</span></em>, <em class="sig-param"><span class="n">flim</span></em>, <em class="sig-param"><span class="n">clim</span></em>, <em class="sig-param"><span class="n">dlim</span></em>, <em class="sig-param"><span class="n">hatch</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hatchlim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fig</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xlim</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/plotting.html#tile_comparison"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.plotting.tile_comparison" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a 6-panel side-by-side comparison of tiles, such as scalar versus
+dynamic rotations.</p>
+<dl class="simple">
+<dt>Sv, Srs, Srd, Sts, Std<span class="classifier">numpy.ndarray (ndim 2)</span></dt><dd><p>The vertical, radial-scalar, radial-dynamic, transverse-scalar, and
+transverse-dynamic stockwell transforms.</p>
+</dd>
+<dt>v, rs, rd, ts, td<span class="classifier">numpy.ndarray (ndim 1)</span></dt><dd><p>The corresponding vertical, radial-scalar, radial-dynamic,
+transverse-scalar, and transverse-dynamic time-series vectors.</p>
+</dd>
+<dt>arrivals<span class="classifier">sequence of (str, float) 2-tuples</span></dt><dd><p>Sequence of arrivals to plot, of the form (label, time_in_seconds)</p>
+</dd>
+<dt>flim, clim, dlim, xlim<span class="classifier">tuple</span></dt><dd><p>Frequency, stockwell amplitude, time-series amplitude, and time-series
+time limits of display.  2-tuples of (min, max) floats.</p>
+</dd>
+<dt>hatch<span class="classifier">numpy.ndarray (ndim 2)</span></dt><dd><p>Optional tile used for hatch mask.</p>
+</dd>
+<dt>hatchlim<span class="classifier">tuple</span></dt><dd><p>Hatch range used to display mask.  2-tuple of floats (hmin, hmax).</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>matplotlib.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-particleman.st">
+<span id="particleman-st-module"></span><h2>particleman.st module<a class="headerlink" href="#module-particleman.st" title="Permalink to this headline">¶</a></h2>
+<p>ctypes interface to st.c</p>
+<dl class="py function">
+<dt id="particleman.st.ist">
+<code class="sig-prename descclassname">particleman.st.</code><code class="sig-name descname">ist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">lo</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hi</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/st.html#ist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.st.ist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="particleman.st.st">
+<code class="sig-prename descclassname">particleman.st.</code><code class="sig-name descname">st</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">lo</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hi</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/particleman/st.html#st"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#particleman.st.st" title="Permalink to this definition">¶</a></dt>
+<dd><p>st(x[, lo, hi]) returns the 2d, complex Stockwell transform of the real
+array x. If lo and hi are specified, only those frequencies (rows) are
+returned; lo and hi default to 0 and n/2, resp., where n is the length of x.</p>
+<p>Stockwell transform of the real array data. The number of time points need
+not be a power of two. The lo and hi arguments specify the range of
+frequencies to return, in Hz. If they are both zero, they default to lo = 0
+and hi = len / 2. The result is returned in the complex array result, which
+must be preallocated, with n rows and len columns, where n is hi - lo + 1.
+For the default values of lo and hi, n is len / 2 + 1.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-particleman">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-particleman" title="Permalink to this headline">¶</a></h2>
+<p>Stockwell transform and its inverse.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="modules.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Jonathan MacCarthy
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

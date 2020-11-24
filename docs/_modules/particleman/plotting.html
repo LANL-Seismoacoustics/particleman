@@ -1,0 +1,811 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>particleman.plotting &mdash; particleman 0.3.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> particleman
+          
+
+          
+            
+            <img src="../../_static/lanl_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../comparison.html">Comparison to Other Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filtering.html">Advanced Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/LANL-Seismoacoustics/particleman">Repository</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">particleman</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>particleman.plotting</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for particleman.plotting</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Plotting functions for Stockwell transforms and normalized inner-product (NIP)</span>
+<span class="sd">filtering.</span>
+
+<span class="sd">These plotting routines, particularly `tile_comparison` and `NIP_filter_plot`,</span>
+<span class="sd">are useful to see how much surface wave energy is in a packet, or how much</span>
+<span class="sd">off-great-circle propagation there is.</span>
+
+<span class="sd">These functions plot a number of configurations of &quot;tiles.&quot; Each tile</span>
+<span class="sd">consists of the Stockwell transform on top and an aligned time-series waveform</span>
+<span class="sd">below.  The transform may have a hatching overlay that would normally</span>
+<span class="sd">correspond to a NIP filter, and the time-series axis may have a reference</span>
+<span class="sd">(gray) trace overlayed, which normally corresponds to the unfiltered trace.</span>
+
+
+<span class="sd">## Channel nomenclature:</span>
+
+<span class="sd">```</span>
+<span class="sd">[nevrt][sd][f]</span>
+<span class="sd">```</span>
+
+<span class="sd">* n : north component</span>
+<span class="sd">* e : east</span>
+<span class="sd">* v : vertical</span>
+<span class="sd">* s : scalar rotation (great circle)</span>
+<span class="sd">* d : dynamic rotation (NIP estimate)</span>
+<span class="sd">* f : NIP filtered</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">gridspec</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
+<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">FormatStrFormatter</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># TODO: make a **tile_kwargs argument in all calling signatures using plot_tile,</span>
+<span class="c1">#    which would include arrivals, flim, clim, dlim, tlim, hatch, hatchlim</span>
+<span class="c1"># TODO: make a plot_image function, and use it as an argument in the plot_tile</span>
+<span class="c1">#    function.</span>
+
+<span class="k">def</span> <span class="nf">_strip_zero_freq</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes the zero-frequency rows from T, F, and S, to facilitate log plotting.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">F</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">F</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">F</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span>
+
+
+<div class="viewcode-block" id="plot_tile"><a class="viewcode-back" href="../../api/particleman.html#particleman.plotting.plot_tile">[docs]</a><span class="k">def</span> <span class="nf">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">label1</span><span class="p">,</span> <span class="n">color1</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">d2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+              <span class="n">label2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arrivals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+              <span class="n">hatchlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">amp_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2e</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot time-frequency pcolormesh tiles above time-aligned aligned time-series.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fig : matplotlib.Figure</span>
+<span class="sd">    ax1 : matplotlib.axis.Axis</span>
+<span class="sd">        Axis for time-frequency pcolormesh tile and optional hatching.</span>
+<span class="sd">    ax2 : matplotlib.axis.Axis</span>
+<span class="sd">        Axis for time-series plot.</span>
+<span class="sd">    T, F, S : numpy.ndarray (ndim 2)</span>
+<span class="sd">        Time, frequency, S-transform tiles from stockwell.stransform</span>
+<span class="sd">    d1, d2 : numpy.ndarray (ndim 1)</span>
+<span class="sd">        Time-series, plotted black.  Optional d2 plotted gray. These need to</span>
+<span class="sd">        be registered in time to T.</span>
+<span class="sd">    color1 : str</span>
+<span class="sd">        Color of plotted d1 line.</span>
+<span class="sd">    label1, label2 : str</span>
+<span class="sd">        Time-series legend label strings.</span>
+<span class="sd">    arrivals : dict</span>
+<span class="sd">        Sequence of arrivals to plot, of the form {label: time_in_seconds, ...}</span>
+<span class="sd">    dlim : 2-tuple of floats</span>
+<span class="sd">        Limits on the time-series amplitudes (y axis limits).</span>
+<span class="sd">    hatch : numpy.ndarray (ndim 2)</span>
+<span class="sd">        Optional tile used for hatch mask.</span>
+<span class="sd">    hatchlim : tuple</span>
+<span class="sd">        Hatch range used to display mask.  2-tuple of floats (hmin, hmax).</span>
+<span class="sd">    amp_fmt : str</span>
+<span class="sd">        Matplotlib format string used for amplitudes in colorbars and axes.</span>
+<span class="sd">    cmap : matplotlib.colors.Colormap</span>
+<span class="sd">    alpha: float</span>
+<span class="sd">        Optionally, use a white transparency mask for overlying the hatch, with</span>
+<span class="sd">        the given alpha value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matplotlib.collections.QuadMesh</span>
+<span class="sd">        The ax1 image from pcolormesh.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    # filtered versus unfiltered radial, and set color limits</span>
+<span class="sd">    &gt;&gt;&gt; plot_tile(fig, ax21, T, F, Srs, ax22, rs, &#39;unfiltered&#39;, rsf, &#39;NIP filtered&#39;, </span>
+<span class="sd">        arrivals=arrivals, flim=(0.0, fmax), clim=(0.0, 5e-5), hatch=sfilt, hatchlim=(0.0, 0.8))</span>
+<span class="sd">    # scalar versus dynamic rotated radial </span>
+<span class="sd">    &gt;&gt;&gt; plot_tile(fig, ax21, T, F, Srs, ax22, rs, &#39;scalar&#39;, rd, &#39;dynamic&#39;, arrivals</span>
+<span class="sd">        flim=(0.0, fmax), clim=(0.0, 5e-5), hatch=dfilt, hatchlim=(0.0, 0.8))</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fig</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+    <span class="n">sciformatter</span> <span class="o">=</span> <span class="n">FormatStrFormatter</span><span class="p">(</span><span class="n">amp_fmt</span><span class="p">)</span>
+
+    <span class="c1"># grab a time vector</span>
+    <span class="n">tm</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># TODO: remove fig from signature?</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">plot_image</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">S</span><span class="p">),</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span> <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span>
+                    <span class="n">clim</span><span class="o">=</span><span class="n">clim</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="p">[</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">],</span>
+                        <span class="nb">format</span><span class="o">=</span><span class="n">amp_fmt</span><span class="p">)</span>
+
+    <span class="c1"># waves and arrivals</span>
+    <span class="k">if</span> <span class="n">d1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tm</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">color1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label1</span><span class="p">)</span>
+        <span class="c1"># ax2.set_ylabel(&#39;amplitude&#39;)</span>
+        <span class="c1"># set view limits</span>
+        <span class="n">dmx</span> <span class="o">=</span> <span class="n">d1</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">dmn</span> <span class="o">=</span> <span class="n">d1</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># XXX</span>
+        <span class="n">dmx</span> <span class="o">=</span> <span class="n">d2</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">dmn</span> <span class="o">=</span> <span class="n">d2</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">d2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tm</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label2</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">dmx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">dmx</span><span class="p">,</span> <span class="n">d2</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+        <span class="n">dmn</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">dmn</span><span class="p">,</span> <span class="n">d2</span><span class="o">.</span><span class="n">min</span><span class="p">()])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dlim</span><span class="p">:</span>
+        <span class="n">dlim</span> <span class="o">=</span> <span class="p">(</span><span class="n">dmn</span><span class="p">,</span> <span class="n">dmx</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">dlim</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time [seconds]&#39;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">tm</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">leg</span> <span class="o">=</span> <span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower right&#39;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">legobj</span> <span class="ow">in</span> <span class="n">leg</span><span class="o">.</span><span class="n">legendHandles</span><span class="p">:</span>
+        <span class="n">legobj</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">arrivals</span><span class="p">:</span>
+        <span class="n">plot_arrivals</span><span class="p">(</span><span class="n">ax2</span><span class="p">,</span> <span class="n">arrivals</span><span class="p">,</span> <span class="n">dmn</span><span class="p">,</span> <span class="n">dmx</span><span class="p">)</span>
+
+    <span class="c1">#ax2.ticklabel_format(style=&#39;sci&#39;, axis=&#39;y&#39;, scilimits=(0,0))</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">sciformatter</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">ax2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">im</span></div>
+
+
+<div class="viewcode-block" id="plot_arrivals"><a class="viewcode-back" href="../../api/particleman.html#particleman.plotting.plot_arrivals">[docs]</a><span class="k">def</span> <span class="nf">plot_arrivals</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">arrivals</span><span class="p">,</span> <span class="n">dmin</span><span class="p">,</span> <span class="n">dmax</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    arrivals : dict</span>
+<span class="sd">        are a dict of {name: seconds}.</span>
+<span class="sd">    dmin, dmax : float</span>
+<span class="sd">        y value in axis &quot;ax&quot; at which labels are plotted.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">arr</span><span class="p">,</span> <span class="n">itt</span> <span class="ow">in</span> <span class="n">arrivals</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">itt</span><span class="p">,</span> <span class="n">dmin</span><span class="p">,</span> <span class="n">dmax</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">itt</span><span class="p">,</span> <span class="n">dmax</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
+                <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="make_tiles"><a class="viewcode-back" href="../../api/particleman.html#particleman.plotting.make_tiles">[docs]</a><span class="k">def</span> <span class="nf">make_tiles</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gs0</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Give a list of (ax_top, ax_bottom) axis tuples for each SubPlotSpec in gs0.</span>
+
+<span class="sd">    full : list</span>
+<span class="sd">        Integer subplotspec numbers for which the ax_top is to take up the</span>
+<span class="sd">        whole tile, so no ax_bottom is to be created.  Returns these tiles&#39;</span>
+<span class="sd">        axis handles as (ax_top, None).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">full</span><span class="p">:</span>
+        <span class="n">full</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">axes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">igs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gs0</span><span class="p">):</span>
+        <span class="n">iigs</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpecFromSubplotSpec</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">subplot_spec</span><span class="o">=</span><span class="n">igs</span><span class="p">,</span>
+                                                <span class="n">hspace</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">Subplot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">iigs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">full</span><span class="p">:</span>
+            <span class="n">ax2</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">Subplot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">iigs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">axes</span></div>
+
+
+
+<div class="viewcode-block" id="plot_image"><a class="viewcode-back" href="../../api/particleman.html#particleman.plotting.plot_image">[docs]</a><span class="k">def</span> <span class="nf">plot_image</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hatchlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot a fime-frequency image, optionally with a hatched mask.</span>
+
+<span class="sd">    T, F, C : numpy.ndarray (ndim 2)</span>
+<span class="sd">        Time and frequency domain arrays, and data arrays.</span>
+<span class="sd">    hatch : numpy.ndarray (rank 2)</span>
+<span class="sd">        Optional array mask for hatching or for opacity.</span>
+<span class="sd">    hatchlim : float</span>
+<span class="sd">        Optional hatch value cutoff for masking, above which masking is not</span>
+<span class="sd">        done.  If hatch is provided but hatchlim is not, hatch will be used as</span>
+<span class="sd">        an opacity mask, and it values are assumed to be between 0 and  1.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matplotlib.collections.QuadMesh from pcolormesh</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fig</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ax</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_xaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cmap</span><span class="p">:</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">viridis</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">flim</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">flim</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">clim</span><span class="p">:</span>
+        <span class="n">im</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="n">clim</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">hatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">hatchlim</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">alpha</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">hatch</span><span class="p">,</span> <span class="n">hatchlim</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">hatch</span><span class="p">,</span> <span class="n">hatchlim</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">hatches</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">hatch</span><span class="p">,</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">hatchlim</span><span class="p">)],</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;frequency [Hz]&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">im</span></div>
+
+
+<div class="viewcode-block" id="plot_instantaneous_azimuth"><a class="viewcode-back" href="../../api/particleman.html#particleman.plotting.plot_instantaneous_azimuth">[docs]</a><span class="k">def</span> <span class="nf">plot_instantaneous_azimuth</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                               <span class="n">clim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot the instantanous azimuth TF tile using imshow.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T, F, theta : numpy.ndarray (ndim 2)</span>
+<span class="sd">        Time [sec], frequency [Hz], and instantaneous azimuth calculated by</span>
+<span class="sd">        stockwell.filter.instantanous_azimuth</span>
+<span class="sd">    fs : float</span>
+<span class="sd">        Sampling rate of data used.</span>
+<span class="sd">    flim, dlim, clim : tuple (min, max)</span>
+<span class="sd">        Optional frequency [Hz], time [sec], or color min/max limits for plots.</span>
+<span class="sd">    fig : matplotlib.Figure instance</span>
+<span class="sd">    ax : matplotlib.axis.Axis instance</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matplotlib.Figure</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fig</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+    <span class="c1"># plt.imshow(theta, origin=&#39;lower&#39;, cmap=plt.cm.hsv, aspect=&#39;auto&#39;,</span>
+    <span class="c1">#            extent=[0, theta.shape[1], 0, fs/2.0], interpolation=&#39;nearest&#39;)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">flim</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">flim</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dlim</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">dlim</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">clim</span><span class="p">:</span>
+        <span class="n">mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">clim</span><span class="p">(</span><span class="o">-</span><span class="n">mx</span><span class="p">,</span> <span class="n">mx</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">f</span></div>
+
+
+<div class="viewcode-block" id="tile_comparison"><a class="viewcode-back" href="../../api/particleman.html#particleman.plotting.tile_comparison">[docs]</a><span class="k">def</span> <span class="nf">tile_comparison</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Sv</span><span class="p">,</span> <span class="n">Srs</span><span class="p">,</span> <span class="n">Srd</span><span class="p">,</span> <span class="n">Sts</span><span class="p">,</span> <span class="n">Std</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">rs</span><span class="p">,</span> <span class="n">rd</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">td</span><span class="p">,</span>
+                    <span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="p">,</span> <span class="n">clim</span><span class="p">,</span> <span class="n">dlim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hatchlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make a 6-panel side-by-side comparison of tiles, such as scalar versus</span>
+<span class="sd">    dynamic rotations.</span>
+
+<span class="sd">    Sv, Srs, Srd, Sts, Std : numpy.ndarray (ndim 2)</span>
+<span class="sd">        The vertical, radial-scalar, radial-dynamic, transverse-scalar, and</span>
+<span class="sd">        transverse-dynamic stockwell transforms.</span>
+<span class="sd">    v, rs, rd, ts, td : numpy.ndarray (ndim 1)</span>
+<span class="sd">        The corresponding vertical, radial-scalar, radial-dynamic,</span>
+<span class="sd">        transverse-scalar, and transverse-dynamic time-series vectors.</span>
+<span class="sd">    arrivals : sequence of (str, float) 2-tuples</span>
+<span class="sd">        Sequence of arrivals to plot, of the form (label, time_in_seconds)</span>
+<span class="sd">    flim, clim, dlim, xlim : tuple</span>
+<span class="sd">        Frequency, stockwell amplitude, time-series amplitude, and time-series</span>
+<span class="sd">        time limits of display.  2-tuples of (min, max) floats.</span>
+<span class="sd">    hatch : numpy.ndarray (ndim 2)</span>
+<span class="sd">        Optional tile used for hatch mask.</span>
+<span class="sd">    hatchlim : tuple</span>
+<span class="sd">        Hatch range used to display mask.  2-tuple of floats (hmin, hmax).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matplotlib.Figure</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># from http://matplotlib.org/1.3.1/users/gridspec.html</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fig</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+    <span class="n">gs0</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">gs0</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+               <span class="n">bottom</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+    <span class="n">tile1</span><span class="p">,</span> <span class="n">tile2</span><span class="p">,</span> <span class="n">tile3</span><span class="p">,</span> <span class="n">tile4</span><span class="p">,</span> <span class="n">tile5</span><span class="p">,</span> <span class="n">tile6</span> <span class="o">=</span> <span class="n">make_tiles</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gs0</span><span class="p">)</span>
+    <span class="n">ax11</span><span class="p">,</span> <span class="n">ax12</span> <span class="o">=</span> <span class="n">tile1</span>
+    <span class="n">ax21</span><span class="p">,</span> <span class="n">ax22</span> <span class="o">=</span> <span class="n">tile2</span>
+    <span class="n">ax31</span><span class="p">,</span> <span class="n">ax32</span> <span class="o">=</span> <span class="n">tile3</span>
+    <span class="n">ax41</span><span class="p">,</span> <span class="n">ax42</span> <span class="o">=</span> <span class="n">tile4</span>
+    <span class="n">ax51</span><span class="p">,</span> <span class="n">ax52</span> <span class="o">=</span> <span class="n">tile5</span>
+    <span class="n">ax61</span><span class="p">,</span> <span class="n">ax62</span> <span class="o">=</span> <span class="n">tile6</span>
+
+    <span class="n">ax11</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Vertical&#39;</span><span class="p">)</span>
+    <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax11</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Sv</span><span class="p">,</span> <span class="n">ax12</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="s1">&#39;vertical&#39;</span><span class="p">,</span> <span class="n">arrivals</span><span class="o">=</span><span class="n">arrivals</span><span class="p">,</span>
+              <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="n">clim</span><span class="p">,</span> <span class="n">dlim</span><span class="o">=</span><span class="n">dlim</span><span class="p">)</span>
+
+    <span class="n">ax21</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Vertical&#39;</span><span class="p">)</span>
+    <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax21</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Sv</span><span class="p">,</span> <span class="n">ax22</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="s1">&#39;vertical&#39;</span><span class="p">,</span> <span class="n">arrivals</span><span class="o">=</span><span class="n">arrivals</span><span class="p">,</span>
+              <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="n">clim</span><span class="p">,</span> <span class="n">dlim</span><span class="o">=</span><span class="n">dlim</span><span class="p">)</span>
+
+    <span class="n">ax31</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Radial, scalar&#39;</span><span class="p">)</span>
+    <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax31</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Srs</span><span class="p">,</span> <span class="n">ax32</span><span class="p">,</span> <span class="n">rs</span><span class="p">,</span> <span class="s1">&#39;great circle&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">rd</span><span class="p">,</span> <span class="s1">&#39;dynamic&#39;</span><span class="p">,</span>
+              <span class="n">arrivals</span><span class="o">=</span><span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="n">clim</span><span class="p">,</span> <span class="n">dlim</span><span class="o">=</span><span class="n">dlim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span>
+              <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">)</span>
+    <span class="c1">#ax31.contour(T, F, theta - az_prop, [20, 0.0, -20], linewidth=1.5, </span>
+    <span class="c1">#             colors=[&#39;r&#39;,&#39;w&#39;,&#39;b&#39;])</span>
+    <span class="c1">#ax31.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)</span>
+
+    <span class="n">ax41</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Radial, dynamic&#39;</span><span class="p">)</span>
+    <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax41</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Srd</span><span class="p">,</span> <span class="n">ax42</span><span class="p">,</span> <span class="n">rd</span><span class="p">,</span> <span class="s1">&#39;dynamic&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">rs</span><span class="p">,</span> <span class="s1">&#39;great circle&#39;</span><span class="p">,</span> 
+              <span class="n">arrivals</span><span class="o">=</span><span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="n">clim</span><span class="p">,</span> <span class="n">dlim</span><span class="o">=</span><span class="n">dlim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span>
+              <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">)</span>
+
+    <span class="n">ax51</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Transverse, scalar&#39;</span><span class="p">)</span>
+    <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax51</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Sts</span><span class="p">,</span> <span class="n">ax52</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="s1">&#39;great circle&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">td</span><span class="p">,</span> <span class="s1">&#39;dynamic&#39;</span><span class="p">,</span>
+              <span class="n">arrivals</span><span class="o">=</span><span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="n">clim</span><span class="p">,</span> <span class="n">dlim</span><span class="o">=</span><span class="n">dlim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span>
+              <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">)</span>
+    <span class="c1">#ax51.contour(T, F, theta - az_prop, [40, 0.0, -40], linewidth=1.5, </span>
+    <span class="c1">#             colors=[&#39;r&#39;,&#39;w&#39;,&#39;b&#39;])</span>
+    <span class="c1">#ax51.contour(T, F, theta - az_prop, [-40, 0, 40], cmap=plt.cm.seismic)</span>
+
+    <span class="n">ax61</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Transverse, dynamic&#39;</span><span class="p">)</span>
+    <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax61</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Std</span><span class="p">,</span> <span class="n">ax62</span><span class="p">,</span> <span class="n">td</span><span class="p">,</span> <span class="s1">&#39;dynamic&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="s1">&#39;great circle&#39;</span><span class="p">,</span>
+              <span class="n">arrivals</span><span class="o">=</span><span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="n">clim</span><span class="p">,</span> <span class="n">dlim</span><span class="o">=</span><span class="n">dlim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span>
+              <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">xlim</span><span class="p">:</span>
+        <span class="n">ax11</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+        <span class="n">ax21</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+        <span class="n">ax31</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+        <span class="n">ax41</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+        <span class="n">ax51</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+        <span class="n">ax61</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="check_filters"><a class="viewcode-back" href="../../api/particleman.html#particleman.plotting.check_filters">[docs]</a><span class="k">def</span> <span class="nf">check_filters</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Sv</span><span class="p">,</span> <span class="n">Srs</span><span class="p">,</span> <span class="n">Sts</span><span class="p">,</span> <span class="n">vsf</span><span class="p">,</span> <span class="n">rsf</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="p">,</span> <span class="n">clim</span><span class="p">,</span>
+                  <span class="n">dlim</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hatchlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T, F : numpy.ndarray (ndim 2)</span>
+<span class="sd">        The time and freqency domain tiles/grids.</span>
+<span class="sd">    Sv, Srs, Sts : numpy.ndarray (ndim 2)</span>
+<span class="sd">        The vertical, scalar-rotated radial, and scalar-rotated transverse</span>
+<span class="sd">        Stockwell transform tiles.</span>
+<span class="sd">    vsf, rsf, ts : numpy.ndarray (ndim 1)</span>
+<span class="sd">        The Stockwell NIP-filtered vertical and radial, and transverse</span>
+<span class="sd">        time-series vectors.</span>
+<span class="sd">    arrivals : sequence of (str, float) 2-tuples</span>
+<span class="sd">        Sequence of arrivals to plot, of the form (label, time_in_seconds)</span>
+<span class="sd">    dlim : 2-tuple of floats</span>
+<span class="sd">        Limits on the time-series amplitudes (y axis limits).</span>
+<span class="sd">    hatch : numpy.ndarray (ndim 2)</span>
+<span class="sd">        Optional tile used for hatch mask.</span>
+<span class="sd">    hatchlim : tuple</span>
+<span class="sd">        Hatch range used to display mask.  2-tuple of floats (hmin, hmax).</span>
+<span class="sd">    fig : matplotlib.Figure</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matplotlib.Figure</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fig</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+    <span class="n">gs0</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">gs0</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+               <span class="n">bottom</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+    <span class="n">tile1</span><span class="p">,</span> <span class="n">tile2</span><span class="p">,</span> <span class="n">tile3</span> <span class="o">=</span> <span class="n">make_tiles</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gs0</span><span class="p">)</span>
+    <span class="n">ax11</span><span class="p">,</span> <span class="n">ax12</span> <span class="o">=</span> <span class="n">tile1</span>
+    <span class="n">ax21</span><span class="p">,</span> <span class="n">ax22</span> <span class="o">=</span> <span class="n">tile2</span>
+    <span class="n">ax31</span><span class="p">,</span> <span class="n">ax32</span> <span class="o">=</span> <span class="n">tile3</span>
+
+    <span class="n">ax11</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Vertical, scalar rotation&#39;</span><span class="p">)</span>
+    <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax11</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Sv</span><span class="p">,</span> <span class="n">ax12</span><span class="p">,</span> <span class="n">vsf</span><span class="p">,</span> <span class="s1">&#39;filtered&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="s1">&#39;vertical&#39;</span><span class="p">,</span>
+              <span class="n">arrivals</span><span class="o">=</span><span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="n">clim</span><span class="p">,</span> <span class="n">dlim</span><span class="o">=</span><span class="n">dlim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span>
+              <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">)</span>
+
+    <span class="n">ax21</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Radial, scalar rotation&#39;</span><span class="p">)</span>
+    <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax21</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Srs</span><span class="p">,</span> <span class="n">ax22</span><span class="p">,</span> <span class="n">rsf</span><span class="p">,</span> <span class="s1">&#39;filtered&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">rs</span><span class="p">,</span> <span class="s1">&#39;radial&#39;</span><span class="p">,</span>
+              <span class="n">arrivals</span><span class="o">=</span><span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="n">clim</span><span class="p">,</span> <span class="n">dlim</span><span class="o">=</span><span class="n">dlim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span>
+              <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">)</span>
+
+    <span class="n">ax31</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Transverse, scalar rotation&#39;</span><span class="p">)</span>
+    <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax31</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Sts</span><span class="p">,</span> <span class="n">ax32</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="s1">&#39;transverse&#39;</span><span class="p">,</span> <span class="n">arrivals</span><span class="o">=</span><span class="n">arrivals</span><span class="p">,</span>
+              <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="n">clim</span><span class="p">,</span> <span class="n">dlim</span><span class="o">=</span><span class="n">dlim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span> <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">xlim</span><span class="p">:</span>
+        <span class="n">ax11</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+        <span class="n">ax21</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+        <span class="n">ax31</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="plot_NIP"><a class="viewcode-back" href="../../api/particleman.html#particleman.plotting.plot_NIP">[docs]</a><span class="k">def</span> <span class="nf">plot_NIP</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">nips</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot the normalized inner product tile.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T, F, nips : numpy.ndarray (ndim 2)</span>
+<span class="sd">        Time, frequency, normalized inner-product tiles.</span>
+<span class="sd">    fs : float</span>
+<span class="sd">        Sampling frequency of the underlying time-series data.</span>
+<span class="sd">    flim : tuple</span>
+<span class="sd">        Frequency limits as (fmin, fmax) 2-tuple, in Hz.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matplotlib.Figure</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fig</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+    <span class="c1"># plt.imshow(nips, cmap=plt.cm.seismic, origin=&#39;lower&#39;,</span>
+    <span class="c1">#            extent=[0,nips.shape[1], 0, fs/2], aspect=&#39;auto&#39;,</span>
+    <span class="c1">#            interpolation=&#39;nearest&#39;)</span>
+    <span class="k">if</span> <span class="n">ax</span><span class="p">:</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">nip</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">nip</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">nips</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.8</span><span class="p">],</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">flim</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">flim</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;frequency [Hz]&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;time [sec]&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="compare_waveforms"><a class="viewcode-back" href="../../api/particleman.html#particleman.plotting.compare_waveforms">[docs]</a><span class="k">def</span> <span class="nf">compare_waveforms</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">vsf</span><span class="p">,</span> <span class="n">rs</span><span class="p">,</span> <span class="n">rsf</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">arrivals</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compare the static and dynamically filtered waveforms.</span>
+
+<span class="sd">    A 3-panel waveform plot of 3 components.  Unfiltered waves are in gray,</span>
+<span class="sd">    filtered are overplotted in black.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    v, vsf : numpy.ndarray (rank 1)</span>
+<span class="sd">        Unfiltered and static-rotated filtered vertical waveform.</span>
+<span class="sd">    rs, rsf : numpy.ndarray (rank 1)</span>
+<span class="sd">        Unfiltered and static-rotated filtered radial waveform.</span>
+<span class="sd">    ts: numpy.ndarray (rank 1)</span>
+<span class="sd">        Unfiltered transverse waveform.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;original&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vsf</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;NIP filtered&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower left&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">312</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;radial&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;original&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rsf</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;NIP filtered&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower left&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">313</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;transverse&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;original&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower left&#39;</span><span class="p">)</span>
+
+    <span class="c1"># plot arrivals</span>
+    <span class="k">for</span> <span class="n">arr</span><span class="p">,</span> <span class="n">itt</span> <span class="ow">in</span> <span class="n">arrivals</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">itt</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">v</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">itt</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">arr</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
+                 <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NIP_filter_plots"><a class="viewcode-back" href="../../api/particleman.html#particleman.plotting.NIP_filter_plots">[docs]</a><span class="k">def</span> <span class="nf">NIP_filter_plots</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">Sr</span><span class="p">,</span> <span class="n">St</span><span class="p">,</span> <span class="n">Sv</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">rf</span><span class="p">,</span> <span class="n">tf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">arrivals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hatchlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,</span>
+<span class="sd">    Quad plot of NIP, and 3 tiles of Stockwell transform with NIP filter hatch</span>
+<span class="sd">    and filtered+unfiltered time-series for each component.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T, F, theta: numpy.ndarray (ndim 2)</span>
+<span class="sd">        Time, frequency, instantaneous azimuth tiles.</span>
+<span class="sd">    fs : float</span>
+<span class="sd">        Sampling rate of underlying time-series data.</span>
+<span class="sd">    Sr, St, Sv : numpy.ndarray (ndim 2, complex)</span>
+<span class="sd">        Stockwell transform of the radial, transverse, and vertical component data.</span>
+<span class="sd">    r, t, v: numpy.ndarray (ndim 1)</span>
+<span class="sd">        Unfiltered radial, transverse, and vertical component time-series.</span>
+<span class="sd">    rf, tf, vf : numpy.ndarray (ndim 1)</span>
+<span class="sd">        NIP-filtered radial, transverse, and vertical component time-series.</span>
+<span class="sd">    arrivals : sequence of (str, float) 2-tuples</span>
+<span class="sd">        Sequence of arrivals to plot, of the form (label, time_in_seconds)</span>
+<span class="sd">    flim : tuple</span>
+<span class="sd">        Frequency limits as (fmin, fmax) 2-tuple, in Hz.</span>
+<span class="sd">    hatch : numpy.ndarray (ndim 2)</span>
+<span class="sd">        Optional tile used for cross-hatch visual mask.</span>
+<span class="sd">    hatchlim : tuple</span>
+<span class="sd">        Hatch range used to display mask.  2-tuple of floats (hmin, hmax).</span>
+<span class="sd">    fig : matplotlib.Figure</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tiles : list</span>
+<span class="sd">        List of two-tuples of axes objects (axis_top, axis_bottom) of each tile,</span>
+<span class="sd">        clockwise from top-left.  Can be unpacked to get all axes as follows:</span>
+
+<span class="sd">    &gt;&gt;&gt; tiles = NIP_filter_plots(...)</span>
+<span class="sd">    &gt;&gt;&gt; (ax11, ax12), (ax21, ax22), (ax31, ax32), (ax41, ax42) = tiles</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fig</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+    <span class="c1"># 2x2 grid of tiles</span>
+    <span class="n">gs0</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">gs0</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.96</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+               <span class="n">bottom</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+    <span class="n">tile1</span><span class="p">,</span> <span class="n">tile2</span><span class="p">,</span> <span class="n">tile3</span><span class="p">,</span> <span class="n">tile4</span> <span class="o">=</span> <span class="n">make_tiles</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gs0</span><span class="p">)</span>
+    <span class="n">ax11</span><span class="p">,</span> <span class="n">ax12</span> <span class="o">=</span> <span class="n">tile1</span> <span class="c1">#top left</span>
+    <span class="n">ax21</span><span class="p">,</span> <span class="n">ax22</span> <span class="o">=</span> <span class="n">tile2</span> <span class="c1">#top right</span>
+    <span class="n">ax31</span><span class="p">,</span> <span class="n">ax32</span> <span class="o">=</span> <span class="n">tile3</span> <span class="c1">#bottom left</span>
+    <span class="n">ax41</span><span class="p">,</span> <span class="n">ax42</span> <span class="o">=</span> <span class="n">tile4</span> <span class="c1">#bottom right</span>
+
+    <span class="c1"># common params: T, F, arrivals=None, flim=None, dlim=None</span>
+    <span class="c1"># each tile: S, title, cmap, clim, hatch, hatchlim, [(d1, color1, label1), (d1, color1, label1)]</span>
+    <span class="c1"># tile_data = [</span>
+    <span class="c1">#              ...</span>
+    <span class="c1">#              (np.abs(Sr), &#39;Radial, prograde&#39;, None, None, dfilt, 0.8, [(r, &#39;gray&#39;, &#39;original&#39;), (rf, &#39;k&#39;, &#39;filtered&#39;)]),</span>
+    <span class="c1">#              (np.abs(St), &#39;Transverse, linear&#39;, None, None, dfilt, 0.2, [(t, &#39;gray&#39;, &#39;original&#39;), (tf, &#39;k&#39;, &#39;filtered&#39;)]),</span>
+    <span class="c1">#              (np.abs(Sv), &#39;Vertical, prograde&#39;, none, None, dfilt, 0.8, [(v, &#39;gray&#39;, &#39;original&#39;), (vf, &#39;k&#39;, &#39;filtered&#39;)])</span>
+    <span class="c1"># ]</span>
+    <span class="c1"># NIP_filter_plots(T, F, tile_data, arrivals=None)</span>
+
+    <span class="c1"># top left axes: Instantaneous and weighted mean azimuth</span>
+    <span class="n">mean_theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">hatch</span><span class="p">)</span>
+    <span class="c1"># opacity_mask = np.array([np.abs(S) / np.abs(S).max() for S in (Sr, St, Sv)]).mean(axis=0)</span>
+    <span class="n">ax11</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Instantaneous propagation azimuth&#39;</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax11</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">ax12</span><span class="p">,</span> <span class="n">mean_theta</span><span class="p">,</span> <span class="s1">&#39;filter-weighted mean&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">arrivals</span><span class="o">=</span><span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span>
+                  <span class="n">dlim</span><span class="o">=</span><span class="p">[</span><span class="n">mean_theta</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">mean_theta</span><span class="o">.</span><span class="n">max</span><span class="p">()],</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span>
+                  <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">,</span> <span class="n">amp_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">nipy_spectral</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="c1"># top right: Vertical</span>
+    <span class="c1"># s transform and filter</span>
+    <span class="n">ax21</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Vertical&#39;</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax21</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Sv</span><span class="p">,</span> <span class="n">ax22</span><span class="p">,</span> <span class="n">vf</span><span class="p">,</span> <span class="s1">&#39;filtered&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="s1">&#39;original&#39;</span><span class="p">,</span>
+                  <span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span> <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">)</span>
+
+    <span class="c1"># bottom right: Radial</span>
+    <span class="c1"># s transform and filter</span>
+    <span class="n">ax41</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Radial&#39;</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax41</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Sr</span><span class="p">,</span> <span class="n">ax42</span><span class="p">,</span> <span class="n">rf</span><span class="p">,</span> <span class="s1">&#39;filtered&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="s1">&#39;original&#39;</span><span class="p">,</span>
+                  <span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span> <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">)</span>
+
+    <span class="c1"># bottom left: Transverse</span>
+    <span class="c1"># s transform and filter</span>
+    <span class="n">ax31</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Transverse&#39;</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">plot_tile</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax31</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">St</span><span class="p">,</span> <span class="n">ax32</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="s1">&#39;filtered&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="s1">&#39;original&#39;</span><span class="p">,</span>
+                  <span class="n">arrivals</span><span class="o">=</span><span class="n">arrivals</span><span class="p">,</span> <span class="n">flim</span><span class="o">=</span><span class="n">flim</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">,</span> <span class="n">hatchlim</span><span class="o">=</span><span class="n">hatchlim</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">tile1</span><span class="p">,</span> <span class="n">tile2</span><span class="p">,</span> <span class="n">tile3</span><span class="p">,</span> <span class="n">tile4</span><span class="p">]</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Jonathan MacCarthy
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

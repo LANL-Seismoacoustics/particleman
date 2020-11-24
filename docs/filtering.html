@@ -1,0 +1,253 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Advanced Filtering &mdash; particleman 0.3.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Plotting" href="plotting.html" />
+    <link rel="prev" title="Comparison to Other Transforms" href="comparison.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> particleman
+          
+
+          
+            
+            <img src="_static/lanl_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="comparison.html">Comparison to Other Transforms</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Advanced Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/LANL-Seismoacoustics/particleman">Repository</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">particleman</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Advanced Filtering</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/filtering.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="advanced-filtering">
+<h1>Advanced Filtering<a class="headerlink" href="#advanced-filtering" title="Permalink to this headline">¶</a></h1>
+<p>One of the benefits of the Stockwell transform as apposed to wavelet transforms
+is that it directly preserves phase in the same way that a Fourier transform
+does, which makes filters based upon phase relationships possible in
+time-frequency space.  In the example below, we use the Normalized Inner
+Produce filter of <a class="reference external" href="http://www.bssaonline.org/content/105/1/210.abstract">Meza-Fajardo et al., (2015)</a> to pass retrograde Rayleigh waves
+(in any frequency) from a particular azimuth.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">read</span>
+
+<span class="n">st</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/mdj-ic-00-lh[rtz]-2010-01-10-00-27.sac&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;SAC&#39;</span><span class="p">)</span>
+
+<span class="n">rs</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+<span class="n">ts</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s1">&#39;T&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s1">&#39;Z&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+
+<span class="n">tr</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">fs</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span>
+</pre></div>
+</div>
+<p><img alt="filtered retrograde radial" src="_images/stransforms_scalar.png" /></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">particleman</span> <span class="kn">import</span> <span class="n">stransform</span><span class="p">,</span> <span class="n">istransform</span>
+<span class="kn">import</span> <span class="nn">particleman.filter</span> <span class="k">as</span> <span class="nn">filt</span>
+
+<span class="c1"># Get the Stockwell transforms</span>
+<span class="n">Sr</span> <span class="o">=</span> <span class="n">stransform</span><span class="p">(</span><span class="n">radial</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+<span class="n">Sv</span> <span class="o">=</span> <span class="n">stransform</span><span class="p">(</span><span class="n">vertical</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+
+<span class="c1"># Advance the phase of the vertical transform</span>
+<span class="n">Sv_advanced</span> <span class="o">=</span> <span class="n">filt</span><span class="o">.</span><span class="n">shift_phase</span><span class="p">(</span><span class="n">Sv</span><span class="p">,</span> <span class="n">polarization</span><span class="o">=</span><span class="s1">&#39;retrograde&#39;</span><span class="p">)</span>
+
+<span class="c1"># Get the normalized inner product and use it to make a filter</span>
+<span class="n">nip</span> <span class="o">=</span> <span class="n">filt</span><span class="o">.</span><span class="n">NIP</span><span class="p">(</span><span class="n">Sr</span><span class="p">,</span> <span class="n">Sv_advanced</span><span class="p">)</span>
+<span class="n">retro_filter</span> <span class="o">=</span> <span class="n">filt</span><span class="o">.</span><span class="n">get_filter</span><span class="p">(</span><span class="n">nips</span><span class="p">,</span> <span class="n">polarization</span><span class="o">=</span><span class="s1">&#39;retrograde&#39;</span><span class="p">)</span>
+
+<span class="c1"># Apply the filter to the transforms, and return to the time-domain</span>
+<span class="n">rf</span> <span class="o">=</span> <span class="n">istransform</span><span class="p">(</span><span class="n">Sr</span> <span class="o">*</span> <span class="n">retro_filter</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">)</span>
+<span class="n">vf</span> <span class="o">=</span> <span class="n">istransform</span><span class="p">(</span><span class="n">Sv</span> <span class="o">*</span> <span class="n">retro_filter</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="plotting.html" class="btn btn-neutral float-right" title="Plotting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="comparison.html" class="btn btn-neutral float-left" title="Comparison to Other Transforms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Jonathan MacCarthy
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

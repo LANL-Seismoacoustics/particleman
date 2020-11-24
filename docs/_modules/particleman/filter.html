@@ -1,0 +1,615 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>particleman.filter &mdash; particleman 0.3.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> particleman
+          
+
+          
+            
+            <img src="../../_static/lanl_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../comparison.html">Comparison to Other Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filtering.html">Advanced Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/LANL-Seismoacoustics/particleman">Repository</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">particleman</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>particleman.filter</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for particleman.filter</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Time-frequency filtering for seismic waves.</span>
+
+<span class="sd">To estimate propagation azimuth for a prograde/retrograde Rayleigh wavetrain:</span>
+
+<span class="sd">1. Make complex component s-transforms, Sn, Se, Sv</span>
+<span class="sd">2. Apply phase delay to Sv for normal retrograde motion, advance for prograde motion</span>
+<span class="sd">3. Convert complex transforms into MxNx2 real (&quot;vector&quot;) arrays</span>
+<span class="sd">4. Calculate theta from theta_r and theta_l</span>
+
+<span class="sd">To make a normalized inner product (NIP) filter, given azimuth</span>
+
+<span class="sd">5. Rotate Sn, Se through theta, into radial (Sr) and transverse (St) component transforms</span>
+<span class="sd">6. Calculate NIP using the vector Sr and phase-shifted vector Sv</span>
+<span class="sd">7. Extract surface waves using NIP &gt;= 0.8 (smoothed) as a filter on Sr, St, Sv, and invert to time domain.</span>
+<span class="sd">   Rayleigh waves will be on the time-domain radial, Love on the time-domain transverse.</span>
+
+
+<span class="sd">References</span>
+<span class="sd">----------</span>
+
+<span class="sd">Meza-Fajardo, K. C., Papageorgiou, A. S., and Semblat, J. F. (2015).</span>
+<span class="sd">Identification and Extraction of Surface Waves from Three Component Seismograms</span>
+<span class="sd">Based on the Normalized Inner Product. Bulletin of the Seismological Society of</span>
+<span class="sd">America.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="c1"># TODO: consider moving the nip argument to inside get_filter.  People may only </span>
+<span class="c1">#   rarely want to see the NIP, and they can do so directly, using NIP.</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="kn">from</span> <span class="nn">.core</span> <span class="kn">import</span> <span class="n">stransform</span><span class="p">,</span> <span class="n">istransform</span>
+
+<div class="viewcode-block" id="get_shift"><a class="viewcode-back" href="../../api/particleman.html#particleman.filter.get_shift">[docs]</a><span class="k">def</span> <span class="nf">get_shift</span><span class="p">(</span><span class="n">polarization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the appropriate pi/2 phase advance or delay for the provided</span>
+<span class="sd">    polarization.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    polarization : str, {&#39;retrograde&#39;, &#39;prograde&#39;, &#39;linear&#39;}</span>
+<span class="sd">        &#39;retrograde&#39; returns i, for a pi/2 phase advance.</span>
+<span class="sd">        &#39;prograde&#39; or &#39;linear&#39; returns -i, for a pi/2 phase delay</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.complex128</span>
+<span class="sd">        Multiply this value (i or -i) into a complex vertical S-transform to</span>
+<span class="sd">        shift its phase.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">polarization</span> <span class="ow">is</span> <span class="s1">&#39;retrograde&#39;</span><span class="p">:</span>
+        <span class="c1"># phase advance</span>
+        <span class="n">shft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">polarization</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;prograde&#39;</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+        <span class="c1"># phase delay</span>
+        <span class="n">shft</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Polarization must be either &#39;prograde&#39;, &#39;retrograde&#39;, or &#39;linear&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">shft</span></div>
+
+
+<div class="viewcode-block" id="shift_phase"><a class="viewcode-back" href="../../api/particleman.html#particleman.filter.shift_phase">[docs]</a><span class="k">def</span> <span class="nf">shift_phase</span><span class="p">(</span><span class="n">Sv</span><span class="p">,</span> <span class="n">polarization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Phase-shift an s-transform by the appropriate phase shift for</span>
+<span class="sd">    prograde/retrograde motion.</span>
+
+<span class="sd">    Shift is done on a complex MxN array by multiplication with either i or -i</span>
+<span class="sd">    (imaginary unit).  This is mostly a reference for how to do/interpret phase</span>
+<span class="sd">    shifts, as it&#39;s such a simple thing to do outside of a function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Sv : numpy.ndarray (complex, rank 2)</span>
+<span class="sd">    polarization : str, {&#39;retrograde&#39;, &#39;prograde&#39;, &#39;linear&#39;}</span>
+<span class="sd">        &#39;retrograde&#39; will apply a pi/2 phase advance (normal Rayleigh waves)</span>
+<span class="sd">        &#39;prograde&#39; or &#39;linear&#39; will apply a pi/2 phase delay</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray (real, rank 2)</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Pages 5 and 10 from Meta-Fajardo et al. (2015)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">shft</span> <span class="o">=</span> <span class="n">get_shift</span><span class="p">(</span><span class="n">polarization</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Sv</span> <span class="o">*</span> <span class="n">shft</span></div>
+
+
+<div class="viewcode-block" id="xpr"><a class="viewcode-back" href="../../api/particleman.html#particleman.filter.xpr">[docs]</a><span class="k">def</span> <span class="nf">xpr</span><span class="p">(</span><span class="n">az</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the Meza-Fajardo &quot;xpr&quot; sense-of-propagation of wavefield.</span>
+<span class="sd">    propagation azimuth.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    az : int or float</span>
+<span class="sd">        Propagation direction in degrees.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    1 for eastward propagation</span>
+<span class="sd">    -1 for westward</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If the azimuth is 0 or 180, polarization type may be ambiguous.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">az</span><span class="p">))))</span></div>
+
+
+<div class="viewcode-block" id="instantaneous_azimuth"><a class="viewcode-back" href="../../api/particleman.html#particleman.filter.instantaneous_azimuth">[docs]</a><span class="k">def</span> <span class="nf">instantaneous_azimuth</span><span class="p">(</span><span class="n">Sv</span><span class="p">,</span> <span class="n">Sn</span><span class="p">,</span> <span class="n">Se</span><span class="p">,</span> <span class="n">polarization</span><span class="p">,</span> <span class="n">xpr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get instantaneous propagation angle [degrees], under the Rayleigh wave</span>
+<span class="sd">    assumption, using the Meza-Fajardo et al. Normalized Inner Product criterion.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Sv, Sn, Se : numpy.ndarray (complex, rank 2)</span>
+<span class="sd">        The vertical, North, and East component equal-sized complex s-transforms.</span>
+<span class="sd">    polarization : str, {&#39;retrograde&#39;, &#39;prograde&#39;, &#39;linear&#39;}</span>
+<span class="sd">        &#39;retrograde&#39; will apply a pi/2 phase advance.</span>
+<span class="sd">        &#39;prograde&#39; or &#39;linear&#39; will apply a pi/2 phase delay</span>
+<span class="sd">    xpr : int</span>
+<span class="sd">        Sense of propagation.  1 for eastward, -1 for westward.</span>
+<span class="sd">        Try -int(np.sign(np.sin(np.radians(baz)))), unless they&#39;re directly N-S</span>
+<span class="sd">        from each other.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    az : numpy.ndarray (real, rank 2)</span>
+<span class="sd">        Instantaneous Rayleigh wave propagation angle [degrees]</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Equations (19), (20), and (21) from Meza-Fajardo et al. (2015)</span>
+
+<span class="sd">    &quot;Let us emphatically note that if the sense of propagation of the phase</span>
+<span class="sd">    under investigation is not established, prograde or retrograde motion</span>
+<span class="sd">    cannot be defined without ambiguity.&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Svhat</span> <span class="o">=</span> <span class="n">shift_phase</span><span class="p">(</span><span class="n">Sv</span><span class="p">,</span> <span class="n">polarization</span><span class="p">)</span>
+
+    <span class="n">num</span> <span class="o">=</span> <span class="p">(</span><span class="n">Se</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">Svhat</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">Se</span><span class="o">.</span><span class="n">imag</span> <span class="o">*</span> <span class="n">Svhat</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+    <span class="n">denom</span> <span class="o">=</span> <span class="p">(</span><span class="n">Sn</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">Svhat</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">Sn</span><span class="o">.</span><span class="n">imag</span> <span class="o">*</span> <span class="n">Svhat</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+
+    <span class="c1"># zeros will become nans, then propate in bad ways.</span>
+    <span class="c1"># put a tiny number in the denominator where both the numberator and denominator are zero.</span>
+    <span class="n">denom</span><span class="p">[</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">num</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">denom</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">)</span> <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+    
+    <span class="n">theta_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">num</span> <span class="o">/</span> <span class="n">denom</span><span class="p">)</span> <span class="c1"># [-pi/2, pi/2]</span>
+    <span class="c1"># theta_r = np.arctan2(num, denom)</span>
+
+    <span class="n">theta_I</span> <span class="o">=</span> <span class="n">theta_r</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_r</span><span class="p">)))</span> <span class="o">+</span> \
+        <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_r</span><span class="p">)))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_r</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">theta_I</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_I</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">xpr</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="scalar_azimuth"><a class="viewcode-back" href="../../api/particleman.html#particleman.filter.scalar_azimuth">[docs]</a><span class="k">def</span> <span class="nf">scalar_azimuth</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">vhat</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Time domain estimation the scalar/average azimuth, in degrees.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Equations (10) and (12) from Meza-Fajardo et al. (2015)</span>
+
+<span class="sd">    &quot;If the extracted signal is composed of more than one dispersive wave</span>
+<span class="sd">    propagating in distinct, albeit similar, directions, then, equations</span>
+<span class="sd">    (10)–(12) should be applied independently to each one of them. By</span>
+<span class="sd">    inspecting the Stockwell transform of the signal, the analyst can observe</span>
+<span class="sd">    if there are several wavetrains.&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">theta_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">vhat</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">vhat</span><span class="p">))</span>
+    <span class="c1"># theta_r = np.arctan2(np.dot(e, vhat), np.dot(n, vhat))</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">theta_r</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_r</span><span class="p">)))</span> <span class="o">+</span> \
+              <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_r</span><span class="p">)))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_r</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="rotate_NE_RT"><a class="viewcode-back" href="../../api/particleman.html#particleman.filter.rotate_NE_RT">[docs]</a><span class="k">def</span> <span class="nf">rotate_NE_RT</span><span class="p">(</span><span class="n">Sn</span><span class="p">,</span> <span class="n">Se</span><span class="p">,</span> <span class="n">az</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rotate North and East s-transforms to radial and transverse, through the propagation angle.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Sn, Se : numpy.ndarray (complex, rank 2)</span>
+<span class="sd">        Complex, equal-sized s-transform arrays, for North and East components, respectively.</span>
+<span class="sd">    az : float</span>
+<span class="sd">        Rotation angle [degrees].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Sr, St : numpy.ndarray (rank 2)</span>
+<span class="sd">        Complex s-transform arrays for radial and transverse components, respectively.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Equation (17) from Meta-Fajardo et al. (2015)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">az</span><span class="p">)</span>
+
+    <span class="n">Sr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">Sn</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">Se</span>
+    <span class="n">St</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">Sn</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">Se</span>
+
+    <span class="k">return</span> <span class="n">Sr</span><span class="p">,</span> <span class="n">St</span></div>
+
+
+<div class="viewcode-block" id="NIP"><a class="viewcode-back" href="../../api/particleman.html#particleman.filter.NIP">[docs]</a><span class="k">def</span> <span class="nf">NIP</span><span class="p">(</span><span class="n">Sr</span><span class="p">,</span> <span class="n">Sv</span><span class="p">,</span> <span class="n">polarization</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the normalized inner product of two complex MxN stockwell transforms.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Sr, Sv: numpy.ndarray (complex, rank 2)</span>
+<span class="sd">        The radial and vertical component s-transforms. If the polarization argument is omitted,</span>
+<span class="sd">        Sv is assumed to be phase-shifted according to the desired polarization.</span>
+<span class="sd">    polarization : str, optional</span>
+<span class="sd">        If provided, the Sv will be phase-shifted according to this string before calculating the NIP.</span>
+<span class="sd">        &#39;retrograde&#39; will apply a pi/2 phase advance (1j * Sv)</span>
+<span class="sd">        &#39;prograde&#39; or &#39;linear&#39; will apply a pi/2 phase delay (-1j * Sv)</span>
+<span class="sd">    eps : float, optional</span>
+<span class="sd">        Tolerance for small denominator values, for numerical stability.</span>
+<span class="sd">        Useful for synthetic noise-free data.  Authors used 0.04.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nip : numpy.ndarray (rank 2)</span>
+<span class="sd">        MxN array of floats between -1 and 1.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Equation (16) and (26) from Meza-Fajardo et al. (2015)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">polarization</span><span class="p">:</span>
+        <span class="n">Svhat</span> <span class="o">=</span> <span class="n">shift_phase</span><span class="p">(</span><span class="n">Sv</span><span class="p">,</span> <span class="n">polarization</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Just a literal inner product, no shift.</span>
+        <span class="n">Svhat</span> <span class="o">=</span> <span class="n">Sv</span>
+
+    <span class="n">Avhat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Svhat</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">eps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">Avhat</span> <span class="o">/</span> <span class="n">Avhat</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">&lt;</span> <span class="n">eps</span>
+        <span class="n">Avhat</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">+=</span> <span class="n">eps</span><span class="o">*</span><span class="n">Avhat</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="n">ip</span> <span class="o">=</span> <span class="p">(</span><span class="n">Sr</span><span class="o">.</span><span class="n">real</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Svhat</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">Sr</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Svhat</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Sr</span><span class="p">)</span> <span class="o">*</span> <span class="n">Avhat</span>
+
+    <span class="k">return</span> <span class="n">ip</span><span class="o">/</span><span class="n">n</span></div>
+
+
+<div class="viewcode-block" id="get_filter"><a class="viewcode-back" href="../../api/particleman.html#particleman.filter.get_filter">[docs]</a><span class="k">def</span> <span class="nf">get_filter</span><span class="p">(</span><span class="n">nip</span><span class="p">,</span> <span class="n">polarization</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get an NIP-based filter that will pass waves of the specified type.</span>
+
+<span class="sd">    The filter is made from the NIP and cosine taper for the specified wave type.</span>
+<span class="sd">    The nip and the polarization type must match.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nip : numpy.ndarray (real, rank 2)</span>
+<span class="sd">        The NIP array [-1.0, 1.0]</span>
+<span class="sd">    polarization : str</span>
+<span class="sd">        The type of polarization that was used to calculate the provided NIP.</span>
+<span class="sd">        &#39;retrograde&#39;, &#39;prograde&#39;, or &#39;linear&#39;.  See &quot;NIP&quot; function.</span>
+<span class="sd">    threshold, width : float</span>
+<span class="sd">        The cosine taper critical/crossover value (&quot;x_r&quot;) and width (&quot;\Delta x&quot;).</span>
+<span class="sd">        If not supplied, the default for retrograde polarization is 0.8, and for</span>
+<span class="sd">        prograde or linear polarization is 0.2.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray (real, rank 2)</span>
+<span class="sd">        The NIP-based filter array [0.0, 1.0] to multiply into the complex Stockwell arrays,</span>
+<span class="sd">        before inverse transforming to the time-domain.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Equation (27) and (28) from Meza-Fajardo et al. (2015)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">polarization</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;retrograde&#39;</span><span class="p">,</span> <span class="s1">&#39;prograde&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.8</span>
+        <span class="n">filt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nip</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">threshold</span> <span class="o">-</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="n">nip</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">nip</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)</span>
+        <span class="n">high</span> <span class="o">=</span> <span class="n">threshold</span> <span class="o">&lt;</span> <span class="n">nip</span>
+        <span class="n">filt</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">nip</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span><span class="o">-</span><span class="n">threshold</span><span class="p">))</span><span class="o">/</span><span class="n">width</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span>
+        <span class="n">filt</span><span class="p">[</span><span class="n">high</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">elif</span> <span class="n">polarization</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.2</span>
+        <span class="n">filt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nip</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">threshold</span> <span class="o">&lt;</span> <span class="n">nip</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">nip</span> <span class="o">&lt;</span> <span class="n">threshold</span> <span class="o">+</span> <span class="n">width</span><span class="p">)</span>
+        <span class="n">high</span> <span class="o">=</span> <span class="n">threshold</span> <span class="o">+</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="n">nip</span>
+        <span class="n">filt</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">nip</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span><span class="o">-</span><span class="n">threshold</span><span class="p">))</span><span class="o">/</span><span class="n">width</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span>
+        <span class="n">filt</span><span class="p">[</span><span class="n">high</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown polarization type: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">polarization</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">filt</span></div>
+
+
+<div class="viewcode-block" id="NIP_filter"><a class="viewcode-back" href="../../api/particleman.html#particleman.filter.NIP_filter">[docs]</a><span class="k">def</span> <span class="nf">NIP_filter</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">xpr</span><span class="p">,</span> <span class="n">polarization</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter a 3-component seismogram based on the NIP criterion.</span>
+
+<span class="sd">    This is a composite convenience routine that uses sane defaults.</span>
+<span class="sd">    If you want to get intermediate products, call internal routines individually.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n, e, v : numpy.ndarray (rank 1)</span>
+<span class="sd">        Equal-length data arrays for North, East, and Vertical components, respectively.</span>
+<span class="sd">    fs : float</span>
+<span class="sd">        Sampling frequency [Hz]</span>
+<span class="sd">    xpr : int</span>
+<span class="sd">        Sense of wave propagation. -1 for westward, 1 for eastward.</span>
+<span class="sd">        Try -int(np.sign(np.sin(np.radians(baz)))), unless they&#39;re directly N-S from each other.</span>
+<span class="sd">    polarization : str</span>
+<span class="sd">        &#39;retrograde&#39; to extract normal retrograde Rayleigh waves</span>
+<span class="sd">        &#39;prograde&#39; to extract prograde Rayleigh waves</span>
+<span class="sd">        &#39;linear&#39; to extract Love waves</span>
+<span class="sd">    threshold, width : float</span>
+<span class="sd">        The critical value (&quot;x_r&quot;) and width (&quot;\Delta x&quot;) for the NIP filter (cosine) taper.</span>
+<span class="sd">    eps : float</span>
+<span class="sd">        Tolerance for small NIP denominator values, for numerical stability.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    n, e, v : numpy.ndarray (rank 1)</span>
+<span class="sd">        Filtered north, east, and vertical components.</span>
+<span class="sd">    theta : float</span>
+<span class="sd">        Average propagation azimuth for the given polarization [degrees].</span>
+<span class="sd">        Use this angle to rotate the data to radial and transverse.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    # compare filtered north, east, vertical to original</span>
+<span class="sd">    &gt;&gt;&gt; import obspy.signal as signal</span>
+<span class="sd">    &gt;&gt;&gt; nf, ef, vf, theta = NIP_filter(n, e, v, fs, xpr)</span>
+<span class="sd">    &gt;&gt;&gt; if theta &gt; 180:</span>
+<span class="sd">            nip_baz = theta - 180</span>
+<span class="sd">        else:</span>
+<span class="sd">            nip_baz = theta + 180</span>
+
+<span class="sd">    &gt;&gt;&gt; rf, tf = signal.rotate_NE_RT(nf, ef, nip_baz)</span>
+<span class="sd">    &gt;&gt;&gt; r, t = signal.rotate_NE_RT(n, e, baz)</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO:</span>
+    <span class="c1"># * rewrite this to get rid of all the potentially huge intermediate arrays</span>
+    <span class="c1"># * Allow user to specify a scalar theta propagation azimuth, and sidestep</span>
+    <span class="c1">#   the instantaneous calculation.</span>
+
+    <span class="n">shft</span> <span class="o">=</span> <span class="n">get_shift</span><span class="p">(</span><span class="n">polarization</span><span class="p">)</span>
+
+    <span class="c1">#1. Get instantaneous theta from Sn, Se, Svhat</span>
+    <span class="n">Sn</span> <span class="o">=</span> <span class="n">stransform</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">)</span>
+    <span class="n">Se</span> <span class="o">=</span> <span class="n">stransform</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">)</span>
+    <span class="n">Sv</span> <span class="o">=</span> <span class="n">stransform</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">)</span>
+
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">instantaneous_azimuth</span><span class="p">(</span><span class="n">Sv</span><span class="p">,</span> <span class="n">Sn</span><span class="p">,</span> <span class="n">Se</span><span class="p">,</span> <span class="n">polarization</span><span class="p">,</span> <span class="n">xpr</span><span class="p">)</span>
+
+    <span class="c1">#2. Rotate Sn, Se through theta, and get nip from Svhat and Sr</span>
+    <span class="n">Sr</span><span class="p">,</span> <span class="n">St</span> <span class="o">=</span> <span class="n">rotate_NE_RT</span><span class="p">(</span><span class="n">Sn</span><span class="p">,</span> <span class="n">Se</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+
+    <span class="c1"># damp values where theta is NaN (usually divide-by-zero problems)</span>
+    <span class="n">nanr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">Sr</span><span class="p">)</span>
+    <span class="n">nant</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">St</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">nanr</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">nant</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> fraction of NaNs found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nanr</span><span class="p">))</span> <span class="o">/</span> <span class="n">nanr</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">Sr</span><span class="p">[</span><span class="n">nanr</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">St</span><span class="p">[</span><span class="n">nant</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="n">nip</span> <span class="o">=</span> <span class="n">NIP</span><span class="p">(</span><span class="n">Sr</span><span class="p">,</span> <span class="n">shft</span> <span class="o">*</span> <span class="n">Sv</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
+
+    <span class="c1">#3. get appropriate nip filter, and stamp on Sn, Se, Sv</span>
+    <span class="n">filt</span> <span class="o">=</span> <span class="n">get_filter</span><span class="p">(</span><span class="n">nip</span><span class="p">,</span> <span class="n">polarization</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">istransform</span><span class="p">(</span><span class="n">Sn</span><span class="o">*</span><span class="n">filt</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">)</span>
+    <span class="n">ef</span> <span class="o">=</span> <span class="n">istransform</span><span class="p">(</span><span class="n">Se</span><span class="o">*</span><span class="n">filt</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">)</span>
+    <span class="n">vf</span> <span class="o">=</span> <span class="n">istransform</span><span class="p">(</span><span class="n">Sv</span><span class="o">*</span><span class="n">filt</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">)</span>
+
+    <span class="c1"># get the average propogation azimuth</span>
+    <span class="n">theta_bar</span> <span class="o">=</span> <span class="n">scalar_azimuth</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">istransform</span><span class="p">((</span><span class="n">shft</span> <span class="o">*</span> <span class="n">Sv</span><span class="p">)</span> <span class="o">*</span> <span class="n">filt</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">))</span>
+
+    <span class="c1"># return to time domain</span>
+    <span class="c1">#if theta_bar &gt; 180:</span>
+    <span class="c1">#    baz = theta_bar - 180</span>
+    <span class="c1">#else:</span>
+    <span class="c1">#    baz = theta_bar + 180</span>
+
+    <span class="c1">#import obspy.signal as signal</span>
+    <span class="c1">#rf, tf = signal.rotate_NE_RT(nf, ef, baz)</span>
+
+    <span class="k">return</span> <span class="n">nf</span><span class="p">,</span> <span class="n">ef</span><span class="p">,</span> <span class="n">vf</span><span class="p">,</span> <span class="n">theta_bar</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Jonathan MacCarthy
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
