@@ -1,4 +1,4 @@
-name: particleman
+name: particleman-dev
 channels:
 - defaults # prioritize defaults
 - conda-forge
@@ -10,5 +10,8 @@ dependencies:
 - fftw
 - python=3
 - numpy
+- matplotlib
 - pytest
 - pip
+- pip:
+    - -e .  #install current package editable 
