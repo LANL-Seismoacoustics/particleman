@@ -15,6 +15,7 @@ except ImportError:
     pass
 
 # This needs to be below the setuptools import
+#from setuptools import setup, Extension
 from distutils.core import setup, Extension
 
 here = os.path.abspath(os.path.dirname(__file__))
