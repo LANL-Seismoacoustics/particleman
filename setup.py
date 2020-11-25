@@ -4,7 +4,6 @@
 Particle Man: particle motion analysis of seismic surface waves
 
 """
-import os
 import sys
 import pathlib
 
