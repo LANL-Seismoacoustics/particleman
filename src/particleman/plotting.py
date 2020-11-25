@@ -13,7 +13,8 @@ correspond to a NIP filter, and the time-series axis may have a reference
 (gray) trace overlayed, which normally corresponds to the unfiltered trace.
 
 
-## Channel nomenclature:
+Channel Nomenclature
+--------------------
 
 ```
 [nevrt][sd][f]
@@ -95,10 +96,13 @@ def plot_tile(fig, ax1, T, F, S, ax2, d1, label1, color1='k', d2=None,
 
     Examples
     --------
-    # filtered versus unfiltered radial, and set color limits
+    Filtered versus unfiltered radial, and set color limits
+
     >>> plot_tile(fig, ax21, T, F, Srs, ax22, rs, 'unfiltered', rsf, 'NIP filtered', 
         arrivals=arrivals, flim=(0.0, fmax), clim=(0.0, 5e-5), hatch=sfilt, hatchlim=(0.0, 0.8))
-    # scalar versus dynamic rotated radial 
+
+    Scalar versus dynamic rotated radial 
+
     >>> plot_tile(fig, ax21, T, F, Srs, ax22, rs, 'scalar', rd, 'dynamic', arrivals
         flim=(0.0, fmax), clim=(0.0, 5e-5), hatch=dfilt, hatchlim=(0.0, 0.8))
 
@@ -518,10 +522,10 @@ def compare_waveforms(v, vsf, rs, rsf, ts, arrivals):
                  va='top')
 
 
+# def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
 def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, r, t, v, rf, tf=None, vf=None,
                      arrivals=None, flim=None, hatch=None, hatchlim=None, fig=None):
     """
-def NIP_filter_plots(T, F, theta, fs, Sr, St, Sv, rf, r, vf, v, t, tf=None,
     Quad plot of NIP, and 3 tiles of Stockwell transform with NIP filter hatch
     and filtered+unfiltered time-series for each component.
 
