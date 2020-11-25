@@ -6,13 +6,13 @@ Particle Man: particle motion analysis of seismic surface waves
 """
 import os
 import sys
+import pathlib
 
 from numpy.distutils.system_info import get_info, system_info
 from setuptools import setup, Extension, find_packages
 
-here = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
-    readme = f.read()
+here = pathlib.Path(__file__).parent.resolve()
+readme = (here / 'README.md').read_text(encoding='utf-8')
 
 # Find the fftw3 headers
 info = system_info()
@@ -42,6 +42,7 @@ setup(name='particleman',
       author='Jonathan MacCarthy',
       author_email='jkmacc@lanl.gov',
       install_requires=['numpy', 'matplotlib'],
+      python_requires='>=3.4',
       package_dir={'': 'src'},
       packages=find_packages(where='src'),
       ext_modules=ext_modules,
