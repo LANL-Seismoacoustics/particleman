@@ -8,15 +8,7 @@ import os
 import sys
 
 from numpy.distutils.system_info import get_info, system_info
-
-try:
-    import setuptools
-except ImportError:
-    pass
-
-# This needs to be below the setuptools import
-#from setuptools import setup, Extension
-from distutils.core import setup, Extension
+from setuptools import setup, Extension, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -36,7 +28,7 @@ libdirs = info.get_lib_dirs()
 fftw = get_info('fftw3') or get_info('fftw')
 
 if not fftw:
-    print("We require either fftw3 or fftw to be present in order to build")
+    print("We require either fftw3 or fftw to be present in order to build", file=sys.stderr)
     sys.exit(1)
 
 #define_macros = fftw['define_macros'],
@@ -56,6 +48,6 @@ setup(name='particleman',
       author_email='jkmacc@lanl.gov',
       install_requires=['numpy', 'matplotlib'],
       package_dir={'': 'src'},
-      packages=['particleman'],
+      packages=find_packages(where='src'),
       ext_modules=ext_modules,
      )
