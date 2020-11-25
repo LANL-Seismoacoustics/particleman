@@ -14,12 +14,6 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     readme = f.read()
 
-try:
-    import pypandoc
-    readme = pypandoc.convert(readme, 'md', 'rst')
-except ImportError:
-    pass
-
 # Find the fftw3 headers
 info = system_info()
 incdirs = info.get_include_dirs()
@@ -43,6 +37,7 @@ setup(name='particleman',
       version='0.3.0',
       description='Particle motion analysis for seismic surface waves',
       long_description=readme,
+      long_description_content_type='text/markdown',
       url='http://github.com/lanl-seismoacoustics/particleman',
       author='Jonathan MacCarthy',
       author_email='jkmacc@lanl.gov',
