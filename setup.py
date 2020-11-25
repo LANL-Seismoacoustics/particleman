@@ -44,7 +44,7 @@ ext_modules = [Extension('particleman.libst',
                          include_dirs=incdirs + fftw['include_dirs'],
                          libraries=fftw['libraries'],
                          library_dirs=fftw['library_dirs'],
-                         sources=['particleman/src/st.c'])]
+                         sources=['src/particleman/st.c'])]
 
 
 setup(name='particleman',
@@ -54,9 +54,8 @@ setup(name='particleman',
       url='http://github.com/lanl-seismoacoustics/particleman',
       author='Jonathan MacCarthy',
       author_email='jkmacc@lanl.gov',
-      install_requires=['numpy'],
+      install_requires=['numpy', 'matplotlib'],
+      package_dir={'': 'src'},
       packages=['particleman'],
-      py_modules=['particleman.core', 'particleman.plotting', 'particleman.st',
-                  'particleman.filter'],
       ext_modules=ext_modules,
      )
