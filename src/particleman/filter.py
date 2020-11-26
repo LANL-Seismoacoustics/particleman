@@ -318,7 +318,7 @@ def get_filter(nip, polarization, threshold=None, width=0.1):
 
 
 def NIP_filter(n, e, v, fs, xpr, polarization, threshold=0.8, width=0.1, eps=None):
-    r"""
+    """
     Filter a 3-component seismogram based on the NIP criterion.
 
     This is a composite convenience routine that uses sane defaults.
@@ -352,14 +352,14 @@ def NIP_filter(n, e, v, fs, xpr, polarization, threshold=0.8, width=0.1, eps=Non
 
     Examples
     --------
-    # compare filtered north, east, vertical to original
+    Compare filtered north, east, vertical to original
+
     >>> import obspy.signal as signal
     >>> nf, ef, vf, theta = NIP_filter(n, e, v, fs, xpr)
     >>> if theta > 180:
             nip_baz = theta - 180
         else:
             nip_baz = theta + 180
-
     >>> rf, tf = signal.rotate_NE_RT(nf, ef, nip_baz)
     >>> r, t = signal.rotate_NE_RT(n, e, baz)
 
