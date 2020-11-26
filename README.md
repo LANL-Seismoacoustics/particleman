@@ -2,9 +2,8 @@
 
 **Particle** **m**otion **an**alysis of seismic surface waves using the Stockwell Transform.
 
-
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
-[![pipeline status](https://git.lanl.gov/ees-geophysics/particleman/badges/master/pipeline.svg)](https://git.lanl.gov/ees-geophysics/particleman/commits/master)
+![Build Status](https://github.com/LANL-Seismoacoustics/particleman/workflows/Python%20package/badge.svg?branch=master)
 
 * [Documentation](https://lanl-seismoacoustics.github.io/particleman)
 
