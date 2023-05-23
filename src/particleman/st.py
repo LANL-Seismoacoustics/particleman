@@ -3,12 +3,12 @@ ctypes interface to st.c
 
 """
 import ctypes
-from distutils import sysconfig
+import importlib.machinery
 import os
 
 import numpy as np
 
-ext, = sysconfig.get_config_vars('SO')
+ext = importlib.machinery.EXTENSION_SUFFIXES[0]
 libst = ctypes.CDLL(os.path.dirname(__file__) + '/libst' + ext)
 
 # void st(int len, int lo, int hi, double *data, double *result)
@@ -55,7 +55,7 @@ def st(data, lo=None, hi=None):
     # interpreted as real, and the second one interpreted as imaginary.
     # NumPy complex apparently interprets the underlying array(s) in the same way
     # that FFTW fills in the real and imaginary parts.
-    results = np.zeros((M, N), dtype=np.complex)
+    results = np.zeros((M, N), dtype=np.complex128)
 
     # void st(int len, int lo, int hi, double *data, double *result)
     libst.st(N, lo, hi,
@@ -67,7 +67,7 @@ def st(data, lo=None, hi=None):
 
 
 def ist(X, lo=None, hi=None):
-    X = np.ascontiguousarray(X, dtype=np.complex)
+    X = np.ascontiguousarray(X, dtype=np.complex128)
 
     N, M = X.shape
 
