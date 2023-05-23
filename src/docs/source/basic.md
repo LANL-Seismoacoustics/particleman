@@ -28,7 +28,7 @@ be large, you may use the `return_time_freq=False` keyword.
 This example shows that a time-integration of the the Stockwell transform is 
 equivalent to the traditional FFT.
 
-![chirp](data/chirp.png "chirp")
+![chirp](_static/chirp.png "chirp")
 
 
 Optionally, only certain rows of the S-transform can be returned (**filtered**),
