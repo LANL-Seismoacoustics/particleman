@@ -1,4 +1,4 @@
-image: centos:6
+image: centos:7
 
 before_script:
  - yum -y install gcc && yum clean all
