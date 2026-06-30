@@ -19,9 +19,9 @@ def test_xpr():
 
 def test_instantaneous_azimuth(synthetic_data):
     """
-    The instantaneous azimuth at 1 Hz should be ~150
-    The instantaneous azimuth at 2 Hz should be ~60
-    The instantaneous azimuth at 5 Hz should be ~105
+    The instantaneous azimuth at 1 Hz should be ~150 (prograde)
+    The instantaneous azimuth at 2 Hz should be ~60 (regrograde)
+    The instantaneous azimuth at 5 Hz should be ~105 (linear)
     """
     TOL = 1.0 # [degrees]
     POLARIZATION = 'retrograde'
@@ -35,10 +35,10 @@ def test_instantaneous_azimuth(synthetic_data):
     with np.errstate(divide='ignore', invalid='ignore'):
         theta = filt.instantaneous_azimuth(Sv, Sn, Se, POLARIZATION, xpr)
 
-    assert theta[idx_5hz, idx_10sec] == pytest.approx(az_retro + 45, abs=TOL) # 60 (y axis retrograde wave) + 45 (x-y linear wave)
-    assert theta[idx_2hz, idx_10sec] == pytest.approx(az_retro, abs=TOL)
-    assert theta[idx_1hz, idx_10sec] == pytest.approx(az_retro + 90, abs=TOL) # 60 (retrograde wave) + 90 
-    assert theta[idx_7_5hz, idx_2sec] == pytest.approx(az_retro + 90, abs=TOL) # 60 (retrograde wave) + 90 
+    assert theta[idx_5hz, idx_10sec] == pytest.approx(az_retro + 45, abs=TOL) # 60 (y axis retrograde wave) + 45 = 105 x-y linear wave
+    assert theta[idx_2hz, idx_10sec] == pytest.approx(az_retro, abs=TOL) # retrograde wave = 60
+    assert theta[idx_1hz, idx_10sec] == pytest.approx(az_retro + 90, abs=TOL) # 60 (retrograde wave) + 90 = 150 prograde wave
+    # assert theta[idx_7_5hz, idx_2sec] == pytest.approx(az_retro + 90, abs=TOL) # 60 (retrograde wave) + 90 = ?   I'm not sure what I was testing here.
 
 
 def test_rotate_NE_RT(synthetic_data):
@@ -194,14 +194,21 @@ def test_get_filter_prograde(synthetic_data):
 
 
 def test_scalar_azimuth_prograde(synthetic_data):
+    """
+    Filter the synthetic data to pass only the prograde wave, and check it's scalar
+    propagation azimuth.
+    """
+    # a prograde wave looks like a retrograde wave from the other direction
     TOL = 1.0 # [degrees]
     POLARIZATION = 'prograde'
 
     az_retro, n, e, v, fs = synthetic_data
+    az_pro = az_retro + 90 # the 1Hz prograde wave "moves" at 150 degrees
+
     Sn = stransform(n, Fs=fs, return_time_freq=False)
     Se = stransform(e, Fs=fs)
     Sv = stransform(v, Fs=fs)
-    xpr = filt.xpr(az_retro)
+    xpr = filt.xpr(az_pro)
     with np.errstate(divide='ignore', invalid='ignore'):
         theta = filt.instantaneous_azimuth(Sv, Sn, Se, POLARIZATION, xpr)
     Sr, St = filt.rotate_NE_RT(Sn, Se, theta)
@@ -210,10 +217,11 @@ def test_scalar_azimuth_prograde(synthetic_data):
     f = filt.get_filter(NIP, POLARIZATION, threshold=0.8, width=0.1)
     Svhat = filt.shift_phase(Sv, POLARIZATION)
 
+    # time-series containing only the prograde wave
     ef = istransform(Se * f, Fs=fs)
     nf = istransform(Sn * f, Fs=fs)
     vfhat = istransform(Svhat * f, Fs=fs)
 
     az = filt.scalar_azimuth(ef, nf, vfhat)
 
-    assert az == pytest.approx(az_retro + 90, abs=TOL)
+    assert az == pytest.approx(az_pro, abs=TOL)

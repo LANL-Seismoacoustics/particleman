@@ -172,6 +172,8 @@ def instantaneous_azimuth(Sv, Sn, Se, polarization, xpr):
 def scalar_azimuth(e, n, vhat):
     """
     Time domain estimation the scalar/average azimuth, in degrees.
+    
+    The average propagation direction of a wavetrain in a time series.
 
     References
     ----------
