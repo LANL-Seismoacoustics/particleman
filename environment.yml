@@ -1,10 +1,7 @@
 name: particleman
 channels:
-- defaults # prioritize defaults
 - conda-forge
 dependencies:
-- fftw
+- stockwell
 - python=3
 - numpy
-- pytest
-- pip
