@@ -51,6 +51,53 @@ def test_default_frequency_range_bug():
     assert S.shape[1] == N
 
 
+def test_gamma_parameter():
+    """
+    Test that the gamma parameter affects the transform.
+    
+    Gamma controls the time-frequency resolution tradeoff:
+    - gamma < 1: Better time resolution
+    - gamma = 1: Standard (default)
+    - gamma > 1: Better frequency resolution
+    """
+    N = 100
+    data = np.sin(2 * np.pi * 10 * np.arange(N) / N)
+    
+    # Different gamma values should produce different transforms
+    S_low = stransform(data, gamma=0.5)
+    S_default = stransform(data, gamma=1.0)
+    S_high = stransform(data, gamma=2.0)
+    
+    # All should have the same shape
+    assert S_low.shape == S_default.shape == S_high.shape
+    
+    # But different content
+    assert not np.allclose(S_low, S_high)
+    assert not np.allclose(S_low, S_default)
+    assert not np.allclose(S_default, S_high)
+
+
+def test_window_types():
+    """
+    Test that different window types produce different transforms.
+    
+    Two window types are available:
+    - 'gauss': Standard Gaussian window (default)
+    - 'kazemi': Alternative window from Kazemi (2014)
+    """
+    N = 100
+    data = np.sin(2 * np.pi * 10 * np.arange(N) / N)
+    
+    S_gauss = stransform(data, win_type='gauss')
+    S_kazemi = stransform(data, win_type='kazemi')
+    
+    # Same shape
+    assert S_gauss.shape == S_kazemi.shape
+    
+    # Different results
+    assert not np.allclose(S_gauss, S_kazemi)
+
+
 def test_fft():
     """
     The S transform is the same as a time-integrated FFT.

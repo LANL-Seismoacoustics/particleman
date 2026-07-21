@@ -15,7 +15,6 @@ filtering/extraction and display for multifrequency analysis.
 
 This package implements the Normalized Inner Product surface wave filtering and extraction methods of
 [Meza-Fajardo et al., (2015)](https://pubs.geoscienceworld.org/ssa/bssa/article/105/1/210/323461/identification-and-extraction-of-surface-waves).
-The Stockwell transform is implemented in C using FFTW libraries.
 
 ![chirp](docs/src/data/chirp.png "Comparison to FFT for a chirp signal")
 
@@ -24,31 +23,74 @@ The Stockwell transform is implemented in C using FFTW libraries.
 
 ## Installation
 
-### Prerequisites
+### Simple Installation (v0.4.0+)
 
+As of version 0.4.0, Particle Man uses the external [stockwell](https://github.com/claudiodsf/stockwell) library, which provides pre-built wheels. No C compiler or FFTW installation required!
+
+```bash
+pip install particleman
+```
+
+### Using Conda
+
+```bash
+conda install -c conda-forge particleman
+```
+
+### From Source
+
+```bash
+git clone https://github.com/LANL-Seismoacoustics/particleman.git
+cd particleman
+pip install .
+```
+
+### Legacy Installation (v0.3.0 and earlier)
+
+Older versions required a C compiler and FFTW libraries. If you need the old version:
+
+**Prerequisites:**
 * C compiler
 * fftw3
 
-### Dependencies
-
+**Dependencies:**
 * Python 3
 * NumPy
 * Matplotlib
 
-### Using from a Conda environment.yml
+On macOS: `brew install fftw` or `conda install -c conda-forge fftw`
 
-The `environment.yml` file will install everything you need into a `particleman`
-environment: `conda env create -f environment.yml`.  To install Particle Man into
-an existing Conda environment, make sure you've got the dependencies you need installed
-and available, and just use `pip` to install it from source.
+On Linux: `apt-get install libfftw3-dev` (Debian/Ubuntu) or equivalent
 
-### Manually on a Mac
+## New in v0.4.0
 
-`gcc` from XCode should work fine.  Getting fttw3 is easy with [homebrew](http://brew.sh/) (`brew install fftw`)
-or with Conda (`conda install -c conda-forge fftw`).
+### Enhanced Time-Frequency Resolution Control
 
-To Particle Man install from source, just:
+The Stockwell transform now supports gamma parameter tuning:
 
-```bash
-pip install .
+```python
+from particleman import stransform
+
+# Standard transform (gamma=1.0, default)
+S = stransform(data, Fs=100)
+
+# Better time resolution (gamma < 1)
+S = stransform(data, Fs=100, gamma=0.5)
+
+# Better frequency resolution (gamma > 1)
+S = stransform(data, Fs=100, gamma=2.0)
 ```
+
+### Alternative Window Functions
+
+Choose between Gaussian (default) and Kazemi window functions:
+
+```python
+# Standard Gaussian window
+S = stransform(data, Fs=100, win_type='gauss')
+
+# Kazemi window
+S = stransform(data, Fs=100, win_type='kazemi')
+```
+
+See [MIGRATION_NOTES.md](MIGRATION_NOTES.md) for complete details.

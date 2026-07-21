@@ -1,29 +1,14 @@
 """
-ctypes interface to st.c
+Backward-compatible wrapper around external stockwell library.
 
+This module provides the same API as the old internal st implementation,
+but uses the external stockwell library which fixes bugs and adds features.
 """
-import ctypes
-import importlib.machinery
-import os
-
 import numpy as np
+from stockwell.st import st as _st, ist as _ist, hilbert as _hilbert
 
-ext = importlib.machinery.EXTENSION_SUFFIXES[0]
-libst = ctypes.CDLL(os.path.dirname(__file__) + '/libst' + ext)
 
-# void st(int len, int lo, int hi, double *data, double *result)
-libst.st.restype = None
-libst.st.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int,
-                     ctypes.POINTER(ctypes.c_double),
-                     ctypes.POINTER(ctypes.c_double)]
-
-# void ist(int len, int lo, int hi, double *data, double *result)
-libst.ist.restype = None
-libst.ist.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int,
-                      ctypes.POINTER(ctypes.c_double),
-                      ctypes.POINTER(ctypes.c_double)]
-
-def st(data, lo=None, hi=None):
+def st(data, lo=None, hi=None, gamma=1.0, win_type='gauss'):
     """
     st(x[, lo, hi]) returns the 2d, complex Stockwell transform of the real
     array x. If lo and hi are specified, only those frequencies (rows) are
@@ -36,53 +21,105 @@ def st(data, lo=None, hi=None):
     must be preallocated, with n rows and len columns, where n is hi - lo + 1.
     For the default values of lo and hi, n is len / 2 + 1.
 
+    Parameters
+    ----------
+    data : array_like
+        Input data array.
+    lo : int, optional
+        Lowest frequency index to return (default 0).
+    hi : int, optional
+        Highest frequency index to return (default n/2), where n is the
+        length of data.
+    gamma : float, optional
+        Gamma parameter (default 1). Controls time-frequency resolution.
+        Higher values increase frequency resolution at expense of time resolution.
+    win_type : {'gauss', 'kazemi'}, optional
+        Window type (default 'gauss').
+
+    Returns
+    -------
+    result : ndarray
+        The Stockwell transform of data. Shape: (nfreqs, ntimes)
+
+    Notes
+    -----
+    The gamma parameter can be used to tune resolution:
+    - gamma < 1: Better time resolution, worse frequency resolution
+    - gamma = 1: Standard Stockwell transform (default)
+    - gamma > 1: Better frequency resolution, worse time resolution
+
+    Two window types are available:
+    - 'gauss' (default): Standard Gaussian window
+    - 'kazemi': Alternative window from Kazemi (2014)
     """
-    # number of time samples
-    N = data.shape[0]
-
-    if (lo is None) and (hi is None):
-        # use C division, following the old stmodule.c
-        # XXX: this doesn't seem right
-        hi = N % 2
-
-    # number of frequencies
-    M = hi - lo + 1
-
-    data = np.ascontiguousarray(data, dtype=np.double)
-
-    # this works, even though M x N doesn't seem big enough, because a complex
-    # NumPy array is actually two arrays back-to-back.  The first one is
-    # interpreted as real, and the second one interpreted as imaginary.
-    # NumPy complex apparently interprets the underlying array(s) in the same way
-    # that FFTW fills in the real and imaginary parts.
-    results = np.zeros((M, N), dtype=np.complex128)
-
-    # void st(int len, int lo, int hi, double *data, double *result)
-    libst.st(N, lo, hi,
-             data.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
-             results.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-            )
-
-    return results
+    # Handle backward compatibility with None defaults
+    if lo is None:
+        lo = 0
+    if hi is None:
+        hi = len(data) // 2  # Fixed: was N % 2 (bug), now N // 2 (correct)
+    
+    # Call external stockwell library
+    return _st(data, lo=lo, hi=hi, gamma=gamma, win_type=win_type)
 
 
 def ist(X, lo=None, hi=None):
+    """
+    Inverse Stockwell transform.
+
+    Parameters
+    ----------
+    X : array_like
+        Input data array, 2d and complex.
+    lo : int, optional
+        Lowest frequency index to use (default 0).
+    hi : int, optional
+        Highest frequency index to use (default n/2), where n is the number of
+        time samples in X.
+
+    Returns
+    -------
+    result : ndarray
+        The inverse Stockwell transform of X.
+
+    Notes
+    -----
+    The difference between hi and lo must be equal to the number of
+    frequencies in X (first dimension) minus 1.
+    """
     X = np.ascontiguousarray(X, dtype=np.complex128)
-
+    
     N, M = X.shape
-
-    if (lo is None) and (hi is None):
-        hi = M % 2
-
+    
+    # Handle backward compatibility with None defaults
+    if lo is None:
+        lo = 0
+    if hi is None:
+        hi = M // 2  # Fixed: was M % 2 (bug), now M // 2 (correct)
+    
+    # Validate dimensions
     if hi - lo + 1 != N:
         raise ValueError("Inconsistent dimensions")
+    
+    # Call external stockwell library
+    return _ist(X, lo=lo, hi=hi)
 
-    results = np.zeros(M, dtype=np.double)
 
-    # void ist(int len, int lo, int hi, double *data, double *result)
-    libst.ist(M, lo, hi,
-              X.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
-              results.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-             )
+def hilbert(data):
+    """
+    Return the complex Hilbert transform of the real array data.
 
-    return results
+    Parameters
+    ----------
+    data : array_like
+        Input data array.
+
+    Returns
+    -------
+    result : ndarray
+        The Hilbert transform of data.
+    """
+    return _hilbert(data)
+
+
+# Export the functions
+__all__ = ['st', 'ist', 'hilbert']
