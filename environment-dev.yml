@@ -7,7 +7,7 @@ dependencies:
 - setuptools>=38.6
 - sphinx
 - sphinx_rtd_theme
-- fftw
+- stockwell
 - python=3
 - numpy
 - matplotlib

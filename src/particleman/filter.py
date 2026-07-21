@@ -26,43 +26,22 @@ Based on the Normalized Inner Product. Bulletin of the Seismological Society of
 America.
 
 """
-from functools import lru_cache
 import warnings
-# TODO: consider moving the nip argument to inside get_filter.  People may only 
+# TODO: consider moving the nip argument to inside get_filter.  People may only
 #   rarely want to see the NIP, and they can do so directly, using NIP.
 import numpy as np
 
 
 from .core import stransform, istransform
 
-def get_shift(polarization):
-    """
-    Get the appropriate pi/2 phase advance or delay for the provided
-    polarization.
-
-    Parameters
-    ----------
-    polarization : str, {'retrograde', 'prograde', 'linear'}
-        'retrograde' returns i, for a pi/2 phase advance.
-        'prograde' or 'linear' returns -i, for a pi/2 phase delay
-
-    Returns
-    -------
-    numpy.complex128
-        Multiply this value (i or -i) into a complex vertical S-transform to
-        shift its phase.
-
-    """
-    if polarization is 'retrograde':
-        # phase advance
-        shft = np.array(1j)
-    elif polarization in ('prograde', 'linear'):
-        # phase delay
-        shft = -np.array(1j)
-    else:
-        raise ValueError("Polarization must be either 'prograde', 'retrograde', or 'linear'")
-
-    return shft
+# Get the appropriate pi/2 phase advance or delay for the provided polarization.
+# pi/2 phase advance (i) or delay (-i), to be multiplied into complex vertical
+# S-transform to shift its phase
+PHASE_SHIFT = {
+    'retrograde': np.array(1j), # phase advance
+    'prograde': -np.array(1j), # phase delay
+    'linear': -np.array(1j), # phase delay
+}
 
 
 def shift_phase(Sv, polarization):
@@ -90,7 +69,10 @@ def shift_phase(Sv, polarization):
     Pages 5 and 10 from Meta-Fajardo et al. (2015)
 
     """
-    shft = get_shift(polarization)
+    try:
+        shft = PHASE_SHIFT[polarization]
+    except KeyError:
+        raise ValueError("Polarization must be either 'prograde', 'retrograde', or 'linear'")
 
     return Sv * shft
 
@@ -157,7 +139,7 @@ def instantaneous_azimuth(Sv, Sn, Se, polarization, xpr):
     # zeros will become nans, then propate in bad ways.
     # put a tiny number in the denominator where both the numberator and denominator are zero.
     denom[ np.logical_and(num == 0.0, denom == 0.0) ] = np.finfo(float).eps
-    
+
     theta_r = np.arctan(num / denom) # [-pi/2, pi/2]
     # theta_r = np.arctan2(num, denom)
 
@@ -172,7 +154,7 @@ def instantaneous_azimuth(Sv, Sn, Se, polarization, xpr):
 def scalar_azimuth(e, n, vhat):
     """
     Time domain estimation the scalar/average azimuth, in degrees.
-    
+
     The average propagation direction of a wavetrain in a time series.
 
     References
@@ -340,7 +322,7 @@ def NIP_filter(n, e, v, fs, xpr, polarization, threshold=0.8, width=0.1, eps=Non
         'prograde' to extract prograde Rayleigh waves
         'linear' to extract Love waves
     threshold, width : float
-        The critical value ("x_r") and width ("\Delta x") for the NIP filter (cosine) taper.
+        The critical value ("x_r") and width ("Delta x") for the NIP filter (cosine) taper.
     eps : float
         Tolerance for small NIP denominator values, for numerical stability.
 
@@ -372,7 +354,10 @@ def NIP_filter(n, e, v, fs, xpr, polarization, threshold=0.8, width=0.1, eps=Non
     # * Allow user to specify a scalar theta propagation azimuth, and sidestep
     #   the instantaneous calculation.
 
-    shft = get_shift(polarization)
+    try:
+        shft = PHASE_SHIFT[polarization]
+    except KeyError:
+        raise ValueError("Polarization must be either 'prograde', 'retrograde', or 'linear'")
 
     #1. Get instantaneous theta from Sn, Se, Svhat
     Sn = stransform(n, Fs=fs)

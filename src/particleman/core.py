@@ -3,7 +3,7 @@ Core Stockwell transform and inverse transform functions.
 
 """
 import numpy as np
-from .st import st, ist
+from stockwell.st import st, ist
 
 def _get_lo_hi(L, hp, lp, Fs):
     """Get context-appropriate representation of hp, lp.
@@ -67,7 +67,7 @@ def get_TF_arrays(N, Fs=0, hp=0, lp=0):
 
 
 
-def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False):
+def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False, gamma=1.0, win_type='gauss'):
     """Perform a Stockwell transform on a time-series.
 
     Returns the transform (S), and time (T) and frequency (F)
@@ -85,6 +85,11 @@ def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False):
         sampling rate in Hz
     return_time_freq : bool
         If True, also return the correct-sized time and frequency domain tiles.
+    gamma : float, optional
+        Gamma parameter for time-frequency resolution tuning (default 1.0).
+        Higher values increase frequency resolution at expense of time resolution.
+    win_type : {'gauss', 'kazemi'}, optional
+        Window function type (default 'gauss').
 
     Returns
     -------
@@ -105,11 +110,22 @@ def stransform(x, Fs=0, hp=0, lp=0, return_time_freq=False):
     * http://vcs.ynic.york.ac.uk/docs/naf/intro/concepts/timefreq.html
     * http://kurage.nimh.nih.gov/meglab/Meg/Stockwell
 
+    Notes
+    -----
+    The gamma parameter can be used to tune resolution:
+    - gamma < 1: Better time resolution, worse frequency resolution
+    - gamma = 1: Standard Stockwell transform (default)
+    - gamma > 1: Better frequency resolution, worse time resolution
+
+    Two window types are available:
+    - 'gauss' (default): Standard Gaussian window
+    - 'kazemi': Alternative window from Kazemi (2014)
+
     """
     low, high, lp = _get_lo_hi(len(x), hp, lp, Fs)
 
-    # The stockwell transform
-    S = st(x, low, high)
+    # The stockwell transform with new parameters
+    S = st(x, low, high, gamma=gamma, win_type=win_type)
 
     # Compute our time and frequency matrix with
     # the correct scaling for use with the
