@@ -27,6 +27,14 @@
 * Fixed internal default handling in `st()` function (was using `N % 2`, now correctly uses `N // 2`)
 * Improved memory management with automatic cleanup on exit
 
+### Deprecated
+
+* **Low-level functions**: Direct use of `particleman.st.st()` and `particleman.st.ist()` is deprecated.
+  - These functions now emit `DeprecationWarning`
+  - Use `from stockwell.st import st, ist` instead for low-level access
+  - The high-level `particleman.stransform()` and `particleman.istransform()` are NOT deprecated
+  - Deprecated functions will be removed in v0.5.0 or later
+
 ### Backward Compatibility
 
 * ✅ All existing code continues to work without changes

@@ -93,4 +93,19 @@ S = stransform(data, Fs=100, win_type='gauss')
 S = stransform(data, Fs=100, win_type='kazemi')
 ```
 
-See [MIGRATION_NOTES.md](MIGRATION_NOTES.md) for complete details.
+### Deprecation Notice
+
+⚠️ **Low-level API Deprecation**: Direct use of `particleman.st.st()` and `particleman.st.ist()` is deprecated.
+
+```python
+# Deprecated (will be removed in future version):
+from particleman.st import st, ist
+
+# Use instead:
+from stockwell.st import st, ist
+
+# Or use the high-level API (recommended, not deprecated):
+from particleman import stransform, istransform
+```
+
+The high-level functions `stransform()` and `istransform()` are **not deprecated** and remain the recommended way to use the Stockwell transform in particleman.

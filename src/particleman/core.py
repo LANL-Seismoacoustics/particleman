@@ -3,7 +3,7 @@ Core Stockwell transform and inverse transform functions.
 
 """
 import numpy as np
-from .st import st, ist
+from stockwell.st import st, ist
 
 def _get_lo_hi(L, hp, lp, Fs):
     """Get context-appropriate representation of hp, lp.

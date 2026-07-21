@@ -3,9 +3,25 @@ Backward-compatible wrapper around external stockwell library.
 
 This module provides the same API as the old internal st implementation,
 but uses the external stockwell library which fixes bugs and adds features.
+
+.. deprecated:: 0.4.0
+    The functions in this module (st, ist) are deprecated.
+    Use the stockwell library directly instead:
+    
+    Instead of::
+    
+        from particleman.st import st, ist
+    
+    Use::
+    
+        from stockwell.st import st, ist
+    
+    The high-level functions particleman.stransform() and particleman.istransform()
+    are NOT deprecated and should continue to be used.
 """
+import warnings
 import numpy as np
-from stockwell.st import st as _st, ist as _ist, hilbert as _hilbert
+from stockwell.st import st as _st, ist as _ist
 
 
 def st(data, lo=None, hi=None, gamma=1.0, win_type='gauss'):
@@ -43,6 +59,11 @@ def st(data, lo=None, hi=None, gamma=1.0, win_type='gauss'):
 
     Notes
     -----
+    .. deprecated:: 0.4.0
+        `particleman.st.st()` is deprecated. Use `stockwell.st.st()` directly instead.
+        This wrapper is maintained for backward compatibility but will be removed
+        in a future version.
+    
     The gamma parameter can be used to tune resolution:
     - gamma < 1: Better time resolution, worse frequency resolution
     - gamma = 1: Standard Stockwell transform (default)
@@ -52,6 +73,13 @@ def st(data, lo=None, hi=None, gamma=1.0, win_type='gauss'):
     - 'gauss' (default): Standard Gaussian window
     - 'kazemi': Alternative window from Kazemi (2014)
     """
+    warnings.warn(
+        "particleman.st.st() is deprecated and will be removed in a future version. "
+        "Use 'from stockwell.st import st' instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
     # Handle backward compatibility with None defaults
     if lo is None:
         lo = 0
@@ -83,43 +111,38 @@ def ist(X, lo=None, hi=None):
 
     Notes
     -----
+    .. deprecated:: 0.4.0
+        `particleman.st.ist()` is deprecated. Use `stockwell.st.ist()` directly instead.
+        This wrapper is maintained for backward compatibility but will be removed
+        in a future version.
+    
     The difference between hi and lo must be equal to the number of
     frequencies in X (first dimension) minus 1.
     """
+    warnings.warn(
+        "particleman.st.ist() is deprecated and will be removed in a future version. "
+        "Use 'from stockwell.st import ist' instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
     X = np.ascontiguousarray(X, dtype=np.complex128)
-    
+
     N, M = X.shape
-    
+
     # Handle backward compatibility with None defaults
     if lo is None:
         lo = 0
     if hi is None:
         hi = M // 2  # Fixed: was M % 2 (bug), now M // 2 (correct)
-    
+
     # Validate dimensions
     if hi - lo + 1 != N:
         raise ValueError("Inconsistent dimensions")
-    
+
     # Call external stockwell library
     return _ist(X, lo=lo, hi=hi)
 
 
-def hilbert(data):
-    """
-    Return the complex Hilbert transform of the real array data.
-
-    Parameters
-    ----------
-    data : array_like
-        Input data array.
-
-    Returns
-    -------
-    result : ndarray
-        The Hilbert transform of data.
-    """
-    return _hilbert(data)
-
-
 # Export the functions
-__all__ = ['st', 'ist', 'hilbert']
+__all__ = ['st', 'ist']
