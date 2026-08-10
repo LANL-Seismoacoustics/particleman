@@ -5,8 +5,8 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = particleman
-SOURCEDIR     = .
-BUILDDIR      = _build
+SOURCEDIR     = source
+BUILDDIR      = build
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -21,4 +21,4 @@ help:
 
 github:
 	@make html
-	@cp -a _build/html/. ../docs
+	@cp -a _build/html/. ../../docs

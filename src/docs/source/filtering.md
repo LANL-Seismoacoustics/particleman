@@ -22,7 +22,7 @@ fs = tr.stats.sampling_rate
 
 ```
 
-![filtered retrograde radial](data/stransforms_scalar.png)
+![filtered retrograde radial](_static/stransforms_scalar.png)
 
 
 [Meza-Fajardo et al., (2015)]: http://www.bssaonline.org/content/105/1/210.abstract

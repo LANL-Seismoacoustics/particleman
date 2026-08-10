@@ -42,7 +42,7 @@ plt.draw()
 
 ``` 
 
-![chirp and FFT](data/chirp.png)
+![chirp and FFT](_static/chirp.png)
 
 
 ## Filter Plotting

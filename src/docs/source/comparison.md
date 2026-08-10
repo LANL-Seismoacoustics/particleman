@@ -7,11 +7,11 @@ compared to a spectrogram, whose frequency resolution is is limited by the
 moving window size chosen.
 
 
-![waveform](data/RJOB_EHZ_wave.png "waveform")
+![waveform](_static/RJOB_EHZ_wave.png "waveform")
 
 **Spectrogram**
 
-![spectrogram](data/spectrogram.png "spectrogram")
+![spectrogram](_static/spectrogram.png "spectrogram")
 
 
 ## Morlet Transform
@@ -19,4 +19,4 @@ moving window size chosen.
 Wavelet transforms like the Morlet transform, for example, also do this, but
 the y-dimension of the 'scalogram' is not frequency, it is "scale".
 
-![Morlet comparison](data/morlet_comparison.png "Morlet comparision")
+![Morlet comparison](_static/morlet_comparison.png "Morlet comparision")
